@@ -9,6 +9,16 @@ from fantasyfootball.pipeline.utils import (
 
 
 def collect_calendar(calendar_url: str) -> pd.DataFrame:
+    """Collects the calendar data for a complete season. Includes
+       data on date, time, winner, loser, box-score, total points
+       for each team.
+
+    Args:
+        calendar_url (str): The url to scrape the calendar data from.
+
+    Returns:
+        pd.DataFrame: The calendar data.
+    """
     calendar_df = pd.read_html(calendar_url)[0]
     return calendar_df
 

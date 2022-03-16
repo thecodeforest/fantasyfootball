@@ -1,0 +1,22 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 21.9b0
+    hooks:
+    - id: black
+      language_version: python3
+      args:
+        - --line-length=88
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.9.2
+    hooks:
+    - id: flake8
+      language_version: python3
+      args:
+        - "--max-line-length=88"
+        # ignore unused import, invalid escape sequence, line break before binary operator
+        - "--ignore=F401,W503,W605" 
+  - repo: https://github.com/pycqa/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+        language_version: python3

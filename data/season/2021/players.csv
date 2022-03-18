@@ -1,4 +1,4 @@
-player,team,position,season_year
+name,team,position,season_year
 Jonathan Taylor,IND,RB,2021
 Cooper Kupp,LAR,WR,2021
 Deebo Samuel,SFO,WR,2021
@@ -60,7 +60,6 @@ Darnell Mooney,CHI,WR,2021
 Kyle Pitts,ATL,TE,2021
 Javonte Williams,DEN,RB,2021
 Amon-Ra St. Brown,DET,WR,2021
-Zach Ertz,2TM,TE,2021
 Terry McLaurin,WAS,WR,2021
 Marquise Brown,BAL,WR,2021
 Amari Cooper,DAL,WR,2021
@@ -73,9 +72,7 @@ Kendrick Bourne,NWE,WR,2021
 Darrel Williams,KAN,RB,2021
 D'Andre Swift,DET,RB,2021
 Mike Gesicki,MIA,TE,2021
-Nick Ralston,DAL,,2021
 Elijah Mitchell,SFO,RB,2021
-Tory Carter,TEN,,2021
 Ryan Tannehill,TEN,QB,2021
 Carson Wentz,IND,QB,2021
 Derek Carr,LVR,QB,2021
@@ -148,7 +145,6 @@ Robby Anderson,CAR,WR,2021
 Tyler Higbee,LAR,TE,2021
 Cam Newton,CAR,QB,2021
 Boston Scott,PHI,RB,2021
-Odell Beckham Jr.,2TM,WR,2021
 D'Onta Foreman,TEN,RB,2021
 D'Ernest Johnson,CLE,RB,2021
 J.D. McKissic,WAS,RB,2021
@@ -161,7 +157,6 @@ Brandon Bolden,NWE,RB,2021
 Tyler Huntley,BAL,QB,2021
 Ty Johnson,NYJ,RB,2021
 Mecole Hardman,KAN,WR,2021
-Mark Ingram,2TM,RB,2021
 Zack Moss,BUF,RB,2021
 Tyrod Taylor,HOU,QB,2021
 Jarvis Landry,CLE,WR,2021
@@ -209,7 +204,6 @@ Evan Engram,NYG,TE,2021
 Michael Gallup,DAL,WR,2021
 Zach Pascal,IND,WR,2021
 Mo Alie-Cox,IND,TE,2021
-DeSean Jackson,2TM,WR,2021
 Samaje Perine,CIN,RB,2021
 Tre'Quan Smith,NOR,WR,2021
 Austin Hooper,CLE,TE,2021
@@ -218,10 +212,8 @@ Rondale Moore,ARI,WR,2021
 Foster Moreau,LVR,TE,2021
 Dontrell Hilliard,TEN,RB,2021
 Geno Smith,SEA,QB,2021
-Ameer Abdullah,2TM,RB,2021
 Jamal Agnew,JAX,WR,2021
 Kenny Golladay,NYG,WR,2021
-Josh Reynolds,2TM,WR,2021
 Keelan Cole,NYJ,WR,2021
 Nico Collins,HOU,WR,2021
 T.Y. Hilton,IND,WR,2021
@@ -237,7 +229,6 @@ Derrick Gore,KAN,RB,2021
 Jerry Jeudy,DEN,WR,2021
 Mack Hollins,MIA,WR,2021
 Travis Homer,SEA,RB,2021
-Josh Johnson,2TM,QB,2021
 Jeremy McNichols,TEN,RB,2021
 Jaret Patterson,WAS,RB,2021
 Danny Amendola,HOU,WR,2021
@@ -256,10 +247,8 @@ Sammy Watkins,BAL,WR,2021
 Chris Carson,SEA,RB,2021
 Sterling Shepard,NYG,WR,2021
 James Washington,PIT,WR,2021
-Dan Arnold,2TM,TE,2021
 Harrison Bryant,CLE,TE,2021
 Tevin Coleman,NYJ,RB,2021
-Phillip Lindsay,2TM,RB,2021
 Colt McCoy,ARI,QB,2021
 Peyton Barber,LVR,RB,2021
 Juwan Johnson,NOR,TE,2021
@@ -298,7 +287,6 @@ Carlos Hyde,JAX,RB,2021
 Gardner Minshew II,PHI,QB,2021
 Kyle Rudolph,NYG,TE,2021
 Cam Sims,WAS,WR,2021
-Le'Veon Bell,2TM,RB,2021
 Demetric Felton,CLE,RB,2021
 Isaiah McKenzie,BUF,WR,2021
 Tommy Tremble,CAR,TE,2021
@@ -311,7 +299,6 @@ Mike Glennon,NYG,QB,2021
 Brandon Zylstra,CAR,WR,2021
 John Ross,NYG,WR,2021
 Will Dissly,SEA,TE,2021
-Jakeem Grant,2TM,WR,2021
 Case Keenum,CLE,QB,2021
 Isaiah Ford,MIA,WR,2021
 Craig Reynolds,DET,RB,2021
@@ -323,7 +310,6 @@ Jamycal Hasty,SFO,RB,2021
 Ray-Ray McCloud,PIT,WR,2021
 Elijhaa Penny,NYG,RB,2021
 James O'Shaughnessy,JAX,TE,2021
-Royce Freeman,2TM,RB,2021
 Trey Sermon,SFO,RB,2021
 Maxx Williams,ARI,TE,2021
 Tim Boyle,DET,QB,2021
@@ -336,7 +322,6 @@ Stephen Anderson,LAC,TE,2021
 Corey Clement,DAL,RB,2021
 Tyler Kroft,NYJ,TE,2021
 Jerick McKinnon,KAN,RB,2021
-Adrian Peterson,2TM,RB,2021
 Anthony Schwartz,CLE,WR,2021
 Tajae Sharpe,ATL,WR,2021
 Albert Wilson,MIA,WR,2021
@@ -388,7 +373,7 @@ Brandon Allen,CIN,QB,2021
 Jesper Horsted,CHI,TE,2021
 Scott Miller,TAM,WR,2021
 Ty Montgomery,NOR,WR,2021
-Wayne Gallman,2TM,RB,2021
+P.J. Walker,CAR,QB,2021
 Chris Manhertz,JAX,TE,2021
 Sean Mannion,MIN,QB,2021
 Denzel Mims,NYJ,WR,2021
@@ -403,7 +388,6 @@ Jesse James,CHI,TE,2021
 Joshua Kelley,LAC,RB,2021
 Tom Kennedy,DET,WR,2021
 Antony Auclair,HOU,TE,2021
-Phillip Dorsett,3TM,WR,2021
 Ross Dwelley,SFO,TE,2021
 Dez Fitzpatrick,TEN,WR,2021
 Jake Fromm,NYG,QB,2021
@@ -415,6 +399,7 @@ Eric Saubert,DEN,TE,2021
 Adam Shaheen,MIA,TE,2021
 Jeff Smith,NYJ,WR,2021
 Benny Snell Jr.,PIT,RB,2021
+Equanimeous St. Brown,GNB,WR,2021
 Ryquell Armstead,JAX,RB,2021
 Blake Bell,KAN,TE,2021
 Trinity Benson,DET,WR,2021
@@ -432,10 +417,8 @@ JaQuan Hardy,DAL,RB,2021
 Deon Jackson,IND,RB,2021
 Andy Janovich,CLE,RB,2021
 Sean McKeon,DAL,TE,2021
-Anthony Miller,2TM,WR,2021
 Keith Smith,ATL,RB,2021
 Kyle Allen,WAS,QB,2021
-Alex Armah,2TM,RB,2021
 Garrett Gilbert,WAS,QB,2021
 Tyree Jackson,PHI,TE,2021
 Chris Myarick,NYG,TE,2021
@@ -445,7 +428,6 @@ Mitchell Trubisky,BUF,QB,2021
 Preston Williams,MIA,WR,2021
 KJ Hamler,DEN,WR,2021
 Josh Oliver,BAL,TE,2021
-Andre Roberts,2TM,WR,2021
 Johnny Stanton,CLE,RB,2021
 Jonathan Ward,ARI,RB,2021
 Dede Westbrook,MIN,WR,2021
@@ -457,7 +439,6 @@ Luke Farrell,JAX,TE,2021
 Penny Hart,SEA,WR,2021
 Dax Milne,WAS,WR,2021
 Jason Moore,LAC,WR,2021
-Brandon Powell,LAR,,2021
 Amari Rodgers,GNB,WR,2021
 Ito Smith,DAL,RB,2021
 Trayveon Williams,CIN,RB,2021
@@ -475,14 +456,12 @@ Kendall Blanton,LAR,TE,2021
 Pharoh Cooper,NYG,WR,2021
 Tyler Davis,GNB,TE,2021
 Greg Dortch,ARI,WR,2021
-Darren Fells,2TM,TE,2021
 Garrett Griffin,NOR,TE,2021
 Parker Hesse,ATL,TE,2021
 Jakob Johnson,NWE,RB,2021
 D.J. Montgomery,NYJ,WR,2021
 Gunner Olszewski,NWE,WR,2021
 Curtis Samuel,WAS,WR,2021
-Willie Snead,2TM,WR,2021
 Trent Taylor,CIN,WR,2021
 Trevon Wesco,NYJ,TE,2021
 Kevin White,NOR,WR,2021
@@ -517,7 +496,6 @@ Cethan Carter,MIA,TE,2021
 Davion Davis,HOU,WR,2021
 Darrynton Evans,TEN,RB,2021
 Blaine Gabbert,TAM,QB,2021
-Tyron Johnson,2TM,WR,2021
 Marcus Kemp,KAN,WR,2021
 Keith Kirkwood,CAR,WR,2021
 Patrick Laird,MIA,RB,2021
@@ -548,111 +526,40 @@ Jake Funk,LAR,RB,2021
 Marvin Hall,ATL,WR,2021
 Demetrius Harris,ARI,TE,2021
 Brycen Hopkins,LAR,TE,2021
+Buddy Howell,LAR,RB,2021
 Andy Isabella,ARI,WR,2021
 John Kelly,CLE,RB,2021
 Tommylee Lewis,MIA,WR,2021
 Hunter Long,MIA,TE,2021
 Anthony McFarland Jr.,PIT,RB,2021
 Kirk Merritt,MIA,WR,2021
-Jaydon Mickens,2TM,WR,2021
 Stanley Morgan Jr.,CIN,WR,2021
 Johnny Mundt,LAR,TE,2021
 Ryan Nall,CHI,RB,2021
 Jacques Patrick,SFO,RB,2021
 Kevin Rader,PIT,TE,2021
 Richard Rodgers,PHI,TE,2021
-Mekhi Sargent,3TM,RB,2021
 C.J. Saunders,CAR,WR,2021
 Luke Stocker,MIN,TE,2021
 Eric Tomlinson,BAL,TE,2021
 Tyrell Williams,DET,WR,2021
 Easop Winston,NOR,WR,2021
 Ethan Wolf,NOR,TE,2021
-Josh Adams,NYJ,,2021
-Rodney Adams,CHI,,2021
-Geronimo Allison,DET,,2021
-Devin Asiasi,NWE,,2021
-Marcell Ateman,LVR,,2021
-Tutu Atwell,LAR,,2021
 Alex Bachman,NYG,WR,2021
-Jake Bargas,MIN,,2021
 Kenjon Barner,TAM,RB,2021
-Andrew Beck,DEN,,2021
 Nick Bellore,SEA,RB,2021
 Kurt Benkert,GNB,QB,2021
-Rashod Berry,DET,,2021
 Nick Boyle,BAL,TE,2021
-Darius Bradwell,LAC,,2021
-John Brown,2TM,,2021
-Deante Burton,DAL,,2021
-Lawrence Cager,CLE,,2021
-Stephen Carlson,CLE,,2021
-Dan Chisena,MIN,,2021
-Tyrie Cleveland,DEN,,2021
-Matt Cole,CAR,,2021
 Nathan Cottrell,JAX,RB,2021
-Isaiah Coulter,CHI,,2021
-River Cracraft,SFO,,2021
 Chase Daniel,LAC,QB,2021
 Darrell Daniels,ARI,TE,2021
-Connor Davis,CLE,,2021
-Brandon Dillon,MIN,,2021
-Jeff Driskel,HOU,,2021
-Trey Edmunds,PIT,,2021
-Ben Ellefson,MIN,,2021
-Simi Fehoko,DAL,,2021
 Maurice Ffrench,LAC,WR,2021
-Daurice Fountain,KAN,,2021
-Travis Fulgham,DEN,,2021
-Antonio Gandy-Golden,WAS,,2021
-Cullen Gillaspia,NYG,,2021
-Justin Hardee,NYJ,,2021
-De'Michael Harris,IND,,2021
-Jacob Harris,LAR,,2021
 Daniel Helm,LVR,TE,2021
-Temarrick Hemingway,WAS,,2021
-John Hightower,PHI,,2021
-Brian Hill,SFO,,2021
-Kevin Hogan,TEN,,2021
-J.P. Holtz,CHI,,2021
-Tanner Hudson,SFO,,2021
-Ryan Izzo,TEN,,2021
-Kerryon Johnson,SFO,,2021
-Taiwan Jones,BUF,,2021
-Matt LaCosse,NWE,,2021
-Tyler Mabry,SEA,,2021
-Jordan Matthews,SFO,,2021
 Nate McCrary,BAL,RB,2021
-Codey McElroy,TAM,,2021
 Kellen Mond,MIN,QB,2021
-David Moore,2TM,,2021
-Jojo Natson,CLE,,2021
-Matthew Orzech,LAR,,2021
-Devine Ozigbo,2TM,RB,2021
 Nathan Peterman,LVR,QB,2021
-Artavis Pierce,CHI,,2021
-Giovanni Ricci,CAR,,2021
 Brett Rypien,DEN,QB,2021
-Jordan Scarlett,MIA,,2021
-Mason Schreck,CIN,,2021
-Steven Sims,PIT,,2021
-Matthew Slater,NWE,,2021
-Devin Smith,JAX,,2021
-Vyncint Smith,NYJ,,2021
-Nate Solder,NYG,,2021
-Stephen Sullivan,CAR,,2021
-Tyrone Swoopes,WAS,,2021
-Colin Thompson,CAR,,2021
-Cody Thompson,SEA,,2021
-Noah Togiai,PHI,,2021
-Ross Travis,2TM,,2021
-Jordan Veasy,HOU,,2021
-Kahale Warring,2TM,,2021
-Justin Watson,TAM,,2021
 Davis Webb,BUF,QB,2021
-Nsimba Webster,CHI,,2021
-David Wells,ARI,,2021
-Jordan Wilkins,2TM,,2021
 Deon Yelder,TAM,TE,2021
 Khari Blasingame,TEN,RB,2021
 Jacob Eason,IND,QB,2021
@@ -660,8 +567,6 @@ Feleipe Franks,ATL,QB,2021
 Racey McMath,TEN,WR,2021
 Malik Taylor,GNB,WR,2021
 Logan Woodside,TEN,QB,2021
-Travis Benjamin,SFO,,2021
-Trenton Cannon,2TM,RB,2021
 John Wolford,LAR,QB,2021
 Josh Rosen,ATL,QB,2021
 Diontae Spencer,DEN,WR,2021

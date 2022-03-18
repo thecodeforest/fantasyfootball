@@ -24,11 +24,13 @@ def clean_game_date(season_year: int, date: str) -> str:
         str: The date string if the date is part of the regular season, otherwise
             returns 'non-regular-season'.
     """
-    season_year = str(season_year)
     if len(date) == 3 and date[0] == "9":
         return f"{season_year}-09-{date[1:]}"
     elif len(date) == 4 and int(date[:2]) > 9:
         return f"{season_year}-{date[:2]}-{date[2:]}"
+    elif len(date) == 3 and date[0] in ["1", "2"]:
+        season_year += 1
+        return f"{season_year}-0{date[0]}-{date[1:]}"
     else:
         return "non-regular-season"
 
@@ -138,7 +140,6 @@ def process_betting(df: pd.DataFrame, season_year: int) -> pd.DataFrame:
         point_spread_df["date"] = game_df["date"].iloc[0]
         point_spread_df["season_year"] = season_year
         process_betting_df = process_betting_df.append(point_spread_df)
-    process_betting_df = process_betting_df.rename(columns={"team": "tm"})
     return process_betting_df
 
 

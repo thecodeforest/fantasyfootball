@@ -12,6 +12,28 @@ from fantasyfootball.pipeline.utils import (
 )
 
 
+def create_away_team_df(df: pd.DataFrame) -> pd.DataFrame:
+    """Create a dataframe to indicate if a team is away or home.
+
+    Args:
+        df (pd.DataFrame): The calendar dataframe.
+
+    Returns:
+        pd.DataFrame: The dataframe with the away team column added.
+    """
+    away_game_lst = list()
+    for row in df.itertuples():
+        if row.away == "@":
+            # team on left is away
+            away_game_lst.append([row.week, row.date, row.team, 1])
+            away_game_lst.append([row.week, row.date, row.opp, 0])
+        else:
+            away_game_lst.append([row.week, row.date, row.team, 0])
+            away_game_lst.append([row.week, row.date, row.opp, 1])
+    away_game_df = pd.DataFrame(away_game_lst, columns=["week", "date", "team", "away"])
+    return away_game_df
+
+
 @pf.register_dataframe_method
 def process_calendar(df: pd.DataFrame) -> pd.DataFrame:
     """Clean the calendar dataframe by applying the following steps:
@@ -26,22 +48,27 @@ def process_calendar(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: The cleaned dataframe.
     """
+    # name away field
+    df = df.rename(columns={"unnamed_5": "away"})
     # filter any rows where week is NA
     df = df[~df["week"].isna()]
     # filter only to rows where week is a number
     df = df[[x.isnumeric() for x in df["week"]]]
+    df["team"] = df["winner_tie"].apply(lambda x: retrieve_team_abbreviation(x))
+    df["opp"] = df["loser_tie"].apply(lambda x: retrieve_team_abbreviation(x))
+    away_team_df = create_away_team_df(df)
     # flip positioning of teams so all possible combinations are covered
     df = pd.concat(
         [
-            df[["date", "week", "winner_tie", "loser_tie"]],
-            df[["date", "week", "loser_tie", "winner_tie"]].rename(
-                columns={"winner_tie": "loser_tie", "loser_tie": "winner_tie"}
+            df[["date", "week", "team", "opp"]],
+            df[["date", "week", "opp", "team"]].rename(
+                columns={"opp": "team", "team": "opp"}
             ),
         ]
     )
-    df["tm"] = df["winner_tie"].apply(lambda x: retrieve_team_abbreviation(x))
-    df["opp"] = df["loser_tie"].apply(lambda x: retrieve_team_abbreviation(x))
-    df = df.drop(columns=["winner_tie", "loser_tie"])
+    df = pd.merge(df, away_team_df, how="inner", on=["week", "date", "team"])
+    df = df.sort_values("date")
+    df = df.reset_index(drop=True)
     return df
 
 

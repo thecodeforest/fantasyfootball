@@ -124,6 +124,10 @@ class FantasyData:
             season_ff_df = pd.merge(
                 season_ff_df, defense_df, how="inner", on=["week", "opp"]
             )
+            weather_df = pd.read_csv(ff_season_data_dir / "weather.csv")
+            season_ff_df = pd.merge(
+                season_ff_df, weather_df, how="inner", on=["date", "team", "opp"]
+            )
             ff_df = ff_df.append(season_ff_df)
         self.ff_data = ff_df
 

@@ -8,7 +8,7 @@ from janitor import clean_names
 from fantasyfootball.config import root_dir
 from fantasyfootball.pipeline.pipeline_logger import logger
 from fantasyfootball.pipeline.utils import (
-    get_module_function,
+    get_module_purpose,
     read_args,
     write_ff_csv
 )
@@ -28,6 +28,8 @@ REQUIRED_COLUMNS = {
         "passing_td",
         "fumbles_fmb",
         "passing_int",
+        "scoring_2pm",
+        "punt_returns_td"
     ],
 }
 
@@ -225,9 +227,9 @@ def recode_str_to_numeric(
 
 if __name__ == "__main__":
     args = read_args()
-    dir_type, data_type = get_module_function(module_path=__file__)
+    dir_type, data_type = get_module_purpose(module_path=__file__)
     raw_data_dir = (
-        root_dir / "data" / "season" / str(args.season_year) / "raw" / data_type
+        root_dir / "datasets" / "season" / str(args.season_year) / "raw" / data_type
     )
     raw_stats_files = raw_data_dir.glob("*.csv")
     for player_stats_path in raw_stats_files:
@@ -243,6 +245,7 @@ if __name__ == "__main__":
             .query("~date.str.contains('Games')")
             .recode_str_to_numeric(column="away", target_value="@", replacement_value=1)
             .recode_str_to_numeric(column="gs", target_value="*", replacement_value=1)
+            .rename(columns={"tm": "team"})
         )
         clean_stats_df.write_ff_csv(
             root_dir, args.season_year, dir_type, data_type, pid

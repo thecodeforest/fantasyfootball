@@ -76,8 +76,9 @@ if __name__ == "__main__":
     args = read_args()
     dir_type, data_type = get_module_purpose(module_path=__file__)
     raw_data_dir = (
-        root_dir / "data" / "season" / str(args.season_year) / "raw" / data_type
+        root_dir / "datasets" / "season" / str(args.season_year) / "raw" / data_type
     )
     clean_calendar_df = read_ff_csv(raw_data_dir)
     clean_calendar_df = clean_calendar_df.clean_names().process_calendar()
+    clean_calendar_df["season_year"] = args.season_year
     clean_calendar_df.write_ff_csv(root_dir, args.season_year, dir_type, data_type)

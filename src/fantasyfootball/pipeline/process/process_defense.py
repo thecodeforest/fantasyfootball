@@ -12,7 +12,7 @@ from fantasyfootball.pipeline.utils import (
     write_ff_csv
 )
 
-DEFENSE_COLUMNS = [
+STATS_COLUMNS = [
     "rushing_yds",
     "rushing_td",
     "passing_yds",
@@ -121,7 +121,7 @@ def rank_defense(df: pd.DataFrame, stats_columns: list[str]) -> pd.DataFrame:
         df[f"{points_type}_score"] = df[
             [x for x in df.columns if x.startswith(points_type)]
         ].sum(axis=1)
-        df[f"{points_type}_rank"] = df[f"{points_type}_score"].rank()
+        df[f"{points_type}_def_rank"] = df[f"{points_type}_score"].rank()
     df = df[["opp"] + [x for x in df.columns if x.endswith("_rank")]]
     return df
 
@@ -129,22 +129,23 @@ def rank_defense(df: pd.DataFrame, stats_columns: list[str]) -> pd.DataFrame:
 if __name__ == "__main__":
     args = read_args()
     dir_type, data_type = get_module_purpose(module_path=__file__)
-    data_dir = root_dir / "data" / "season" / str(args.season_year) / dir_type
+    data_dir = root_dir / "datasets" / "season" / str(args.season_year) / dir_type
     stats_df = read_ff_csv(data_dir / "stats")
     cal_df = read_ff_csv(data_dir / "calendar")
     # add week field to player stats
     processed_stats_df = pd.merge(
-        stats_df, cal_df, on=["date", "tm", "opp"], how="inner"
+        stats_df, cal_df, on=["date", "team", "opp"], how="inner"
     )
     defense_stats_df = pd.DataFrame()
     for week in sorted(processed_stats_df["week"].unique()):
         cumulative_stats = (
             processed_stats_df.query(f"week <= {week}")
-            .aggregate_season_defense_stats(stats_columns=DEFENSE_COLUMNS)
+            .aggregate_season_defense_stats(stats_columns=STATS_COLUMNS)
             .scale_defense_stats()
             .weight_defense_stats(yds_weight=0.75)
-            .rank_defense()
+            .rank_defense(stats_columns=STATS_COLUMNS)
         )
         cumulative_stats.insert(0, "week", week)
         defense_stats_df = pd.concat([defense_stats_df, cumulative_stats])
+    defense_stats_df["season_year"] = args.season_year
     defense_stats_df.write_ff_csv(root_dir, args.season_year, dir_type, data_type)

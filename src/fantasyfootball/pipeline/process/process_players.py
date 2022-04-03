@@ -43,7 +43,6 @@ def is_valid_position(position: str) -> bool:
 def process_players(df: pd.DataFrame) -> pd.DataFrame:
     """Cleans the dataframe containing the player's name, position, team, and
        season year by applying the following steps:
-       * Rename team field to be consistent with other datasets
        * Remove players who played for multiple teams within a season or
          were primarily on the practice squad
        * Remove header rows for original table
@@ -56,15 +55,13 @@ def process_players(df: pd.DataFrame) -> pd.DataFrame:
         pd.DataFrame: Clean dataframe containing player information
     """
     df_processed = df.copy()
-    # rename team column
-    df_processed = df_processed.rename(columns={"team": "tm"})
     # remove rows with invalid team values
-    df_processed = df_processed[df_processed["tm"].apply(lambda x: is_valid_team(x))]
+    df_processed = df_processed[df_processed["team"].apply(lambda x: is_valid_team(x))]
     # remove rows for players without a position
     df_processed = df_processed[
         df_processed["position"].apply(lambda x: is_valid_position(x))
     ]
-    # remove any rows with original headers - Player, Tm, FantPos, 2021
+    # remove any rows with original headers - Player, team, FantPos, 2021
     df_processed = df_processed[
         df_processed["player"].apply(lambda x: not x.startswith("Player"))
     ]
@@ -72,6 +69,9 @@ def process_players(df: pd.DataFrame) -> pd.DataFrame:
     df_processed["player"] = df_processed["player"].apply(
         lambda x: x.replace("*", "").replace("+", "").strip()
     )
+    # change player column to name to be consistent with stats columns
+    df_processed = df_processed.rename(columns={"player": "name"})
+    df_processed = df_processed.reset_index(drop=True)
     return df_processed
 
 
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     args = read_args()
     dir_type, data_type = get_module_purpose(module_path=__file__)
     raw_data_dir = (
-        root_dir / "data" / "season" / str(args.season_year) / "raw" / data_type
+        root_dir / "datasets" / "season" / str(args.season_year) / "raw" / data_type
     )
     players_raw = read_ff_csv(raw_data_dir)
     players_processed = players_raw.process_players()

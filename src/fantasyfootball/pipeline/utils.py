@@ -49,11 +49,11 @@ def retrieve_team_abbreviation(team_name: str) -> str:
         ("Houston", "Houston Texans"): "HOU",
         ("Indianapolis", "Indianapolis Colts"): "IND",
         ("Jacksonville", "Jacksonville Jaguars"): "JAX",
-        ("KansasCity", "Kansas City Chiefs"): "KAN",
+        ("KansasCity", "Kansas City Chiefs", "KCChiefs", "Kansas"): "KAN",
         ("LAChargers", "Los Angeles Chargers"): "LAC",
         ("Oakland", "Oakland Raiders"): "OAK",
         ("LARams", "Los Angeles Rams"): "LAR",
-        ("LasVegas", "Las Vegas Raiders"): "LVR",
+        ("LasVegas", "Las Vegas Raiders", "LVRaiders"): "LVR",
         ("Miami", "Miami Dolphins"): "MIA",
         ("Minnesota", "Minnesota Vikings"): "MIN",
         ("NewEngland", "New England Patriots"): "NWE",
@@ -63,10 +63,11 @@ def retrieve_team_abbreviation(team_name: str) -> str:
         ("Philadelphia", "Philadelphia Eagles"): "PHI",
         ("Pittsburgh", "Pittsburgh Steelers"): "PIT",
         ("SanFrancisco", "San Francisco 49ers"): "SFO",
+        ("St Louis", "St. Louis Rams"): "STL",
         ("Seattle", "Seattle Seahawks"): "SEA",
-        ("TampaBay", "Tampa Bay Buccaneers"): "TAM",
+        ("TampaBay", "Tampa Bay Buccaneers", "Tampa"): "TAM",
         ("Tennessee", "Tennessee Titans"): "TEN",
-        ("Washington", "Washington Football Team"): "WAS",
+        ("Washington", "Washingtom", "Washington Football Team"): "WAS",
     }
     for k, v in team_abbreviation_mapping.items():
         if team_name in k:
@@ -167,7 +168,9 @@ def write_ff_csv(
         raise FantasyFootballError(
             f"dir_type must be either 'raw' or 'processed', not {dir_type}"
         )
-    dir_path = root_dir / "data" / "season" / str(season_year) / dir_type / data_type
+    dir_path = (
+        root_dir / "datasets" / "season" / str(season_year) / dir_type / data_type
+    )
     create_dir(dir_path)
     fname = "_".join(file_type + (data_type,)) + ".csv"
     df.to_csv(dir_path / fname, index=False)
@@ -201,6 +204,10 @@ def read_ff_csv(dir_path: PosixPath) -> pd.DataFrame:
             otherwise the dataframe.
     """
     file_paths = list(dir_path.glob("*.csv"))
+    if not file_paths:
+        raise FileNotFoundError(
+            f"No .csv files found in {dir_path}. Have you run the collect module?"
+        )
     if len(file_paths) > 1:
         df = concat_ff_csv(file_paths)
         return df

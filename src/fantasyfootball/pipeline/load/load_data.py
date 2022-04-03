@@ -20,11 +20,15 @@ def copy_to_git_data_dir(root_dir: str, season_year: int) -> None:
     Returns:
         None
     """
-    dir_suffix = Path("data") / "season" / str(season_year)
+    dir_suffix = Path("datasets") / "season" / str(season_year)
     processed_source_dir = Path(root_dir) / dir_suffix / "processed"
     processed_dest_dir = Path(root_dir).parent.parent / dir_suffix
     processed_data_sources = list(processed_source_dir.glob("*"))
-    data_source_types = [str(x).split("/")[-1] for x in processed_data_sources]
+    data_source_types = [
+        x
+        for x in [str(x).split("/")[-1] for x in processed_data_sources]
+        if x != ".DS_Store"
+    ]
     for source_type in data_source_types:
         source_type_fname = source_type + ".csv"
         all_file_paths = list((processed_source_dir / source_type).glob("*.csv"))

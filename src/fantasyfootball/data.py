@@ -108,7 +108,7 @@ class FantasyData:
                 calendar_df, players_df, how="inner", on=["team", "season_year"]
             )
             stats_df = pd.read_csv(ff_season_data_dir / "stats.csv").drop(
-                columns="away"
+                columns="is_away"
             )
             season_ff_df = pd.merge(
                 season_ff_df, stats_df, how="inner", on=["date", "name", "team", "opp"]
@@ -122,7 +122,7 @@ class FantasyData:
             )
             defense_df = pd.read_csv(ff_season_data_dir / "defense.csv")
             season_ff_df = pd.merge(
-                season_ff_df, defense_df, how="inner", on=["week", "opp"]
+                season_ff_df, defense_df, how="inner", on=["week", "opp", "season_year"]
             )
             weather_df = pd.read_csv(ff_season_data_dir / "weather.csv")
             season_ff_df = pd.merge(

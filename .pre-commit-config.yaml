@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/psf/black
-    rev: 21.9b0
+    rev: 22.3.0
     hooks:
     - id: black
       language_version: python3
@@ -13,7 +13,7 @@ repos:
       language_version: python3
       args:
         - "--max-line-length=88"
-        # ignore unused import, invalid escape sequence, line break before binary operator
+        # ignore unused import, invalidescape sequence, line break before binary operator
         - "--ignore=F401,W503,W605" 
   - repo: https://github.com/pycqa/isort
     rev: 5.10.1

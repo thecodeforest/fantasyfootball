@@ -10,24 +10,24 @@ def df():
     columns = ["player", "team", "position", "season_year"]
     data = [
         ["Jonathan Taylor*+", "IND", "RB", 2021],
-        ["Cooper Kupp*+", "LAR", "WR", 2021],
-        ["Deebo Samuel*+", "SFO", "WR", 2021],
-        ["Player", "Tm", "FantPos", 2021],
-        ["Trenton Cannon", "2TM", "RB", 2021],
-        ["John Wolford", "LAR", "QB", 2021],
+        ["Jake Kumerow", "BUF", "WR", 2021],
+        ["Kyle Juszczyk*", "SFO", "RB", 2021],
+        ["Mike Evans*", "TAM", "WR", 2021],
+        ["Gerald Everett", "SEA", "TE", 2021],
     ]
     player_df = pd.DataFrame(data, columns=columns)
     return player_df
 
 
 def test_process_players(df):
-    columns = ["player", "tm", "position", "season_year"]
+    columns = ["name", "team", "position", "season_year"]
     expected = pd.DataFrame(
         [
             ["Jonathan Taylor", "IND", "RB", 2021],
-            ["Cooper Kupp", "LAR", "WR", 2021],
-            ["Deebo Samuel", "SFO", "WR", 2021],
-            ["John Wolford", "LAR", "QB", 2021],
+            ["Jake Kumerow", "BUF", "WR", 2021],
+            ["Kyle Juszczyk", "SFO", "RB", 2021],
+            ["Mike Evans", "TAM", "WR", 2021],
+            ["Gerald Everett", "SEA", "TE", 2021],
         ],
         columns=columns,
     )

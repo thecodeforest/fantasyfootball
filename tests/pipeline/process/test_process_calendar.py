@@ -6,38 +6,38 @@ from fantasyfootball.pipeline.process.process_calendar import process_calendar
 
 @pytest.fixture(scope="module")
 def df():
-    columns = ["date", "week", "winner_tie", "loser_tie"]
+    columns = ["date", "week", "winner_tie", "unnamed_5", "loser_tie"]
     data = [
-        ["2021-09-09", "1", "Tampa Bay Buccaneers", "Dallas Cowboys"],
-        ["2021-09-12", "1", "Philadelphia Eagles", "Atlanta Falcons"],
-        ["2021-09-12", "1", "Pittsburgh Steelers", "Buffalo Bills"],
-        ["2021-10-17", "6", "Arizona Cardinals", "Cleveland Browns"],
-        ["2021-10-17", "6", "Kansas City Chiefs", "Washington Football Team"],
-        ["2022-01-16", "WildCard", "San Francisco 49ers", "Dallas Cowboys"],
-        ["2022-01-16", "WildCard", "Kansas City Chiefs", "Pittsburgh Steelers"],
-        ["2022-01-17", "WildCard", "Los Angeles Rams", "Arizona Cardinals"],
-        ["2022-01-22", "Division", "Cincinnati Bengals", "Tennessee Titans"],
+        ["2021-10-17", "6", "Cincinnati Bengals", "@", "Detroit Lions"],
+        ["2021-11-28", "12", "New York Jets", "@", "Houston Texans"],
+        ["2021-11-01", "8", "Kansas City Chiefs", "", "New York Giants"],
+        ["2021-11-21", "11", "Cleveland Browns", "", "Detroit Lions"],
+        ["2022-01-09", "18", "Pittsburgh Steelers", "@", "Baltimore Ravens"],
+        ["2021-10-31", "8", "San Francisco 49ers", "@", "Chicago Bears"],
     ]
     calendar_df = pd.DataFrame(data, columns=columns)
     return calendar_df
 
 
 def test_process_calendar(df):
-    columns = ["date", "week", "tm", "opp"]
+    columns = ["date", "week", "team", "opp", "is_away"]
     expected = pd.DataFrame(
         [
-            ["2021-09-09", "1", "TAM", "DAL"],
-            ["2021-09-09", "1", "DAL", "TAM"],
-            ["2021-09-12", "1", "PHI", "ATL"],
-            ["2021-09-12", "1", "PIT", "BUF"],
-            ["2021-09-12", "1", "ATL", "PHI"],
-            ["2021-09-12", "1", "BUF", "PIT"],
-            ["2021-10-17", "6", "ARI", "CLE"],
-            ["2021-10-17", "6", "KAN", "WAS"],
-            ["2021-10-17", "6", "CLE", "ARI"],
-            ["2021-10-17", "6", "WAS", "KAN"],
+            ["2021-10-17", "6", "CIN", "DET", 1],
+            ["2021-10-17", "6", "DET", "CIN", 0],
+            ["2021-10-31", "8", "SFO", "CHI", 1],
+            ["2021-10-31", "8", "CHI", "SFO", 0],
+            ["2021-11-01", "8", "KAN", "NYG", 0],
+            ["2021-11-01", "8", "NYG", "KAN", 1],
+            ["2021-11-21", "11", "CLE", "DET", 0],
+            ["2021-11-21", "11", "DET", "CLE", 1],
+            ["2021-11-28", "12", "NYJ", "HOU", 1],
+            ["2021-11-28", "12", "HOU", "NYJ", 0],
+            ["2022-01-09", "18", "PIT", "BAL", 1],
+            ["2022-01-09", "18", "BAL", "PIT", 0],
         ],
         columns=columns,
     )
+    print(df)
     result = df.process_calendar()
     assert expected.equals(result)

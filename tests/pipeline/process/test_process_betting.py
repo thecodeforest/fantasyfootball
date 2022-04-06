@@ -11,7 +11,6 @@ from fantasyfootball.pipeline.process.process_betting import (
 @pytest.mark.parametrize(
     ("season_year", "date", "expected"),
     (
-        (2020, "102", "non-regular-season"),
         (2020, "1003", "2020-10-03"),
         (2021, "1212", "2021-12-12"),
         (2019, "926", "2019-09-26"),
@@ -37,7 +36,7 @@ def test_create_point_spread_df():
     )
     expected = pd.DataFrame(
         [["TAM", "DAL", 30], ["DAL", "TAM", 23]],
-        columns=["team", "opp", "projected_pts"],
+        columns=["team", "opp", "projected_off_pts"],
     )
     result = df.create_point_spread_df()
     assert expected.equals(result)
@@ -50,7 +49,7 @@ def test_create_point_spread_df_even_moneyline():
     )
     expected = pd.DataFrame(
         [["LAC", "WAS", 22], ["WAS", "LAC", 22]],
-        columns=["team", "opp", "projected_pts"],
+        columns=["team", "opp", "projected_off_pts"],
     )
     result = df.create_point_spread_df()
     assert expected.equals(result)

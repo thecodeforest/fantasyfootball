@@ -15,25 +15,40 @@ from fantasyfootball.pipeline.process.process_stats import (
 def df():
     columns = [
         "g_nbr",
-        "gs",
+        "is_start",
         "passing_yds",
         "passing_cmp_pct",
-        "away",
+        "is_away",
         "scoring_2pm",
         "off_snaps_pct",
-        "status",
+        "is_active",
     ]
     data = [
-        [1, 2, 3, 4, 5],
-        ["*", "*", "*", "Did Not Play", "Did Not Play"],
-        [250, 275, 320, "Did Not Play", "Did Not Play"],
-        ["75.0%", "55.0%", "66.7%", "Did Not Play", "Did Not Play"],
-        ["", "@", "@", "", ""],
-        [1, "", "", "", ""],
-        ["72%", "81%", "95%", "Did Not Play", "Did Not Play"],
-        ["", "", "", "Did Not Play", "Did Not Play"],
+        ["1", "*", "250", "75.0%", "", "1", "72%", ""],
+        ["2", "*", "275", "55.0%", "@", "", "81%", ""],
+        ["3", "*", "320", "66.7%", "@", "", "95%", ""],
+        [
+            "4",
+            "Did Not Play",
+            "Did Not Play",
+            "Did Not Play",
+            "",
+            "",
+            "Did Not Play",
+            "Did Not Play",
+        ],
+        [
+            "5",
+            "Did Not Play",
+            "Did Not Play",
+            "Did Not Play",
+            "",
+            "",
+            "Did Not Play",
+            "Did Not Play",
+        ],
     ]
-    stats_df = pd.DataFrame(np.transpose(data), columns=columns)
+    stats_df = pd.DataFrame(data, columns=columns)
     return stats_df
 
 
@@ -91,28 +106,28 @@ def test_clean_stats_column(df):
 def test_clean_status_column_present(df):
     expected = [1, 1, 1, 0, 0]
     result = clean_status_column(df)
-    assert result["status"].tolist() == expected
+    assert result["is_active"].tolist() == expected
 
 
 def test_clean_status_column_absent(df):
     expected = [1, 1, 1, 1, 1]
     df_no_status = df.copy()
-    df_no_status = df_no_status.drop(columns="status")
+    df_no_status = df_no_status.drop(columns="is_active")
     result = clean_status_column(df_no_status)
-    assert result["status"].tolist() == expected
+    assert result["is_active"].tolist() == expected
 
 
 def test_recode_str_to_numeric(df):
     # test away column
     expected = [0, 1, 1, 0, 0]
-    column = "away"
+    column = "is_away"
     target_value = "@"
     replacement_value = 1
     result = recode_str_to_numeric(df, column, target_value, replacement_value)
     assert result[column].tolist() == expected
     # test games started column
     expected = [1, 1, 1, 0, 0]
-    column = "gs"
+    column = "is_start"
     target_value = "*"
     replacement_value = 1
     result = recode_str_to_numeric(df, column, target_value, replacement_value)

@@ -1,4 +1,4 @@
-date,week,team,opp,away,season_year
+date,week,team,opp,is_away,season_year
 2021-09-09,1,TAM,DAL,0,2021
 2021-09-09,1,DAL,TAM,1,2021
 2021-09-12,1,CHI,LAR,1,2021

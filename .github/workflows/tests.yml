@@ -1,0 +1,41 @@
+name: Tests
+
+on: [push]
+
+jobs:
+  unit-tests:
+    name: Fantasy Football Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+    steps:
+  # install poetry 
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        installer-parallel: true
+    - name: Run pre-commit hooks
+      uses: pre-commit/action@v2.0.0
+    # if an environment already exists, load it; otherwise create a new one 
+    - name: Load Cached Virtual Environment
+      id: cached-poetry-dependencies
+      uses: actions/cache@v2
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+    - name: Install dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+    # if no cache exists, install packages 
+      run: poetry install --no-interaction --no-root
+    # run unit tests
+    - name: Run unit tests
+      run: |
+        source .venv/bin/activate
+        python pytest
+    
+
+

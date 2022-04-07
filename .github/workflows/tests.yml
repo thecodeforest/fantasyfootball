@@ -21,7 +21,7 @@ jobs:
       uses: pre-commit/action@v2.0.0
     # Install dependencies 
     - name: Install dependencies      
-  install poetry 
+    # Install poetry 
     - name: Install Poetry
       uses: snok/install-poetry@v1
       with:

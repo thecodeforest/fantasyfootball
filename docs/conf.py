@@ -6,9 +6,9 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u"fantasyfootball"
-copyright = u"2022, Mark LeBoeuf"
-author = u"Mark LeBoeuf"
+project = "fantasyfootball"
+copyright = "2022, Mark LeBoeuf"
+author = "Mark LeBoeuf"
 
 # -- General configuration ---------------------------------------------------
 

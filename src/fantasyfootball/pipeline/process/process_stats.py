@@ -7,15 +7,11 @@ from janitor import clean_names
 
 from fantasyfootball.config import root_dir
 from fantasyfootball.pipeline.pipeline_logger import logger
-from fantasyfootball.pipeline.utils import (
-    get_module_purpose,
-    read_args,
-    write_ff_csv
-)
+from fantasyfootball.pipeline.utils import get_module_purpose, read_args, write_ff_csv
 
 REQUIRED_COLUMNS = {
     "player_columns": ["pid", "name"],
-    "game_columns": ["tm", "opp", "status", "date", "result", "away", "gs"],
+    "game_columns": ["tm", "opp", "is_active", "date", "result", "is_away", "is_start"],
     "stats_columns": [
         "g_nbr",
         "receiving_rec",
@@ -29,7 +25,7 @@ REQUIRED_COLUMNS = {
         "fumbles_fmb",
         "passing_int",
         "scoring_2pm",
-        "punt_returns_td"
+        "punt_returns_td",
     ],
 }
 
@@ -39,7 +35,7 @@ def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     """Cleans the column names of the given dataframe by applying the following steps
        after using the janitor `clean_names` function:
         * strips any 'unnamed' field, for example 'Unnamed: 0'
-        * replaces the first missing name with 'away'
+        * replaces the first missing name with 'is_away'
         * coverts '#' to '_nbr'
         * converts '%' to '_pct'
 
@@ -51,11 +47,13 @@ def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     """
     df = clean_names(df)
     cols = df.columns
-    cols = [re.sub("unnamed_[0-9]+_level_\d", "", x).strip("_") for x in cols]
+    cols = [re.sub("unnamed_[0-9]+_level_[0-9]", "", x).strip("_") for x in cols]
     # away will always be the first empty string following cleaning step above
-    cols[cols.index("")] = "away"
+    cols[cols.index("")] = "is_away"
     cols = [x.replace("#", "_nbr") for x in cols]
     cols = [x.replace("%", "_pct") for x in cols]
+    cols = ["is_active" if x == "status" else x for x in cols]
+    cols = ["is_start" if x == "gs" else x for x in cols]
     df.columns = cols
     return df
 
@@ -77,10 +75,10 @@ def clean_status_column(df: pd.DataFrame) -> pd.DataFrame:
         pd.DataFrame: The Dataframe with the status column cleaned.
     """
     # empty string indicates player played, otherwise player was injured, sick, etc.
-    if "status" not in df.columns:
-        df["status"] = [1] * df.shape[0]
+    if "is_active" not in df.columns:
+        df["is_active"] = [1] * df.shape[0]
     else:
-        df["status"] = [1 if not x else 0 for x in df["status"]]
+        df["is_active"] = [1 if not x else 0 for x in df["is_active"]]
     return df
 
 
@@ -238,13 +236,18 @@ if __name__ == "__main__":
         logger.info(f"Processing player {pid}")
         clean_stats_df = (
             clean_stats_df.clean_column_names()
+            .rename(columns={"gs": "is_start"})
             .clean_status_column()
             .add_missing_stats_columns()
             .select_ff_columns()
             .clean_stats_column_values()
             .query("~date.str.contains('Games')")
-            .recode_str_to_numeric(column="away", target_value="@", replacement_value=1)
-            .recode_str_to_numeric(column="gs", target_value="*", replacement_value=1)
+            .recode_str_to_numeric(
+                column="is_away", target_value="@", replacement_value=1
+            )
+            .recode_str_to_numeric(
+                column="is_start", target_value="*", replacement_value=1
+            )
             .rename(columns={"tm": "team"})
         )
         clean_stats_df.write_ff_csv(

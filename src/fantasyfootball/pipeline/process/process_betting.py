@@ -2,7 +2,6 @@ from itertools import chain
 
 import pandas as pd
 import pandas_flavor as pf
-from janitor import clean_names
 
 from fantasyfootball.config import root_dir
 from fantasyfootball.pipeline.utils import (
@@ -11,6 +10,8 @@ from fantasyfootball.pipeline.utils import (
     read_ff_csv,
     retrieve_team_abbreviation
 )
+
+from janitor import clean_names  # noqa  # isort:skip
 
 
 def clean_game_date(season_year: int, date: str) -> str:
@@ -113,9 +114,11 @@ def create_point_spread_df(df: pd.DataFrame):
         underdog_pts = (over_under / 2) - pt_spread * 0.5
     spread_df = pd.DataFrame(
         [[fav_team, underdog_team, fav_pts], [underdog_team, fav_team, underdog_pts]],
-        columns=["team", "opp", "projected_pts"],
+        columns=["team", "opp", "projected_off_pts"],
     )
-    spread_df["projected_pts"] = spread_df["projected_pts"].apply(lambda x: round(x))
+    spread_df["projected_off_pts"] = spread_df["projected_off_pts"].apply(
+        lambda x: round(x)
+    )
     return spread_df
 
 

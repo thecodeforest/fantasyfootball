@@ -1,11 +1,7 @@
 import pandas as pd
 
 from fantasyfootball.config import betting_url, root_dir
-from fantasyfootball.pipeline.utils import (
-    get_module_function,
-    read_args,
-    write_ff_csv
-)
+from fantasyfootball.pipeline.utils import get_module_purpose, read_args, write_ff_csv
 
 
 def collect_betting(betting_url: str, season_year: int) -> pd.DataFrame:
@@ -27,7 +23,7 @@ def collect_betting(betting_url: str, season_year: int) -> pd.DataFrame:
 
 if __name__ == "__main__":
     args = read_args()
-    dir_type, data_type = get_module_function(module_path=__file__)
+    dir_type, data_type = get_module_purpose(module_path=__file__)
     betting_raw = collect_betting(betting_url=betting_url, season_year=args.season_year)
     betting_raw.write_ff_csv(
         root_dir=root_dir,

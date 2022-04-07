@@ -8,7 +8,7 @@ from fantasyfootball.pipeline.utils import (
     get_module_purpose,
     read_args,
     read_ff_csv,
-    retrieve_team_abbreviation
+    retrieve_team_abbreviation,
 )
 
 from janitor import clean_names  # noqa  # isort:skip

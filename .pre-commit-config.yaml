@@ -15,8 +15,3 @@ repos:
         - "--max-line-length=88"
         # ignore unused import, invalidescape sequence, line break before binary operator
         - "--ignore=F401,W503,W605" 
-  - repo: https://github.com/pycqa/isort
-    rev: 5.10.1
-    hooks:
-      - id: isort
-        language_version: python3

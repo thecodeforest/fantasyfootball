@@ -6,7 +6,7 @@ from fantasyfootball.pipeline.utils import (
     get_module_purpose,
     read_args,
     read_ff_csv,
-    write_ff_csv
+    write_ff_csv,
 )
 
 

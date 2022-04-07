@@ -7,11 +7,7 @@ import pandas as pd
 
 from fantasyfootball.config import root_dir, stats_url
 from fantasyfootball.pipeline.pipeline_logger import logger
-from fantasyfootball.pipeline.utils import (
-    get_module_purpose,
-    read_args,
-    write_ff_csv
-)
+from fantasyfootball.pipeline.utils import get_module_purpose, read_args, write_ff_csv
 
 
 def create_url_by_season(
@@ -222,7 +218,7 @@ if __name__ == "__main__":
     args = read_args()
     dir_type, data_type = get_module_purpose(module_path=__file__)
     data_dir = (
-        root_dir / "data" / "season" / str(args.season_year) / dir_type / data_type
+        root_dir / "datasets" / "season" / str(args.season_year) / dir_type / data_type
     )
     players = pd.read_csv(
         data_dir.parent.parent / "processed" / "players" / "players.csv"

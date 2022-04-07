@@ -6,7 +6,7 @@ from fantasyfootball.pipeline.process.process_defense import (
     aggregate_season_defense_stats,
     rank_defense,
     scale_defense_stats,
-    weight_defense_stats
+    weight_defense_stats,
 )
 
 

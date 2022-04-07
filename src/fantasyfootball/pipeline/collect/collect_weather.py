@@ -6,11 +6,7 @@ from meteostat import Daily, Point
 
 from fantasyfootball.config import root_dir
 from fantasyfootball.pipeline.pipeline_logger import logger
-from fantasyfootball.pipeline.utils import (
-    get_module_purpose,
-    read_args,
-    write_ff_csv
-)
+from fantasyfootball.pipeline.utils import get_module_purpose, read_args, write_ff_csv
 
 
 def collect_daily_weather_conditions(

@@ -1,11 +1,7 @@
 import pandas as pd
 
 from fantasyfootball.config import root_dir, stats_url
-from fantasyfootball.pipeline.utils import (
-    get_module_purpose,
-    read_args,
-    write_ff_csv
-)
+from fantasyfootball.pipeline.utils import get_module_purpose, read_args, write_ff_csv
 
 
 def collect_calendar(calendar_url: str) -> pd.DataFrame:

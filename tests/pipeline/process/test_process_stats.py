@@ -7,7 +7,7 @@ from fantasyfootball.pipeline.process.process_stats import (
     clean_column_names,
     clean_stats_column,
     clean_status_column,
-    recode_str_to_numeric
+    recode_str_to_numeric,
 )
 
 

@@ -4,7 +4,7 @@ from fantasyfootball.pipeline.collect.collect_stats import (
     clean_player_name,
     create_abbr_name_combo,
     create_player_id,
-    first_name_is_abbr
+    first_name_is_abbr,
 )
 
 

@@ -4,7 +4,7 @@ import pytest
 from fantasyfootball.pipeline.process.process_betting import (
     clean_game_date,
     create_game_id,
-    create_point_spread_df
+    create_point_spread_df,
 )
 
 

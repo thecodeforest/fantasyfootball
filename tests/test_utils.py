@@ -8,7 +8,7 @@ from fantasyfootball.pipeline.utils import (
     concat_ff_csv,
     create_dir,
     get_module_purpose,
-    retrieve_team_abbreviation
+    retrieve_team_abbreviation,
 )
 
 

@@ -30,7 +30,9 @@ def create_away_team_df(df: pd.DataFrame) -> pd.DataFrame:
         else:
             away_game_lst.append([row.week, row.date, row.team, 0])
             away_game_lst.append([row.week, row.date, row.opp, 1])
-    away_game_df = pd.DataFrame(away_game_lst, columns=["week", "date", "team", "is_away"])
+    away_game_df = pd.DataFrame(
+        away_game_lst, columns=["week", "date", "team", "is_away"]
+    )
     return away_game_df
 
 
@@ -61,7 +63,9 @@ def process_calendar(df: pd.DataFrame) -> pd.DataFrame:
     df = pd.concat(
         [
             df[["date", "week", "team", "opp"]],
-            df[["date", "week", "opp", "team"]].rename(columns={"opp": "team", "team": "opp"}),
+            df[["date", "week", "opp", "team"]].rename(
+                columns={"opp": "team", "team": "opp"}
+            ),
         ]
     )
     df = pd.merge(df, away_team_df, how="inner", on=["week", "date", "team"])
@@ -73,7 +77,9 @@ def process_calendar(df: pd.DataFrame) -> pd.DataFrame:
 if __name__ == "__main__":
     args = read_args()
     dir_type, data_type = get_module_purpose(module_path=__file__)
-    raw_data_dir = root_dir / "datasets" / "season" / str(args.season_year) / "raw" / data_type
+    raw_data_dir = (
+        root_dir / "datasets" / "season" / str(args.season_year) / "raw" / data_type
+    )
     clean_calendar_df = read_ff_csv(raw_data_dir)
     clean_calendar_df = clean_calendar_df.clean_names().process_calendar()
     clean_calendar_df["season_year"] = args.season_year

@@ -2,11 +2,7 @@ import pandas as pd
 import pandas_flavor as pf
 
 from fantasyfootball.config import root_dir
-from fantasyfootball.pipeline.utils import (
-    get_module_purpose,
-    read_args,
-    read_ff_csv
-)
+from fantasyfootball.pipeline.utils import get_module_purpose, read_args, read_ff_csv
 
 
 def is_valid_team(team: str) -> bool:

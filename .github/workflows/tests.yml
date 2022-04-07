@@ -40,8 +40,9 @@ jobs:
     # run unit tests
     - name: Run unit tests
       run: |
-        source .venv/bin/activate
-        pytest tests/
+        python -c "import sys; print('\n'.join(sys.path))"
+      # source .venv/bin/activate
+      # pytest tests/
     
 
 

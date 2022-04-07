@@ -20,8 +20,6 @@ jobs:
     - name: Run Pre-commit hooks
       uses: pre-commit/action@v2.0.0
     # Install dependencies 
-    - name: Install dependencies      
-    # Install poetry 
     - name: Install Poetry
       uses: snok/install-poetry@v1
       with:

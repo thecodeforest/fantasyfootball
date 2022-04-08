@@ -40,9 +40,9 @@ jobs:
     # run unit tests
     - name: Run unit tests
       run: |
-        python -c "import sys; print('\n'.join(sys.path))"
-      # source .venv/bin/activate
-      # pytest tests/
+        source .venv/bin/activate
+        poetry install
+        pytest tests/
     
 
 

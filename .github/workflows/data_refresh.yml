@@ -38,6 +38,18 @@ jobs:
         source .venv/bin/activate
         python src/fantasyfootball/pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
         python src/fantasyfootball/pipeline/process/process_calendar.py --season_year $SEASON_YEAR
-
+  # load proccesed data to datasets
+        python src/fantasyfootball/pipeline/load/load_data.py --season_year $SEASON_YEAR
+    - name: Commit new data to datasets directory
+      shell: bash
+      run: |
+        echo "Loading data to git"
+        if [[ "$(git status --porcelain)" != "" ]]; then
+            git config --global user.name 'MarkLeBoeuf'
+            git config --global user.email 'markleboeuf2015@u.northwestern.edu'
+            git add datasets/*.csv        
+            git commit -m "Auto update historical NFL data"
+            git push
+        fi
 
 

@@ -90,6 +90,7 @@ def create_dir(dir_path: PosixPath) -> None:
         None
     """
     if not Path.exists(dir_path):
+        print("Creating directory:", dir_path)
         Path.mkdir(dir_path, parents=True)
     return None
 

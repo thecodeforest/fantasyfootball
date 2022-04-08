@@ -3,7 +3,7 @@ from pathlib import Path
 
 from fantasyfootball.config import root_dir
 from fantasyfootball.pipeline.pipeline_logger import logger
-from fantasyfootball.pipeline.utils import concat_ff_csv, read_args
+from fantasyfootball.pipeline.utils import concat_ff_csv, read_args, create_dir
 
 
 def copy_to_git_data_dir(root_dir: str, season_year: int) -> None:
@@ -23,6 +23,7 @@ def copy_to_git_data_dir(root_dir: str, season_year: int) -> None:
     dir_suffix = Path("datasets") / "season" / str(season_year)
     processed_source_dir = Path(root_dir) / dir_suffix / "processed"
     processed_dest_dir = Path(root_dir).parent.parent / dir_suffix
+    create_dir(processed_dest_dir)
     processed_data_sources = list(processed_source_dir.glob("*"))
     data_source_types = [
         x

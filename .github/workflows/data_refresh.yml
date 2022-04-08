@@ -1,0 +1,69 @@
+name: Data Pipeline
+
+on: [push]
+
+jobs: 
+  data_refresh: 
+    runs-on: ubuntu-latest 
+    env:
+      SEASON_YEAR: 2019
+    steps:
+    # check-out the repository <stat-scrape> so job can access all your code
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with: 
+          python-version: 3.9.7
+        # install poetry 
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+      # if an environment already exists, load it; otherwise create a new one 
+      - name: Load Cached Virtual Environment
+        id: cached-poetry-dependencies
+        uses: actions/cache@v2
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      # if no cache exists, install packages 
+        run: poetry install --no-interaction --no-root
+      - name: NFL data refresh
+        run: | 
+          source .venv/bin/activate
+      # calendar          
+          python fantasyfootball/src/fantasyfootball/pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
+          python fantasyfootball/src/fantasyfootball/pipeline/process/process_calendar.py --season_year $SEASON_YEAR
+      # players         
+          # python fantasyfootball/src/fantasyfootball/pipeline/collect/collect_players.py --season_year $SEASON_YEAR
+          # python fantasyfootball/src/fantasyfootball/pipeline/process/process_players.py --season_year $SEASON_YEAR
+      # stats
+          # python fantasyfootball/src/fantasyfootball/pipeline/collect/collect_stats.py --season_year $SEASON_YEAR
+          # python fantasyfootball/src/fantasyfootball/pipeline/process/process_stats.py --season_year $SEASON_YEAR
+      # betting
+          # python fantasyfootball/src/fantasyfootball/pipeline/collect/collect_betting.py --season_year $SEASON_YEAR
+          # python fantasyfootball/src/fantasyfootball/pipeline/process/process_betting.py --season_year $SEASON_YEAR
+      # weather
+          # python fantasyfootball/src/fantasyfootball/pipeline/collect/collect_weather.py --season_year $SEASON_YEAR
+          # python fantasyfootball/src/fantasyfootball/pipeline/process/process_weather.py --season_year $SEASON_YEAR
+      # defense - no processing step, as it derives from existing data sources
+          # python fantasyfootball/src/fantasyfootball/pipeline/process/process_defense.py --season_year $SEASON_YEAR
+      # load processed data to datasets
+          python fantasyfootball/src/fantasyfootball/pipeline/load/load_data.py --season_year $SEASON_YEAR
+      - name: Commit new data to datasets directory
+        shell: bash
+        run: |
+          if [[ "$(git status --porcelain)" != "" ]]; then
+              git config --global user.name 'MarkLeBoeuf'
+              git config --global user.email 'markleboeuf2015@u.northwestern.edu'
+              git add fantasyfootball/datasets/*.csv        
+              git commit -m "Auto update historical NFL data"
+              git push
+          fi
+         
+
+

@@ -36,24 +36,10 @@ jobs:
     - name: NFL data refresh
       run: | 
         source .venv/bin/activate
-    # calendar          
+  # calendar          
         python fantasyfootball/src/fantasyfootball/pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
         python fantasyfootball/src/fantasyfootball/pipeline/process/process_calendar.py --season_year $SEASON_YEAR
-      # players         
-          # python fantasyfootball/src/fantasyfootball/pipeline/collect/collect_players.py --season_year $SEASON_YEAR
-          # python fantasyfootball/src/fantasyfootball/pipeline/process/process_players.py --season_year $SEASON_YEAR
-      # stats
-          # python fantasyfootball/src/fantasyfootball/pipeline/collect/collect_stats.py --season_year $SEASON_YEAR
-          # python fantasyfootball/src/fantasyfootball/pipeline/process/process_stats.py --season_year $SEASON_YEAR
-      # betting
-          # python fantasyfootball/src/fantasyfootball/pipeline/collect/collect_betting.py --season_year $SEASON_YEAR
-          # python fantasyfootball/src/fantasyfootball/pipeline/process/process_betting.py --season_year $SEASON_YEAR
-      # weather
-          # python fantasyfootball/src/fantasyfootball/pipeline/collect/collect_weather.py --season_year $SEASON_YEAR
-          # python fantasyfootball/src/fantasyfootball/pipeline/process/process_weather.py --season_year $SEASON_YEAR
-      # defense - no processing step, as it derives from existing data sources
-          # python fantasyfootball/src/fantasyfootball/pipeline/process/process_defense.py --season_year $SEASON_YEAR
-      # load processed data to datasets
+  # load processed data to datasets
         python fantasyfootball/src/fantasyfootball/pipeline/load/load_data.py --season_year $SEASON_YEAR
     - name: Commit new data to datasets directory
       shell: bash

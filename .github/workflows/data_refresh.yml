@@ -4,6 +4,7 @@ on: [push]
 
 jobs: 
   data_refresh: 
+    name: Data refresh
     runs-on: ubuntu-latest 
     env:
       SEASON_YEAR: 2019

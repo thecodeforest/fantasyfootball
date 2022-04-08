@@ -67,7 +67,12 @@ def retrieve_team_abbreviation(team_name: str) -> str:
         ("Seattle", "Seattle Seahawks"): "SEA",
         ("TampaBay", "Tampa Bay Buccaneers", "Tampa"): "TAM",
         ("Tennessee", "Tennessee Titans"): "TEN",
-        ("Washington", "Washingtom", "Washington Football Team"): "WAS",
+        (
+            "Washington",
+            "Washingtom",
+            "Washington Football Team",
+            "Washington Redskins",
+        ): "WAS",
     }
     for k, v in team_abbreviation_mapping.items():
         if team_name in k:

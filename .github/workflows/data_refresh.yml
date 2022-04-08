@@ -33,24 +33,5 @@ jobs:
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
   # if no cache exists, install packages 
       run: poetry install --no-interaction --no-root
-    - name: NFL data refresh
-      run: | 
-        source .venv/bin/activate
-  # calendar          
-        python fantasyfootball/src/fantasyfootball/pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
-        python fantasyfootball/src/fantasyfootball/pipeline/process/process_calendar.py --season_year $SEASON_YEAR
-  # load processed data to datasets
-        python fantasyfootball/src/fantasyfootball/pipeline/load/load_data.py --season_year $SEASON_YEAR
-    - name: Commit new data to datasets directory
-      shell: bash
-      run: |
-        if [[ "$(git status --porcelain)" != "" ]]; then
-            git config --global user.name 'MarkLeBoeuf'
-            git config --global user.email 'markleboeuf2015@u.northwestern.edu'
-            git add fantasyfootball/datasets/*.csv        
-            git commit -m "Auto update historical NFL data"
-            git push
-        fi
-         
 
 

@@ -33,5 +33,11 @@ jobs:
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
   # if no cache exists, install packages 
       run: poetry install --no-interaction --no-root
+    - name: NFL data refresh
+      run: |
+        source .venv/bin/activate
+        python fantasyfootball/src/fantasyfootball/pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
+        python fantasyfootball/src/fantasyfootball/pipeline/process/process_calendar.py --season_year $SEASON_YEAR
+
 
 

@@ -211,7 +211,7 @@ def collect_stats(
         except Exception:
             logger.error(f"Error collecting stats for {player_url}")
             continue
-    return None
+    return pd.DataFrame(None)
 
 
 if __name__ == "__main__":
@@ -232,8 +232,9 @@ if __name__ == "__main__":
             season_year=args.season_year,
             stats_url=stats_url,
         )
-        if not stats_raw:
+        if stats_raw.empty:
             logger.error(f"Could not collect stats for {player_name}")
+            continue
         pid = stats_raw["pid"].iloc[0]
         stats_raw.write_ff_csv(root_dir, args.season_year, dir_type, data_type, pid)
         time.sleep(2)

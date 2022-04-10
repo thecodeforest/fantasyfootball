@@ -1,6 +1,6 @@
 name: Data Pipeline
 
-# on: [push]
+on: [push]
 
 jobs: 
   data_refresh: 

@@ -142,7 +142,7 @@ def process_betting(df: pd.DataFrame, season_year: int) -> pd.DataFrame:
         point_spread_df = game_df.create_point_spread_df()
         point_spread_df["date"] = game_df["date"].iloc[0]
         point_spread_df["season_year"] = season_year
-        process_betting_df = process_betting_df.append(point_spread_df)
+        process_betting_df = pd.concat([process_betting_df, point_spread_df])
     return process_betting_df
 
 

@@ -1,15 +1,15 @@
 name: Data Pipeline
 
-on: [push]
+# on: [push]
 
 jobs: 
   data_refresh: 
     name: Data refresh
     runs-on: ubuntu-latest 
     env:
-      SEASON_YEAR: 2019
+      SEASON_YEAR: 2018
     steps:
-    # check-out the repository <stat-scrape> so job can access all your code
+    # check-out the repository so job can access all your code
     - uses: actions/checkout@v2
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
@@ -37,7 +37,16 @@ jobs:
       run: |
         source .venv/bin/activate
         python src/fantasyfootball/pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
-        python src/fantasyfootball/pipeline/process/process_calendar.py --season_year $SEASON_YEAR
+        python src/fantasyfootball/pipeline/process/process_calendar.py --season_year $SEASON_YEAR      
+        python src/fantasyfootball/pipeline/collect/collect_players.py --season_year $SEASON_YEAR
+        python src/fantasyfootball/pipeline/process/process_players.py --season_year $SEASON_YEAR
+        python src/fantasyfootball/pipeline/collect/collect_stats.py --season_year $SEASON_YEAR
+        python src/fantasyfootball/pipeline/process/process_stats.py --season_year $SEASON_YEAR
+        python src/fantasyfootball/pipeline/collect/collect_betting.py --season_year $SEASON_YEAR
+        python src/fantasyfootball/pipeline/process/process_betting.py --season_year $SEASON_YEAR
+        python src/fantasyfootball/pipeline/collect/collect_weather.py --season_year $SEASON_YEAR
+        python src/fantasyfootball/pipeline/process/process_weather.py --season_year $SEASON_YEAR      
+        python src/fantasyfootball/pipeline/process/process_defense.py --season_year $SEASON_YEAR   
         python src/fantasyfootball/pipeline/load/load_data.py --season_year $SEASON_YEAR
     - name: Commit new data to datasets directory
       shell: bash
@@ -47,7 +56,7 @@ jobs:
             git config --global user.name 'MarkLeBoeuf'
             git config --global user.email 'markleboeuf2015@u.northwestern.edu'
             git add datasets/*.csv        
-            git commit -m "Auto update historical NFL data"
+            git commit -m "data: auto update historical NFL data"
             git push
         fi
 

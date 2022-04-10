@@ -27,8 +27,8 @@ def collect_weather(
     game_weather_df = pd.DataFrame(columns=game_location_fields)
     for row in calendar_df.itertuples(index=False):
         logger.info(f"collecting data for {row}")
-        game_date, team, opp, away = (row.date, row.team, row.opp, row.away)
-        if away == 1:
+        game_date, team, opp, is_away = (row.date, row.team, row.opp, row.is_away)
+        if is_away == 1:
             home_team = opp
         else:
             home_team = team
@@ -54,7 +54,7 @@ def collect_weather(
                 [game_location_data + game_day_weather_df.iloc[0].tolist()],
                 columns=game_location_fields + game_day_weather_df.columns.tolist(),
             )
-        game_weather_df = game_weather_df.append(game_day_weather_df)
+        game_weather_df = pd.concat([game_weather_df, game_day_weather_df])
         sleep(2)
     return game_weather_df
 

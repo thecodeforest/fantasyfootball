@@ -42,7 +42,12 @@ jobs:
       run: |
         source .venv/bin/activate
         poetry install
-        pytest tests/
+        pytest --cov=./ --cov-report=xml tests/ 
+    - name: Upload Coverage report
+      uses: codecov/codecov-action@v2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage.xml
     
 
 

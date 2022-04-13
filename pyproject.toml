@@ -29,6 +29,7 @@ pre-commit = "^2.16.0"
 isort = "^5.10.1"
 flake8 = "^4.0.1"
 meteostat = "^1.6.1"
+pytest-cov = "^3.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

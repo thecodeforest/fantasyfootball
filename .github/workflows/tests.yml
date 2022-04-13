@@ -42,7 +42,7 @@ jobs:
       run: |
         source .venv/bin/activate
         poetry install
-        pytest --cov=./ --cov-report=xml tests/ 
+        pytest --cov=./ --cov-report=xml
     - name: Upload Coverage report
       uses: codecov/codecov-action@v2
       with:

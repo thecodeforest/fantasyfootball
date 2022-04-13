@@ -7,7 +7,7 @@ jobs:
     name: Data refresh
     runs-on: ubuntu-latest 
     env:
-      SEASON_YEAR: 2018
+      SEASON_YEAR: 2017
     steps:
     # check-out the repository so job can access all your code
     - uses: actions/checkout@v2

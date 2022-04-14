@@ -141,5 +141,16 @@ dmypy.json
 # MacOS
 .DS_Store
 
+# Logging
+/logs.log
+.log
+
 # Sandbox for temporary files
 sandbox.*
+
+# Temporary football data
+src/fantasyfootball/datasets/season
+datasets/season/[0-9]*/*.csv
+
+# VScode settings
+.vscode/

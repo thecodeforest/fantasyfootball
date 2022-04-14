@@ -94,6 +94,7 @@ class FantasyData:
         season_years = [
             int(str(x).split("/")[-1])
             for x in (root_dir.parent.parent / "datasets" / "season").glob("*")
+            if str(x).split("/")[-1].isdigit()
         ]
         min_year = min(season_years)
         max_year = max(season_years)
@@ -118,33 +119,43 @@ class FantasyData:
         ff_df = pd.DataFrame()
         for season_year in range(self.season_year_start, self.season_year_end + 1):
             ff_season_data_dir = ff_data_dir / str(season_year)
-            calendar_df = pd.read_csv(ff_season_data_dir / "calendar.csv")
-            players_df = pd.read_csv(ff_season_data_dir / "players.csv")
+            calendar_df = pd.read_csv(
+                ff_season_data_dir / "calendar.gz", compression="gzip"
+            )
+            players_df = pd.read_csv(
+                ff_season_data_dir / "players.gz", compression="gzip"
+            )
             season_ff_df = pd.merge(
                 calendar_df, players_df, how="inner", on=["team", "season_year"]
             )
-            stats_df = pd.read_csv(ff_season_data_dir / "stats.csv").drop(
-                columns="is_away"
-            )
+            stats_df = pd.read_csv(
+                ff_season_data_dir / "stats.gz", compression="gzip"
+            ).drop(columns="is_away")
             season_ff_df = pd.merge(
                 season_ff_df, stats_df, how="inner", on=["date", "name", "team", "opp"]
             )
-            betting_df = pd.read_csv(ff_season_data_dir / "betting.csv")
+            betting_df = pd.read_csv(
+                ff_season_data_dir / "betting.gz", compression="gzip"
+            )
             season_ff_df = pd.merge(
                 season_ff_df,
                 betting_df,
                 how="left",
                 on=["date", "season_year", "team", "opp"],
             )
-            defense_df = pd.read_csv(ff_season_data_dir / "defense.csv")
+            defense_df = pd.read_csv(
+                ff_season_data_dir / "defense.gz", compression="gzip"
+            )
             season_ff_df = pd.merge(
                 season_ff_df, defense_df, how="inner", on=["week", "opp", "season_year"]
             )
-            weather_df = pd.read_csv(ff_season_data_dir / "weather.csv")
+            weather_df = pd.read_csv(
+                ff_season_data_dir / "weather.gz", compression="gzip"
+            )
             season_ff_df = pd.merge(
                 season_ff_df, weather_df, how="inner", on=["date", "team", "opp"]
             )
-            ff_df = ff_df.append(season_ff_df)
+            ff_df = pd.concat([ff_df, season_ff_df])
         self.ff_data = ff_df
 
     @staticmethod

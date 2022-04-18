@@ -62,6 +62,7 @@ def retrieve_team_abbreviation(team_name: str) -> str:
         ("NYJets", "New York Jets"): "NYJ",
         ("Philadelphia", "Philadelphia Eagles"): "PHI",
         ("Pittsburgh", "Pittsburgh Steelers"): "PIT",
+        ("San Diego", "San Diego Chargers"): "SDG",
         ("SanFrancisco", "San Francisco 49ers"): "SFO",
         ("St Louis", "St. Louis Rams"): "STL",
         ("Seattle", "Seattle Seahawks"): "SEA",

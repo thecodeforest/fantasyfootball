@@ -1,6 +1,6 @@
 name: DataPipeline
 
-on: [push]
+# on: [push]
 
 jobs: 
   data-pipeline: 

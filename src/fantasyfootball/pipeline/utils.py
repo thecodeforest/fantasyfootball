@@ -4,6 +4,7 @@ from typing import List, Tuple
 
 import pandas as pd
 import pandas_flavor as pf
+from fuzzywuzzy import fuzz
 
 from fantasyfootball.errors import FantasyFootballError
 
@@ -79,6 +80,97 @@ def retrieve_team_abbreviation(team_name: str) -> str:
         if team_name in k:
             return v
     raise ValueError(f"Team name {team_name} not found in team_abbreviation_mapping")
+
+
+def map_abbr2_to_abbr3(team_name: str) -> str:
+    "Maps the 2-letter abbreviation to the 3-letter abbreviation."
+    abbr2_mapping = {
+        "KC": "KAN",
+        "LA": "LAC",
+        "LV": "LVR",
+        "SF": "SFO",
+        "TB": "TAM",
+        "GB": "GNB",
+        "NE": "NWE",
+        "NO": "NOR",
+        "PH": "PHI",
+    }
+    if len(team_name) == 2:
+        if team_name not in abbr2_mapping.keys():
+            raise ValueError(f"{team_name} not found in abbr2_mapping")
+        return abbr2_mapping[team_name]
+    else:
+        return team_name
+
+
+def collapse_cols_to_str(df: pd.DataFrame) -> List[str]:
+    """Collapses across columns in the dataframe to a single string.
+
+    Args:
+        df (pd.DataFrame): The dataframe to collapse.
+
+    Returns:
+        Tuple[str]: The collapsed dataframe.
+    """
+    if not all([x == "object" for x in df.dtypes.astype(str).tolist()]):
+        raise ValueError("all columns must be of type 'object'")
+    all_columns = df.columns.tolist()
+    cols_collapsed = [
+        " ".join(x.split(","))
+        for x in (df[all_columns].stack().groupby(level=0).apply(",".join))
+    ]
+    return cols_collapsed
+
+
+def map_player_names(
+    reference_df: pd.DataFrame, new_df: pd.DataFrame, *keys: str, match_threshold=80
+) -> pd.DataFrame:
+    """Maps player names between two dataframes using fuzzy matching.
+
+    Args:
+        reference_df (pd.DataFrame): Dataframe with reference player names,
+            or names that other dataframes will be mapped to.
+        new_df (pd.DataFrame): Dataframe with player names that will be
+            mapped to the reference_df
+        keys (str): Columns that will be used to match players
+        match_threshold (int, optional): Threshold for fuzzy matching. Defaults to 80.
+
+    Returns:
+        pd.DataFrame: Dataframe with mapped player names
+
+    Example:
+        >>> ref_df = pd.DataFrame({"name": ["John Doe", "Jane Doe", "John Smith"]})
+        >>> new_df = pd.DataFrame({"name": ["John Done", "Jane Roe", "John Smit"]})
+        >>> map_player_names(ref_df, new_df, "name")
+
+    """
+    keys = list(keys)
+    if "name" not in keys:
+        raise ValueError("Must include 'name' in keys")
+    reference_df = reference_df[keys].drop_duplicates()
+    new_df = new_df[keys].drop_duplicates()
+    new_df_match_lst = collapse_cols_to_str(new_df)
+    new_df["is_match"] = 1
+    reference_no_match_df = reference_df.merge(new_df, how="left", on=keys).query(
+        "is_match != 1"
+    )
+    reference_no_match_lst = collapse_cols_to_str(reference_no_match_df)
+    name_mapping_lst = []
+    for row_index, correct_player_name in enumerate(reference_no_match_lst):
+        name_proximity = [
+            [index, fuzz.ratio(x, correct_player_name)]
+            for index, x in enumerate(new_df_match_lst)
+        ]
+        match_index, match_proximity = sorted(
+            name_proximity, key=lambda x: x[1], reverse=True
+        )[0]
+        if match_proximity > match_threshold:
+            mapped_name_lst = new_df[keys].iloc[match_index].tolist() + [
+                reference_no_match_df.iloc[row_index]["name"]
+            ]
+            name_mapping_lst.append(mapped_name_lst)
+    name_mapping_df = pd.DataFrame(name_mapping_lst, columns=keys + ["mapped_name"])
+    return name_mapping_df
 
 
 def create_dir(dir_path: PosixPath) -> None:

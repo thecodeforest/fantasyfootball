@@ -172,8 +172,8 @@ class FantasyFeatures:
             games_played_this_season_df.shape[0] - players_above_threshold_df.shape[0]
         )
         print(
-            f"{n_players_removed} player(s) removed who"
-            f"have not played {min_games_played} games in a season"
+            f"{n_players_removed} player(s) removed that"
+            f" have not played {min_games_played} games in a season"
         )
 
     @staticmethod
@@ -273,11 +273,17 @@ class FantasyFeatures:
         self._validate_max_week(season_year=current_season_year, week_number=max_week)
         ff_data_dir = root_dir.parent.parent / "datasets" / "season"
         calendar_df = pd.read_csv(
-            ff_data_dir / str(current_season_year) / "calendar.csv"
+            ff_data_dir / str(current_season_year) / "calendar.gz", compression="gzip"
         ).drop(columns="season_year")
-        betting_df = pd.read_csv(ff_data_dir / str(current_season_year) / "betting.csv")
-        defense_df = pd.read_csv(ff_data_dir / str(current_season_year) / "defense.csv")
-        weather_df = pd.read_csv(ff_data_dir / str(current_season_year) / "weather.csv")
+        betting_df = pd.read_csv(
+            ff_data_dir / str(current_season_year) / "betting.gz", compression="gzip"
+        )
+        defense_df = pd.read_csv(
+            ff_data_dir / str(current_season_year) / "defense.gz", compression="gzip"
+        )
+        weather_df = pd.read_csv(
+            ff_data_dir / str(current_season_year) / "weather.gz", compression="gzip"
+        )
         future_week_df = pd.DataFrame()
         for row in (
             current_season_df[self.player_group_columns]
@@ -316,7 +322,7 @@ class FantasyFeatures:
             player_attributes = pd.DataFrame(
                 {
                     **dict(zip(self.player_group_columns, list(row))),
-                    **{"status": 1, "position": self.position},
+                    **{"is_active": 1, "position": self.position},
                 },
                 index=[0],
             )
@@ -327,7 +333,7 @@ class FantasyFeatures:
                 ],
                 axis=1,
             )
-            future_week_df = future_week_df.append(upcoming_game_df)
+            future_week_df = pd.concat([future_week_df, upcoming_game_df])
         # ensure no features exist in future week that are not present in df
         future_week_df = future_week_df[
             list(set(self.df.columns).intersection(future_week_df.columns))
@@ -358,23 +364,23 @@ class FantasyFeatures:
         step_str = f"('{step}', {transformer_name}({param_str}))"
         return step_str
 
-    def _validate_n_week_lag_length(self, n_week_lag: list):
-        max_lag_length = max(n_week_lag)
-        games_played_this_season_df = self._calculate_n_games_played(
-            self.df, self.player_group_columns
-        )
-        min_games_played = min(games_played_this_season_df["n_games_played"])
-        # exclude future week from count if present
-        if "is_future_week" in self.df.columns:
-            min_games_played -= 1
-        if max_lag_length > min_games_played:
-            raise ValueError(
-                f"The lag length of {max_lag_length}\n"
-                "is greater than the minimum number of games\n"
-                f"played in the season ({min_games_played}) for some players.\n"
-                "Either reduce lag length or ensure players have played\n"
-                f"at least {max_lag_length} games"
-            )
+    # def _validate_n_week_lag_length(self, n_week_lag: list):
+    #     max_lag_length = max(n_week_lag)
+    #     games_played_this_season_df = self._calculate_n_games_played(
+    #         self.df, self.player_group_columns
+    #     )
+    #     min_games_played = min(games_played_this_season_df["n_games_played"])
+    #     # exclude future week from count if present
+    #     if "is_future_week" in self.df.columns:
+    #         min_games_played -= 1
+    #     if max_lag_length > min_games_played:
+    #         raise ValueError(
+    #             f"The lag length of {max_lag_length}\n"
+    #             "is greater than the minimum number of games\n"
+    #             f"played in the season ({min_games_played}) for some players.\n"
+    #             "Either reduce lag length or ensure players have played\n"
+    #             f"at least {max_lag_length} games"
+    #         )
 
     def _validate_column_present(self, feature_columns: list) -> None:
         for column in feature_columns:
@@ -384,7 +390,8 @@ class FantasyFeatures:
     def add_lag_feature(self, n_week_lag: list, lag_columns: list):
         feature_type = "lag"
         self._validate_column_present(feature_columns=lag_columns)
-        self._validate_n_week_lag_length(self.df, self.player_group_columns, n_week_lag)
+        # self._validate_n_week_lag_length(self.df,
+        # self.player_group_columns, n_week_lag)
         new_lag_features = self._save_pipeline_feature_names(
             lag_columns, feature_type, *n_week_lag
         )

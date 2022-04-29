@@ -1,9 +1,9 @@
 
 <p align="center">
-<img src="docs/images/logo.jpeg" width="1000" height="250">
+<img src="docs/images/logo.png" width="1000" height="250">
 </p>
 
-![logo](https://github.com/thecodeforest/fantasyfootball/blob/main/docs/images/logo.jpeg?raw=true)
+![logo](https://github.com/thecodeforest/fantasyfootball/blob/main/docs/images/logo.png?raw=true)
 -----------------
 
 # Welcome to fantasyfootball

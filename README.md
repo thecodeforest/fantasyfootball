@@ -1,9 +1,8 @@
 
 <p align="center">
-<img src="docs/images/logo.png" width="1000" height="250">
+<img src="docs/images/logo.png" width="800" height="250">
 </p>
 
-![logo](https://github.com/thecodeforest/fantasyfootball/blob/main/docs/images/logo.png?raw=true)
 -----------------
 
 # Welcome to fantasyfootball
@@ -15,53 +14,132 @@
 
 Additionally, **fantasyfootball** streamlines the creation of features for in-season, player-level fantasy point projections. The resulting projections can then determine weekly roster decisions. 
 
-## Why fantasyfootball
-
-Let's walk through a brief, real-world example to illustrate the second use case highlighted above: weekly roster decisions. Imagine it's the Tuesday of Week 10 in the 2021 NFL regular season. Your somewhat mediocre team occupies 5th place, one spot away from the coveted playoff threshold. It is a must-win week, and you are in the unenviable position of deciding who starts in the Flex roster spot. You have two wide-receivers -- Hunter Renfrow, Cole Beasley -- and one running back -- Zack Moss -- for a single roster spot. 
-The goal is to start the player who will score the most points in Week 10. To aid in your roster decision, you train a predictive model on past data and then generate point projections for these three players in Week 10. 
-
-```python
-from fantasyfootball.data import FantasyData
-from fantasyfootball.features import FantasyFeatures
-
-fantasy_data = FantasyData(season_year_start=2018, season_year_end=2021)
-fantasy_data.create_fantasy_points_column(scoring_source="draft kings")                           
-fantasy_df = fantasy_data.data
-fantasy_df.head()
-```
-
-Very neat. Much wow. Want to test out your features on a past week?
-
-```python
-
-backtest_df = fantasy_df.filter_to_prior_week(season_year=2021, 
-                                              week_number=8
-                                              )
-features = FantasyFeatures(backtest_df, position="QB")                 
-features.filter_n_games_played_by_season(min_games_played=2)                             
-features.create_future_week()
-# create features lag
-yvar = fantasy_df.columns[-1]
-features.add_lag_feature(n_week_lag=[1, 2], 
-                        lag_columns=["status", yvar]
-                                 )
-# create moving average feature                                 
-fantasy_features.add_moving_avg_feature(n_week_window=[4],
-                                        window_columns=["passing_cmp", yvar]
-                                        )
-feature_names, df_features = fantasy_features.create_ff_signature()                                        
-
-```
-
-
-
-
-
 ## Installation
 
 ```bash
 $ pip install fantasyfootball
 ```
+
+## Why fantasyfootball
+
+Let's walk through an example to illustrate a core use-case of **fantasyfootball**: weekly roster decisions. Imagine it's Tuesday, Week 15 of the 2021 NFL regular season. Your mediocre team occupies 5th place in the league standings, one spot away from the coveted playoff threshold. It is a must-win week, and you are in the unenviable position of deciding who starts in the Flex roster spot. 
+You have two wide-receivers available to start, Hunter Renfrow or Chris Godwin, and you want to estimate which player will score more points in Week 15. Accordingly, you use the data and feature engineering capabilities in **fantasyfootball** to create features before making point projections for the upcoming week. The player with the highest point projection will be slotted into the Flex roster spot, propelling your team to fantasy glory in the upcoming playoffs. 
+
+Start by reading all player data from the 2015-2021 seasons.
+
+```python
+from fantasyfootball.data import FantasyData
+
+fantasy_data = FantasyData(season_year_start=2015, season_year_end=2021)
+```
+
+Next, we'll create our outcome variable that defines the total weekly fantasy points scored by each player. Then, depending on your league's scoring rules, you can supply standard fantasy football scoring systems, including *yahoo*, *fanduel*, *draftkings*, or create your own *custom* configuration. For example, assume you are part of a *yahoo* league with standard scoring.
+
+```python
+fantasy_data.create_fantasy_points_column(scoring_source="yahoo") 
+```
+
+Now that we've added our outcome variable, we'll extract the data as a data frame and take a look at the past four weeks for Hunter Renfrow. Note that only a subset of the 38 total fields appears below. 
+
+```python
+fantasy_df = fantasy_data.data
+renfh_df = fantasy_df.query("name=='Hunter Renfrow' & season_year==2021 & 11<=week<=14")   
+print(renfh_df[["pid", "week", "is_away", "receiving_rec", 
+                "receiving_td","receiving_yds","draftkings_salary",
+                "ff_pts_yahoo"]]
+     )
+```
+
+| pid      |   week |   is_away |   receiving_rec |   receiving_td |   receiving_yds |   draftkings_salary |   ff_pts_yahoo |
+|:---------|-------:|----------:|----------------:|---------------:|----------------:|--------------------:|---------------:|
+| RenfHu00 |     11 |         0 |               4 |              0 |              30 |                5800 |            5.5 |
+| RenfHu00 |     12 |         1 |               8 |              0 |             134 |                5600 |           17.6 |
+| RenfHu00 |     13 |         0 |               9 |              0 |             102 |                5800 |           14.7 |
+| RenfHu00 |     14 |         1 |              13 |              1 |             117 |                6100 |           22.2 |
+
+We'll create the feature set that will feed our predictive model in the following section. The first step is to filter to the most recently completed week for all wide receivers (WR). 
+
+```python
+from fantasyfootball.backtesting import filter_to_prior_week
+
+backtest_df = fantasy_df.filter_to_prior_week(season_year=2021,week_number=14)
+features = FantasyFeatures(backtest_df, position="WR")    
+```
+
+Now, we'll apply the following transformations to our historical data: 
+
+* `create_future_week` - Adds leading indicators that we can use to make predictions for Week 15. Recall that, in the current example, we only have game data up to Week 14, so we need to create features for a future, unplayed game. For example, the over/under point projections combined with the point spread estimate how much each team will score. A high-scoring estimate would likely translate into more fantasy points for all players on a team. Another example is weather forecasts. An exceptionally windy game may favor a "run-centric" offense, leading to fewer passing/receiving plays and more rushing plays. Such an occurrence would benefit runnings backs while hurting wide receivers and quarterbacks. 
+A field, `is_future_week`, is also added during this step and allows for an easy split between past and future data during the modeling process. 
+ 
+* `filter_n_games_played_by_season` - Filters out players who have played only a few games in a season. Setting a threshold is necessary when creating lagged features (which happen to be some of the best predictors of future performance). 
+
+* `add_lag_feature` - Add lags of a specified length for lagging indicators, such as receptions, receiving yards, or rushing touchdowns from previous weeks. 
+
+* `add_moving_avg_feature` - Add a moving average of a specified length for lagging indicators.
+
+* `create_ff_signature` - Executes all of the steps used to create "derived features," or features that we've created using some transformation (e.g., a lag or moving average). 
+
+```python
+from fantasyfootball.features import FantasyFeatures
+
+yvar = fantasy_df.columns[-1]
+fantasy_features.create_future_week()
+fantasy_features.filter_n_games_played_by_season(min_games_played=2)
+fantasy_features.add_lag_feature(n_week_lag=[1], lag_columns=[yvar])
+fantasy_features.add_moving_avg_feature(n_week_window=[4], window_columns=[yvar])
+derived_features, feature_df = fantasy_features.create_ff_signature()
+```
+
+Having created our feature set and extracted the names of the newly created features, we'll seperate our historical data (training), denoted `hist_df`, from the future, unplayed game data (testing), denoted `future_df`, using the indicator added above during the `create_future_week` step. 
+
+```python
+hist_df = feature_df[feature_df['is_future_week'] == 0]
+future_df = feature_df[feature_df['is_future_week'] == 1]
+```
+For the sake of simplicity, we'll leverage a small subset of raw, untransformed features from our original data, and combine these with the derived features we created in a previous step. 
+
+```python
+raw_features = ["is_active", "avg_windspeed", "receiving_def_rank", "draftkings_salary"]
+all_features = raw_features + derived_features
+```
+
+Let's split between our train/hist and test/future data. 
+```python
+from janitor import get_features_targets
+
+X_hist, y_hist = hist_df[all_features + [yvar]].get_features_targets(yvar, all_features)
+X_future = future_df[all_features]
+```
+
+Now we can fit a simple model and make predictions for the upcoming week. 
+
+```python
+from sklearn.ensemble import RandomForestRegressor
+
+rf = RandomForestRegressor(n_estimators=1000, 
+                           max_depth=4,                            
+                           random_state=0)
+rf.fit(X_hist.values, y_hist.values)
+y_future = rf.predict(X_future.values)
+```
+
+Below we'll assign our point predictions back to the original `future_df` we created for Week 15 and filter to the two players in questions. 
+
+```python
+future_df = future_df.assign(**{f"{yvar}_pred": y_future})
+players = ['Hunter Renfrow', 'Chris Godwin']
+future_df[["name", "team", "opp","week", "date", f"{yvar}_pred"]].query("name in @players")
+```
+
+| name           | team   | opp   |   week | date       |   ff_pts_yahoo_pred |
+|:---------------|:-------|:------|-------:|:-----------|--------------------:|
+| Chris Godwin   | TAM    | NOR   |     15 | 2021-12-19 |             12.2594 |
+| Hunter Renfrow | LVR    | CLE   |     15 | 2021-12-20 |             14.9204 |
+
+Based on our point projections, we should start Hunter Renfrow over Chris Godwin, as he is expected to score ~2.5 more points this week. 
+
+## Benchmarking
+
 
 ## Datasets
 The package provides the following seven datasets by season: 

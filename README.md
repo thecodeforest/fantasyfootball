@@ -1,7 +1,8 @@
 
 <p align="center">
-<img src="docs/images/logo.png" width="800" height="250">
-</p>
+
+<img src="docs/images/logo.png" width="1000" height="350">
+
 
 -----------------
 

@@ -98,3 +98,58 @@ data_sources = {
         "is_forward_looking": True,
     },
 }
+
+scoring = {
+    "draft kings": {
+        "scoring_columns": {
+            "passing_td": 4,
+            "passing_yds": 0.04,
+            "passing_int": -1,
+            "rushing_td": 6,
+            "rushing_yds": 0.1,
+            "receiving_rec": 1,
+            "receiving_td": 6,
+            "receiving_yds": 0.1,
+            "fumbles_fmb": -1,
+            "scoring_2pm": 2,
+            "punt_returns_td": 6,
+        },
+        "multiplier": {
+            "rushing_yds": {"threshold": 100, "points": 3},
+            "passing_yds": {"threshold": 300, "points": 3},
+            "receiving_yds": {"threshold": 100, "points": 3},
+        },
+    },
+    "yahoo": {
+        "scoring_columns": {
+            "passing_td": 4,
+            "passing_yds": 0.04,
+            "passing_int": -1,
+            "rushing_td": 6,
+            "rushing_yds": 0.1,
+            "receiving_rec": 0.5,
+            "receiving_td": 6,
+            "receiving_yds": 0.1,
+            "fumbles_fmb": -2,
+            "scoring_2pm": 2,
+            "punt_returns_td": 6,
+        },
+        "multiplier": None,
+    },
+    "custom": {
+        "scoring_columns": {
+            "passing_td": 5,
+            "passing_yds": 0.04,
+            "passing_int": -2,
+            "rushing_td": 6,
+            "rushing_yds": 0.1,
+            "receiving_rec": 0.5,
+            "receiving_td": 5,
+            "receiving_yds": 0.1,
+            "fumbles_fmb": -2,
+            "scoring_2pm": 4,
+            "punt_returns_td": 6,
+        },
+        "multiplier": None,
+    },
+}

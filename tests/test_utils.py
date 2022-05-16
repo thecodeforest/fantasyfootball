@@ -9,6 +9,8 @@ from fantasyfootball.pipeline.utils import (
     create_dir,
     get_module_purpose,
     retrieve_team_abbreviation,
+    collapse_cols_to_str,
+    map_player_names,
 )
 
 
@@ -23,6 +25,33 @@ def test_retrieve_team_abbreviation(team_name, expected):
 def test_retrieve_team_abbreviation_incorrect_name():
     with pytest.raises(ValueError):
         retrieve_team_abbreviation("Cincinnati Vikings")
+
+
+def test_collapse_cols_to_str():
+    df = pd.DataFrame(
+        {"col1": ["a", "b", "c"], "col2": ["d", "e", "f"], "col3": ["g", "h", "i"]}
+    )
+    expected = ["a d g", "b e h", "c f i"]
+    assert collapse_cols_to_str(df) == expected
+
+
+def test_map_player_names():
+    reference_df = pd.DataFrame(
+        {"name": ["John Doe", "Jane Doe", "John Smith", "Jane Taylor"]}
+    )
+    new_df = pd.DataFrame(
+        {"name": ["John Done", "Jane Roe", "John Smit", "Lauren Hill"]}
+    )
+    expected = pd.DataFrame(
+        [
+            ["John Done", "John Doe"],
+            ["Jane Roe", "Jane Doe"],
+            ["John Smit", "John Smith"],
+        ],
+        columns=["name", "mapped_name"],
+    )
+    result = map_player_names(reference_df, new_df, "name")
+    assert expected.equals(result)
 
 
 @pytest.fixture(scope="module")

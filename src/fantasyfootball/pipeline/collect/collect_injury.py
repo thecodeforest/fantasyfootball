@@ -37,7 +37,7 @@ def trim_weekly_injury_report_data(team_injury_report: Tag) -> str:
     start_index, _, end_index, _ = chain(*start_end_index)
     trimmed_injury_report = "\n".join(
         report_lines[start_index + 1 : end_index]  # noqa: E203
-    )  # noqa: E203
+    )
     return trimmed_injury_report
 
 

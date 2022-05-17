@@ -1,11 +1,14 @@
 from itertools import product
+from pathlib import PosixPath
 from typing import List, Union
 
+import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import Pipeline
 
-from fantasyfootball.config import root_dir
+from fantasyfootball.config import data_sources, root_dir
+from fantasyfootball.data import FantasyData
 
 
 class LagFeatureTransformer(BaseEstimator, TransformerMixin):
@@ -72,12 +75,65 @@ class MAFeatureTransformer(BaseEstimator, TransformerMixin):
         return X
 
 
+class CategoryConsolidatorFeatureTransformer:
+    def __init__(self, category_columns: List[str]):
+        self.category_columns = category_columns
+        self.threshold = 0.01
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X, y=None):
+        Xo = X.copy()
+        n = X.shape[0]
+        for col in self.category_columns:
+            category_count = (
+                pd.DataFrame(X[col].value_counts())
+                .reset_index()
+                .rename(columns={"index": col, col: "count"})
+                .sort_values("count", ascending=False)
+            )
+            category_count["pct_of_obs"] = (category_count["count"] / n) * 100
+            Xo[col] = category_count = category_count.apply(
+                lambda row: row[col] if row["pct_of_obs"] > self.threshold else "other",
+                axis=1,
+            )
+        return Xo
+
+
+class TargetEncoderFeatureTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self, category_columns: List[str]):
+        self.category_columns = category_columns
+
+    # fit target encoder to x and y
+    def fit(self, X, y):
+        # Encode each element of each column
+        self.category_mappings = dict()
+        for column in self.category_columns:
+            column_mappings = dict()
+            unique_column_values = X[column].unique()
+            for unique_value in unique_column_values:
+                column_mappings[unique_value] = y[X[column] == unique_value].mean()
+            self.category_mappings[column] = column_mappings
+        return self
+
+    def transform(self, X, y=None):
+        for column, column_mappings in self.category_mappings.items():
+            col_name = f"{column}_te"
+            values = np.full(X.shape[0], np.nan)
+            for value, mean_target in column_mappings.items():
+                values[X[column] == value] = mean_target
+            X = X.assign(**{col_name: values})
+        return X
+
+
 class FantasyFeatures:
     """Create common fantasy football features for predictive modeling"""
 
     def __init__(
         self,
         df: pd.DataFrame,
+        y: str,
         position: str,
         player_group_columns: list = ["pid", "name", "team", "season_year"],
         game_week_column: str = "week",
@@ -106,6 +162,7 @@ class FantasyFeatures:
         self.df = df[df["position"] == position].sort_values(
             player_group_columns + [game_week_column]
         )
+        self.y = y
         self.position = position
         self.player_group_columns = player_group_columns
         self.game_week_column = game_week_column
@@ -120,6 +177,17 @@ class FantasyFeatures:
             pd.DataFrame: Historical NFL Fantasy data.
         """
         return self.df
+
+    def filter_inactive_games(self, status_column: str = "is_active") -> None:
+        if not all(x in [0, 1] for x in self.df[status_column]):
+            raise ValueError(
+                "status_column must be 0 or 1 indicating if player is active"
+            )
+        print("Removing all rows where player was not active for game")
+        self.df = self.df[self.df[status_column] == 1]
+        print(f"dropping {status_column} column")
+        self.df = self.df.drop(columns=status_column)
+        return self
 
     @staticmethod
     def _calculate_n_games_played(
@@ -145,6 +213,12 @@ class FantasyFeatures:
             .to_frame("n_games_played")
             .reset_index()
         )
+        # if future week has already been added
+        # subtract 1 to ignore unplayed, future game
+        if "is_future_week" in df.columns:
+            games_played_this_season_df["n_games_played"] = (
+                games_played_this_season_df["n_games_played"] - 1
+            )
         return games_played_this_season_df
 
     def filter_n_games_played_by_season(self, min_games_played: int) -> None:
@@ -168,13 +242,7 @@ class FantasyFeatures:
             on=self.player_group_columns,
             how="inner",
         )
-        n_players_removed = (
-            games_played_this_season_df.shape[0] - players_above_threshold_df.shape[0]
-        )
-        print(
-            f"{n_players_removed} player(s) removed that"
-            f" have not played {min_games_played} games in a season"
-        )
+        return self
 
     @staticmethod
     def _format_pd_filter_query(columns: List[str], row_values: List[str]) -> List[str]:
@@ -252,8 +320,41 @@ class FantasyFeatures:
             raise ValueError(
                 "Cannot create future week when the max week number is greater than 16"
             )
+        return None
 
-    # TO DO: Refactor this method into smaller methods
+    @staticmethod
+    def _validate_future_data_is_present(ff_data_dir: PosixPath, max_week: int) -> None:
+        future_week = max_week + 1
+        calendar_df = pd.read_csv(ff_data_dir / "calendar.gz", compression="gzip")
+        future_data_sources = [
+            k for k in data_sources.keys() if data_sources[k]["is_forward_looking"]
+        ]
+        for data in future_data_sources:
+            dataset_df = pd.read_csv(ff_data_dir / f"{data}.gz", compression="gzip")
+            if "week" in dataset_df.columns:
+                future_week_df = dataset_df.query(f"week == {future_week}")
+            elif "date" in dataset_df.columns:
+                future_week_df = pd.merge(
+                    dataset_df,
+                    calendar_df[calendar_df["week"] == future_week][["date"]],
+                    on="date",
+                    how="inner",
+                )
+            else:
+                raise ValueError(f"{data} is missing a 'week' or 'date' column")
+            if future_week_df.empty:
+                raise ValueError(
+                    f"No data for week {future_week} in {data}"
+                    f"{data} data is refreshed each week on Tuesday during season"
+                )
+        return None
+
+    def log_transform_y(self) -> None:
+        print(f"Adding 1 and log transforming {self.y}")
+        # convert any negative scores to 0
+        self.df[self.y] = self.df[self.y].transform(lambda x: 0 if x < 0 else x)
+        self.df[self.y] = self.df[self.y].transform(lambda x: np.log1p(x))
+
     def create_future_week(self):
         """Creates a dataframe of future features for an upcoming NFL game week.
         For example, if 'Week 8' is the most recent completed set of games,
@@ -271,73 +372,27 @@ class FantasyFeatures:
         current_season_df = self.df[self.df["season_year"] == current_season_year]
         max_week = max(current_season_df[self.game_week_column])
         self._validate_max_week(season_year=current_season_year, week_number=max_week)
-        ff_data_dir = root_dir.parent.parent / "datasets" / "season"
-        calendar_df = pd.read_csv(
-            ff_data_dir / str(current_season_year) / "calendar.gz", compression="gzip"
-        ).drop(columns="season_year")
-        betting_df = pd.read_csv(
-            ff_data_dir / str(current_season_year) / "betting.gz", compression="gzip"
+        ff_data_dir = (
+            root_dir.parent.parent / "datasets" / "season" / str(current_season_year)
         )
-        defense_df = pd.read_csv(
-            ff_data_dir / str(current_season_year) / "defense.gz", compression="gzip"
-        )
-        weather_df = pd.read_csv(
-            ff_data_dir / str(current_season_year) / "weather.gz", compression="gzip"
-        )
-        future_week_df = pd.DataFrame()
-        for row in (
-            current_season_df[self.player_group_columns]
-            .drop_duplicates()
-            .itertuples(index=False)
-        ):
-            player_filter_query = self._format_pd_filter_query(
-                columns=self.player_group_columns, row_values=list(row)
-            )
-            player_df = current_season_df.query(player_filter_query)
-            upcoming_game_df = calendar_df[
-                (calendar_df[self.game_week_column] == max_week + 1)
-                & (calendar_df["team"] == player_df["team"].iloc[0])
-            ]
-            if upcoming_game_df.empty:  # indicates buy week if empty
-                continue
-            upcoming_game_defense = defense_df[
-                (defense_df["week"] == max_week)
-                & (defense_df["opp"] == upcoming_game_df["opp"].iloc[0])
-            ].drop(columns="week")
-            upcoming_game_df = pd.merge(
-                upcoming_game_df, upcoming_game_defense, on="opp", how="inner"
-            )
-            # add in point projections based on over/under and point spread
-            upcoming_game_df = pd.merge(
-                upcoming_game_df,
-                betting_df.drop(columns="season_year"),
-                on=["team", "opp", "date"],
-                how="inner",
-            )
-            # add in weather data (will use forecast for future, unplayed games;
-            # otherwise uses actual historical weather)
-            upcoming_game_df = pd.merge(
-                upcoming_game_df, weather_df, on=["date", "team", "opp"], how="inner"
-            )
-            player_attributes = pd.DataFrame(
-                {
-                    **dict(zip(self.player_group_columns, list(row))),
-                    **{"is_active": 1, "position": self.position},
-                },
-                index=[0],
-            )
-            upcoming_game_df = pd.concat(
-                [
-                    player_attributes.drop(columns=["team", "season_year"]),
-                    upcoming_game_df,
-                ],
-                axis=1,
-            )
-            future_week_df = pd.concat([future_week_df, upcoming_game_df])
-        # ensure no features exist in future week that are not present in df
-        future_week_df = future_week_df[
-            list(set(self.df.columns).intersection(future_week_df.columns))
+        self._validate_future_data_is_present(ff_data_dir, max_week)
+        _load_data = FantasyData._load_data
+        season_ff_data = _load_data(ff_data_dir, "stats")
+        future_week_df = season_ff_data[
+            (season_ff_data[self.game_week_column] == max_week + 1)
+            & (season_ff_data["season_year"] == current_season_year)
         ]
+        # load in historical stats data to add in player id
+        stats_df = pd.read_csv(ff_data_dir / "stats.gz", compression="gzip")
+        stats_df = stats_df[["name", "team", "pid"]].drop_duplicates()
+        # assume player is active
+        if "is_active" in self.df.columns:
+            stats_df["is_active"] = 1
+        # assume player is starting
+        stats_df["is_start"] = 1
+        future_week_df = pd.merge(
+            future_week_df, stats_df, how="left", on=["name", "team"]
+        )
         future_week_df["is_future_week"] = 1
         self.df = (
             pd.concat([self.df, future_week_df], axis=0)
@@ -345,6 +400,7 @@ class FantasyFeatures:
             .reset_index(drop=True)
         )
         self.df["is_future_week"] = self.df["is_future_week"].fillna(0)
+        return self
 
     @staticmethod
     def _create_step_str(step: str, transformer_name: str, **params) -> str:
@@ -364,34 +420,21 @@ class FantasyFeatures:
         step_str = f"('{step}', {transformer_name}({param_str}))"
         return step_str
 
-    # def _validate_n_week_lag_length(self, n_week_lag: list):
-    #     max_lag_length = max(n_week_lag)
-    #     games_played_this_season_df = self._calculate_n_games_played(
-    #         self.df, self.player_group_columns
-    #     )
-    #     min_games_played = min(games_played_this_season_df["n_games_played"])
-    #     # exclude future week from count if present
-    #     if "is_future_week" in self.df.columns:
-    #         min_games_played -= 1
-    #     if max_lag_length > min_games_played:
-    #         raise ValueError(
-    #             f"The lag length of {max_lag_length}\n"
-    #             "is greater than the minimum number of games\n"
-    #             f"played in the season ({min_games_played}) for some players.\n"
-    #             "Either reduce lag length or ensure players have played\n"
-    #             f"at least {max_lag_length} games"
-    #         )
-
     def _validate_column_present(self, feature_columns: list) -> None:
         for column in feature_columns:
             if column not in self.df.columns:
                 raise ValueError(f"{column} not in dataframe")
+        return None
 
-    def add_lag_feature(self, n_week_lag: list, lag_columns: list):
+    def add_lag_feature(
+        self, n_week_lag: Union[int, List[int]], lag_columns: Union[str, List[str]]
+    ):
         feature_type = "lag"
+        if isinstance(n_week_lag, int):
+            n_week_lag = [n_week_lag]
+        if isinstance(lag_columns, str):
+            lag_columns = [lag_columns]
         self._validate_column_present(feature_columns=lag_columns)
-        # self._validate_n_week_lag_length(self.df,
-        # self.player_group_columns, n_week_lag)
         new_lag_features = self._save_pipeline_feature_names(
             lag_columns, feature_type, *n_week_lag
         )
@@ -406,16 +449,25 @@ class FantasyFeatures:
 
         print("add lag step")
         self._pipeline_steps += lag_step_str + ","
+        return self
 
-    def add_moving_avg_feature(self, n_week_window: list, window_columns: list):
+    def add_moving_avg_feature(
+        self,
+        n_week_window: Union[int, List[int]],
+        window_columns: Union[str, List[str]],
+    ):
         feature_type = "ma"
+        if isinstance(n_week_window, int):
+            n_week_window = [n_week_window]
+        if isinstance(window_columns, str):
+            window_columns = [window_columns]
         self._validate_column_present(feature_columns=window_columns)
         new_ma_features = self._save_pipeline_feature_names(
             window_columns, feature_type, *n_week_window
         )
         self.new_pipeline_features = self.new_pipeline_features + new_ma_features
         ma_step_str = self._create_step_str(
-            step="Create Moving Aveage of Features",
+            step="Create Moving Average of Features",
             transformer_name="MAFeatureTransformer",
             player_group_columns=self.player_group_columns,
             n_week_window=n_week_window,
@@ -423,9 +475,69 @@ class FantasyFeatures:
         )
         print("add moving average")
         self._pipeline_steps += ma_step_str + ","
+        return self
+
+    def add_target_encoded_feature(self, category_columns: Union[str, list]):
+        feature_type = "te"
+        if isinstance(category_columns, str):
+            category_columns = [category_columns]
+        self._validate_column_present(feature_columns=category_columns)
+        new_te_feature = self._save_pipeline_feature_names(
+            category_columns, feature_type
+        )
+        self.new_pipeline_features = self.new_pipeline_features + new_te_feature
+        te_step_str = self._create_step_str(
+            step="Target Encode Categorical Feature",
+            transformer_name="TargetEncoderFeatureTransformer",
+            category_columns=category_columns,
+        )
+        print("add target encoding for categorical variables")
+        self._pipeline_steps += te_step_str + ","
+        return self
+
+    def consolidate_category_feature(self, category_columns: Union[str, list]):
+        if isinstance(category_columns, str):
+            category_columns = [category_columns]
+        self._validate_column_present(feature_columns=category_columns)
+        cc_step_str = self._create_step_str(
+            step="Consolidate Categorical Feature",
+            transformer_name="CategoryConsolidatorFeatureTransformer",
+            category_columns=category_columns,
+        )
+        print("Consolidating levels for categorical variables")
+        self._pipeline_steps += cc_step_str + ","
+        return self
+
+    def _remove_missing_feature_values(self, feature_df: pd.DataFrame) -> pd.DataFrame:
+        # max weeks to drop conditions
+        lag_fields = [x for x in feature_df.columns if "lag" in x]
+        if lag_fields:
+            weeks_to_drop_lag = max([int(x.split("_")[-1]) for x in lag_fields])
+        salary_fields = [x for x in feature_df.columns if "salary" in x]
+        if salary_fields:
+            weeks_to_drop_salary = 1
+        weeks_to_drop = max(weeks_to_drop_lag, weeks_to_drop_salary)
+
+        feature_df["player_game_index"] = (
+            feature_df.sort_values(self.player_group_columns + [self.game_week_column])
+            .groupby(self.player_group_columns)
+            .cumcount()
+            .reset_index(drop=True)
+        )
+        feature_df = feature_df.query(f"player_game_index >= {weeks_to_drop}").drop(
+            columns="player_game_index"
+        )
+        return feature_df
 
     def create_ff_signature(self):
         all_feature_steps = "[" + self._pipeline_steps + "]"
         pipeline = Pipeline(steps=eval(all_feature_steps))
-        ff_df_trans = pipeline.fit_transform(self.df)
-        return self.new_pipeline_features, ff_df_trans
+        feature_df = pipeline.fit_transform(self.df, y=self.df[self.y])
+        feature_df = self._remove_missing_feature_values(feature_df)
+        # TO DO: break into separate function
+        salary_columns = [x for x in feature_df.columns if "salary" in x]
+        if salary_columns:
+            for column in salary_columns:
+                feature_df[column] = feature_df[column].fillna(0)
+        ##########
+        return self.new_pipeline_features, feature_df

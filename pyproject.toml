@@ -32,6 +32,10 @@ meteostat = "^1.6.1"
 pytest-cov = "^3.0.0"
 fuzzywuzzy = "^0.18.0"
 python-Levenshtein = "^0.12.2"
+tabulate = "^0.8.9"
+xgboost = "^1.6.0"
+matplotlib = "^3.5.2"
+tqdm = "^4.64.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

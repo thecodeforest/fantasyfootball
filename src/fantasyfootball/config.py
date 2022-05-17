@@ -5,6 +5,7 @@ stats_url = "https://www.pro-football-reference.com"
 betting_url = (
     "https://www.sportsbookreviewsonline.com/scoresoddsarchives/nfl/nfl%20odds%2020"
 )
+injury_url = "https://www.footballdb.com/transactions/injuries.html"
 data_sources = {
     "calendar": {
         "keys": ["team", "season_year"],
@@ -93,6 +94,23 @@ data_sources = {
             "max_snow_depth",
             "total_precip",
             "avg_temp",
+        ],
+        "is_required": False,
+        "is_forward_looking": True,
+    },
+    "injury": {
+        "keys": ["name", "team", "position", "week", "season_year"],
+        "cols": [
+            "name",
+            "team",
+            "position",
+            "season_year",
+            "week",
+            "injury_type",
+            "has_dnp_tag",
+            "has_limited_tag",
+            "most_recent_injury_status",
+            "n_injuries",
         ],
         "is_required": False,
         "is_forward_looking": True,

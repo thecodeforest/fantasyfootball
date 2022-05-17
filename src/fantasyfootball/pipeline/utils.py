@@ -51,7 +51,7 @@ def retrieve_team_abbreviation(team_name: str) -> str:
         ("Indianapolis", "Indianapolis Colts"): "IND",
         ("Jacksonville", "Jacksonville Jaguars"): "JAX",
         ("KansasCity", "Kansas City Chiefs", "KCChiefs", "Kansas"): "KAN",
-        ("LAChargers", "Los Angeles Chargers"): "LAC",
+        ("LAChargers", "Los Angeles Chargers", "LosAngeles"): "LAC",
         ("Oakland", "Oakland Raiders"): "OAK",
         ("LARams", "Los Angeles Rams"): "LAR",
         ("LasVegas", "Las Vegas Raiders", "LVRaiders"): "LVR",
@@ -63,9 +63,9 @@ def retrieve_team_abbreviation(team_name: str) -> str:
         ("NYJets", "New York Jets"): "NYJ",
         ("Philadelphia", "Philadelphia Eagles"): "PHI",
         ("Pittsburgh", "Pittsburgh Steelers"): "PIT",
-        ("San Diego", "San Diego Chargers"): "SDG",
+        ("San Diego", "San Diego Chargers", "SanDiego"): "SDG",
         ("SanFrancisco", "San Francisco 49ers"): "SFO",
-        ("St Louis", "St. Louis Rams"): "STL",
+        ("St Louis", "St. Louis Rams", "St.Louis"): "STL",
         ("Seattle", "Seattle Seahawks"): "SEA",
         ("TampaBay", "Tampa Bay Buccaneers", "Tampa"): "TAM",
         ("Tennessee", "Tennessee Titans"): "TEN",
@@ -94,6 +94,7 @@ def map_abbr2_to_abbr3(team_name: str) -> str:
         "NE": "NWE",
         "NO": "NOR",
         "PH": "PHI",
+        "SD": "SDG",
     }
     if len(team_name) == 2:
         if team_name not in abbr2_mapping.keys():
@@ -112,8 +113,6 @@ def collapse_cols_to_str(df: pd.DataFrame) -> List[str]:
     Returns:
         Tuple[str]: The collapsed dataframe.
     """
-    if not all([x == "object" for x in df.dtypes.astype(str).tolist()]):
-        raise ValueError("all columns must be of type 'object'")
     all_columns = df.columns.tolist()
     cols_collapsed = [
         " ".join(x.split(","))

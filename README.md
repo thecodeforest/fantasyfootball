@@ -84,11 +84,11 @@ A field, `is_future_week`, is also added during this step and allows for an easy
 from fantasyfootball.features import FantasyFeatures
 
 yvar = fantasy_df.columns[-1]
-fantasy_features.create_future_week()
-fantasy_features.filter_n_games_played_by_season(min_games_played=2)
-fantasy_features.add_lag_feature(n_week_lag=[1], lag_columns=[yvar])
-fantasy_features.add_moving_avg_feature(n_week_window=[4], window_columns=[yvar])
-derived_features, feature_df = fantasy_features.create_ff_signature()
+features.create_future_week()
+features.filter_n_games_played_by_season(min_games_played=2)
+features.add_lag_feature(n_week_lag=[1], lag_columns=[yvar])
+features.add_moving_avg_feature(n_week_window=[4], window_columns=[yvar])
+derived_features, feature_df = features.create_ff_signature()
 ```
 
 Having created our feature set and extracted the names of the newly created features, we'll seperate our historical data (training), denoted `hist_df`, from the future, unplayed game data (testing), denoted `future_df`, using the indicator added above during the `create_future_week` step. 
@@ -137,9 +137,16 @@ future_df[["name", "team", "opp","week", "date", f"{yvar}_pred"]].query("name in
 | Chris Godwin   | TAM    | NOR   |     15 | 2021-12-19 |             12.2594 |
 | Hunter Renfrow | LVR    | CLE   |     15 | 2021-12-20 |             14.9204 |
 
-Based on our point projections, we should start Hunter Renfrow over Chris Godwin, as he is expected to score ~2.5 more points this week. 
+Based on our point projections, we should start Hunter Renfrow over Chris Godwin, as he is expected to score ~2.75 more points this week. 
 
 ## Benchmarking
+
+The main goal of the fantasyfootball package is to provide football enthusiasts with the data and tools to create "industry-grade" player point projections customized for their league's scoring system. Indeed, a simple comparison between (1) a "naive" projection, and (2) a subscription-based, "industry-grade" projection, revealed that accurate weekly player-level predictions are achievable with the fantasyfootball package. 
+
+Naive projections are a one-week lag of points scored by each player from the previous or last active week. The "industry-grade" projections are from a subscription-based fantasy sports website (www.fantasydata.com). Projection accuracy was assessed for the 2020 and 2021 seasons, starting with week three and ending with week 16, for 28 games. The Mean Absolute Error (MAE) quantified projection performance. The forecasting horizon is one week ahead, and the Yahoo scoring system determined point projections for each player. Separate models are fit for each position (QB, RB, WR, TE). Projection performance was considered only for "active" players for the week and excluded all injured or ineligible players. 
+
+<img src="docs/images/benchmark_performance.png" width="1000" height="500">
+
 
 
 ## Datasets

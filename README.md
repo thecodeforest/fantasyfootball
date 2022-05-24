@@ -21,6 +21,12 @@ Additionally, **fantasyfootball** streamlines the creation of features for in-se
 $ pip install fantasyfootball
 ```
 
+## Benchmarking
+
+The **fantasyfootball** package provides football enthusiasts with the data and tools to create "industry-grade" player point projections customized for their league's scoring system. Indeed, a simple comparison between (1) a "naive" projection, and (2) a subscription-based, "industry-grade" projection, revealed that accurate weekly player-level point projections are achievable with **fantasyfootball**. Across all player positions, **fantasyfootball** projections were, on average, 29% more accurate relative to the naive projection (6.5 vs. 4.6), while the industry-grade projections were 4% more accurate than the **fantasyfootball** projections (4.6 vs. 4.3). The figure below further disaggregates projection performance by player position. More details surrounding this analysis can be found in the [benchmarking notebook](https://github.com/thecodeforest/fantasyfootball/blob/main/examples/benchmarking.ipynb). 
+
+<img src="docs/images/benchmark_performance.png" width="1000" height="500">
+
 ## Why fantasyfootball
 
 Let's walk through an example to illustrate a core use-case of **fantasyfootball**: weekly roster decisions. Imagine it's Tuesday, Week 15 of the 2021 NFL regular season. Your mediocre team occupies 5th place in the league standings, one spot away from the coveted playoff threshold. It is a must-win week, and you are in the unenviable position of deciding who starts in the Flex roster spot. 
@@ -138,14 +144,6 @@ future_df[["name", "team", "opp","week", "date", f"{yvar}_pred"]].query("name in
 | Hunter Renfrow | LVR    | CLE   |     15 | 2021-12-20 |             14.9204 |
 
 Based on our point projections, we should start Hunter Renfrow over Chris Godwin, as he is expected to score ~2.75 more points this week. 
-
-## Benchmarking
-
-The main goal of the fantasyfootball package is to provide football enthusiasts with the data and tools to create "industry-grade" player point projections customized for their league's scoring system. Indeed, a simple comparison between (1) a "naive" projection, and (2) a subscription-based, "industry-grade" projection, revealed that accurate weekly player-level predictions are achievable with the fantasyfootball package. 
-
-Naive projections are a one-week lag of points scored by each player from the previous or last active week. The "industry-grade" projections are from a subscription-based fantasy sports website (www.fantasydata.com). Projection accuracy was assessed for the 2020 and 2021 seasons, starting with week three and ending with week 16, for 28 games. The Mean Absolute Error (MAE) quantified projection performance. The forecasting horizon is one week ahead, and the Yahoo scoring system determined point projections for each player. Separate models are fit for each position (QB, RB, WR, TE). Projection performance was considered only for "active" players for the week and excluded all injured or ineligible players. 
-
-<img src="docs/images/benchmark_performance.png" width="1000" height="500">
 
 
 

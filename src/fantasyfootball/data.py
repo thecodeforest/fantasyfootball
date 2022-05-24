@@ -47,6 +47,7 @@ class FantasyData:
             for x in (root_dir.parent.parent / "datasets" / "season").glob("*")
             if str(x).split("/")[-1].isdigit()
         ]
+        print(f"directory is: {root_dir.parent.parent}")
         min_year = min(season_years)
         max_year = max(season_years)
         if self.season_year_start < min_year:

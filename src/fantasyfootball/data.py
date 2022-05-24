@@ -305,7 +305,7 @@ class FantasyData:
                     )
         return player_weekly_points
 
-    def create_fantasy_points_column(self, scoring_source: str) -> Self:
+    def create_fantasy_points_column(self, scoring_source: str):
         """Creates a fantasy points column for the scoring source provided.
 
         Args:
@@ -342,7 +342,6 @@ class FantasyData:
             self.ff_data, all_pts_df, on=["name", "pid", "date"], how="inner"
         )
         print(f"Fantasy points column '{self.ff_data.columns[-1]}' added")
-        return self
 
     def show_scoring_sources(self) -> List[str]:
         return f"Current scoring sources: {list(self.scoring.keys())}"

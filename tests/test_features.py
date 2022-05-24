@@ -2,7 +2,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from fantasyfootball.features import FantasyFeatures
+from fantasyfootball.features import (
+    FantasyFeatures,
+    CategoryConsolidatorFeatureTransformer,
+    TargetEncoderFeatureTransformer,
+)
 
 
 @pytest.fixture(scope="module")
@@ -26,6 +30,8 @@ def df():
         "receiving_yds",
         "is_outdoor",
         "avg_temp",
+        "injury_type",
+        "actual_pts",
     ]
     data = [
         [
@@ -47,6 +53,8 @@ def df():
             0.0,
             1,
             69.44,
+            "no injury",
+            1,
         ],
         [
             "2021-10-24",
@@ -67,6 +75,8 @@ def df():
             0.0,
             1,
             80.78,
+            "hip",
+            2,
         ],
         [
             "2021-10-31",
@@ -87,6 +97,8 @@ def df():
             0.0,
             0,
             75.0,
+            "hip",
+            2,
         ],
         [
             "2021-10-17",
@@ -107,6 +119,8 @@ def df():
             0.0,
             1,
             59.0,
+            "head",
+            3,
         ],
         [
             "2021-10-31",
@@ -127,6 +141,8 @@ def df():
             0.0,
             1,
             41.72,
+            "no injury",
+            1,
         ],
         [
             "2021-10-31",
@@ -147,6 +163,8 @@ def df():
             0.0,
             1,
             58.64,
+            "no injury",
+            1,
         ],
         [
             "2021-10-17",
@@ -167,6 +185,8 @@ def df():
             0.0,
             1,
             54.5,
+            "no injury",
+            1,
         ],
         [
             "2021-10-24",
@@ -187,6 +207,8 @@ def df():
             0.0,
             1,
             39.38,
+            "hip",
+            2,
         ],
         [
             "2021-10-28",
@@ -207,6 +229,8 @@ def df():
             0.0,
             0,
             75.0,
+            "no injury",
+            1,
         ],
     ]
     historical_df = pd.DataFrame(data, columns=columns)
@@ -217,7 +241,7 @@ def test_filter_n_games_played_by_season(df):
     # Remove Joe Flacco, who has only played 1 game during this time period.
     expected_players = 3
     min_games_played = 2
-    features = FantasyFeatures(df, position="QB")
+    features = FantasyFeatures(df, y="actual_pts", position="QB")
     features.filter_n_games_played_by_season(min_games_played=min_games_played)
     result_players = len(features.data["pid"].unique())
     assert result_players == expected_players
@@ -263,3 +287,35 @@ def test__save_pipeline_feature_names(columns, feature_type, values, expected):
 def test__create_step_str(step, transformer_name, kwargs, expected):
     _create_step_str = FantasyFeatures._create_step_str
     assert _create_step_str(step, transformer_name, **kwargs) == expected
+
+
+def test_CategoryConsolidatorFeatureTransformer(df):
+    category_column = "injury_type"
+    threshold = 0.3
+    expected = [
+        "no injury",
+        "hip",
+        "hip",
+        "other",  # changed from 'head' to 'other', given it appears below the threshold
+        "no injury",
+        "no injury",
+        "no injury",
+        "hip",
+        "no injury",
+    ]
+    cc = CategoryConsolidatorFeatureTransformer(
+        category_columns=category_column, threshold=threshold
+    )
+    result = cc.fit_transform(df)[category_column].tolist()
+    assert result == expected
+
+
+def test_TargetEncoderFeatureTransformer(df):
+    category_column = "injury_type"
+    te_category_column = f"{category_column}_te"
+    expected = [1.0, 2.0, 2.0, 3.0, 1.0, 1.0, 1.0, 2.0, 1.0]
+    te = TargetEncoderFeatureTransformer(category_columns="injury_type")
+    X = df[df.columns.tolist()[:-1]]
+    y = df[df.columns.tolist()[-1]]
+    result = te.fit_transform(X, y)[te_category_column].tolist()
+    assert result == expected

@@ -75,16 +75,18 @@ class MAFeatureTransformer(BaseEstimator, TransformerMixin):
         return X
 
 
-class CategoryConsolidatorFeatureTransformer:
-    def __init__(self, category_columns: List[str]):
+class CategoryConsolidatorFeatureTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self, category_columns: Union[str, List[str]], threshold: float):
+        if not isinstance(category_columns, list):
+            category_columns = [category_columns]
         self.category_columns = category_columns
-        self.threshold = 0.01
+        self.threshold = threshold
+        print(self.category_columns)
 
     def fit(self, X, y=None):
         return self
 
     def transform(self, X, y=None):
-        Xo = X.copy()
         n = X.shape[0]
         for col in self.category_columns:
             category_count = (
@@ -93,16 +95,25 @@ class CategoryConsolidatorFeatureTransformer:
                 .rename(columns={"index": col, col: "count"})
                 .sort_values("count", ascending=False)
             )
-            category_count["pct_of_obs"] = (category_count["count"] / n) * 100
-            Xo[col] = category_count = category_count.apply(
+            category_count["pct_of_obs"] = category_count["count"] / n
+            category_count[f"{col}_consolidated"] = category_count.apply(
                 lambda row: row[col] if row["pct_of_obs"] > self.threshold else "other",
                 axis=1,
             )
-        return Xo
+            category_count = category_count.drop(columns=["count", "pct_of_obs"])
+            X = pd.merge(X, category_count, how="left", on=col)
+            X = X.drop(columns=col)
+            X = X.rename(columns={f"{col}_consolidated": col})
+        return X
+
+    def fit_transform(self, X, y=None):
+        return self.fit(X, y).transform(X, y)
 
 
 class TargetEncoderFeatureTransformer(BaseEstimator, TransformerMixin):
-    def __init__(self, category_columns: List[str]):
+    def __init__(self, category_columns: Union[str, List[str]]):
+        if not isinstance(category_columns, list):
+            category_columns = [category_columns]
         self.category_columns = category_columns
 
     # fit target encoder to x and y
@@ -125,6 +136,9 @@ class TargetEncoderFeatureTransformer(BaseEstimator, TransformerMixin):
                 values[X[column] == value] = mean_target
             X = X.assign(**{col_name: values})
         return X
+
+    def fit_transform(self, X, y=None):
+        return self.fit(X, y).transform(X, y)
 
 
 class FantasyFeatures:
@@ -420,7 +434,11 @@ class FantasyFeatures:
         step_str = f"('{step}', {transformer_name}({param_str}))"
         return step_str
 
-    def _validate_column_present(self, feature_columns: list) -> None:
+    def _validate_column_present(
+        self, feature_columns: Union[int, str, float, list]
+    ) -> None:
+        if not isinstance(feature_columns, list):
+            feature_columns = [feature_columns]
         for column in feature_columns:
             if column not in self.df.columns:
                 raise ValueError(f"{column} not in dataframe")
@@ -495,14 +513,15 @@ class FantasyFeatures:
         self._pipeline_steps += te_step_str + ","
         return self
 
-    def consolidate_category_feature(self, category_columns: Union[str, list]):
-        if isinstance(category_columns, str):
-            category_columns = [category_columns]
+    def consolidate_category_feature(
+        self, category_columns: Union[str, list], threshold: float
+    ):
         self._validate_column_present(feature_columns=category_columns)
         cc_step_str = self._create_step_str(
             step="Consolidate Categorical Feature",
             transformer_name="CategoryConsolidatorFeatureTransformer",
             category_columns=category_columns,
+            threshold=threshold,
         )
         print("Consolidating levels for categorical variables")
         self._pipeline_steps += cc_step_str + ","

@@ -44,16 +44,9 @@ class FantasyData:
         """
         season_years = [
             int(str(x).split("/")[-1])
-            for x in (root_dir.parent.parent / "datasets" / "season").glob("*")
+            for x in (root_dir / "datasets" / "season").glob("*")
             if str(x).split("/")[-1].isdigit()
         ]
-        print(f"directory is: {root_dir.parent.parent}")
-        print("-----")
-        print(f"root directory is: {root_dir}")
-        print("-----")
-        from pathlib import Path
-
-        print(f"current directory is: {Path(__file__)}")
 
         min_year = min(season_years)
         max_year = max(season_years)
@@ -169,7 +162,7 @@ class FantasyData:
         then concatenated together.
         """
         print(f"Loading data from {self.season_year_start} to {self.season_year_end}")
-        ff_data_dir = root_dir.parent.parent / "datasets" / "season"
+        ff_data_dir = root_dir / "datasets" / "season"
         ff_df = pd.DataFrame()
         for season_year in range(self.season_year_start, self.season_year_end + 1):
             if season_year < 2016:

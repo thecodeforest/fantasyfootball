@@ -386,9 +386,7 @@ class FantasyFeatures:
         current_season_df = self.df[self.df["season_year"] == current_season_year]
         max_week = max(current_season_df[self.game_week_column])
         self._validate_max_week(season_year=current_season_year, week_number=max_week)
-        ff_data_dir = (
-            root_dir.parent.parent / "datasets" / "season" / str(current_season_year)
-        )
+        ff_data_dir = root_dir / "datasets" / "season" / str(current_season_year)
         self._validate_future_data_is_present(ff_data_dir, max_week)
         _load_data = FantasyData._load_data
         season_ff_data = _load_data(ff_data_dir, "stats")

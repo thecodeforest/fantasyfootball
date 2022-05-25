@@ -26,11 +26,7 @@ def filter_to_prior_week(
         pd.DataFrame: Historical data and features.
     """
     calendar_df = pd.read_csv(
-        root_dir.parent.parent
-        / "datasets"
-        / "season"
-        / str(season_year)
-        / "calendar.gz"
+        root_dir / "datasets" / "season" / str(season_year) / "calendar.gz"
     )
     prior_week_df = calendar_df[calendar_df["week"] == week_number]
     max_date_week = max(prior_week_df["date"])

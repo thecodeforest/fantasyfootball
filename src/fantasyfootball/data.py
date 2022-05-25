@@ -53,7 +53,7 @@ class FantasyData:
         print("-----")
         from pathlib import Path
 
-        print(f"current directory is: {Path.cwd()}")
+        print(f"current directory is: {Path(__file__)}")
 
         min_year = min(season_years)
         max_year = max(season_years)

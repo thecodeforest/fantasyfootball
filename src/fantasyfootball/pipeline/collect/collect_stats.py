@@ -218,7 +218,12 @@ if __name__ == "__main__":
     args = read_args()
     dir_type, data_type = get_module_purpose(module_path=__file__)
     data_dir = (
-        root_dir / "datasets" / "season" / str(args.season_year) / dir_type / data_type
+        root_dir
+        / "staging_datasets"
+        / "season"
+        / str(args.season_year)
+        / dir_type
+        / data_type
     )
     players = pd.read_csv(
         data_dir.parent.parent / "processed" / "players" / "players.csv"

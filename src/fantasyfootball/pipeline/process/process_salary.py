@@ -58,7 +58,12 @@ if __name__ == "__main__":
         / "players.csv"
     )
     raw_data_dir = (
-        root_dir / "datasets" / "season" / str(args.season_year) / "raw" / data_type
+        root_dir
+        / "staging_datasets"
+        / "season"
+        / str(args.season_year)
+        / "raw"
+        / data_type
     )
     clean_salary_df = read_ff_csv(raw_data_dir)
     clean_salary_df = (

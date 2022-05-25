@@ -65,8 +65,8 @@ def zip_git_data_dir(dest_dir: PosixPath) -> None:
 
 if __name__ == "__main__":
     args = read_args()
-    dir_suffix = Path("datasets") / "season" / str(args.season_year)
+    dir_suffix = Path("staging_datasets") / "season" / str(args.season_year)
     source_dir = Path(root_dir) / dir_suffix / "processed"
-    dest_dir = Path(root_dir).parent.parent / dir_suffix
+    dest_dir = Path(root_dir) / dir_suffix
     copy_to_git_data_dir(source_dir=source_dir, dest_dir=dest_dir)
     zip_git_data_dir(dest_dir=dest_dir)

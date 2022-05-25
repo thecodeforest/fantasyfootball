@@ -207,7 +207,7 @@ if __name__ == "__main__":
     dir_type, data_type = get_module_purpose(module_path=__file__)
     players_df = pd.read_csv(
         root_dir
-        / "datasets"
+        / "staging_datasets"
         / "season"
         / str(args.season_year)
         / "processed"
@@ -215,7 +215,12 @@ if __name__ == "__main__":
         / "players.csv"
     )
     raw_data_dir = (
-        root_dir / "datasets" / "season" / str(args.season_year) / "raw" / data_type
+        root_dir
+        / "staging_datasets"
+        / "season"
+        / str(args.season_year)
+        / "raw"
+        / data_type
     )
     clean_injury_df = read_ff_csv(raw_data_dir)
     clean_injury_df = clean_injury_df[

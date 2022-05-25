@@ -267,7 +267,12 @@ def write_ff_csv(
             f"dir_type must be either 'raw' or 'processed', not {dir_type}"
         )
     dir_path = (
-        root_dir / "datasets" / "season" / str(season_year) / dir_type / data_type
+        root_dir
+        / "staging_datasets"
+        / "season"
+        / str(season_year)
+        / dir_type
+        / data_type
     )
     create_dir(dir_path)
     fname = "_".join(file_type + (data_type,)) + ".csv"

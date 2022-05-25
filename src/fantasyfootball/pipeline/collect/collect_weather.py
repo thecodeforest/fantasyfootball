@@ -64,7 +64,7 @@ if __name__ == "__main__":
     dir_type, data_type = get_module_purpose(module_path=__file__)
     processed_calendar_path = (
         root_dir
-        / "datasets"
+        / "staging_datasets"
         / "season"
         / str(args.season_year)
         / "processed"
@@ -72,7 +72,7 @@ if __name__ == "__main__":
         / "calendar.csv"
     )
     calendar_df = pd.read_csv(processed_calendar_path)
-    stadium_df = pd.read_csv(root_dir / "datasets" / "stadiums.csv")
+    stadium_df = pd.read_csv(root_dir / "staging_datasets" / "stadiums.csv")
     weather_raw = collect_weather(calendar_df, stadium_df)
     weather_raw.write_ff_csv(
         root_dir=root_dir,

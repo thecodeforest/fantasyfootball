@@ -80,7 +80,12 @@ if __name__ == "__main__":
     args = read_args()
     dir_type, data_type = get_module_purpose(module_path=__file__)
     raw_data_dir = (
-        root_dir / "datasets" / "season" / str(args.season_year) / "raw" / data_type
+        root_dir
+        / "staging_datasets"
+        / "season"
+        / str(args.season_year)
+        / "raw"
+        / data_type
     )
     players_raw = read_ff_csv(raw_data_dir)
     players_processed = players_raw.process_players()

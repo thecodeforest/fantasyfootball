@@ -207,12 +207,17 @@ if __name__ == "__main__":
     args = read_args()
     dir_type, data_type = get_module_purpose(module_path=__file__)
     raw_data_dir = (
-        root_dir / "datasets" / "season" / str(args.season_year) / "raw" / data_type
+        root_dir
+        / "staging_datasets"
+        / "season"
+        / str(args.season_year)
+        / "raw"
+        / data_type
     )
     clean_betting_df = read_ff_csv(raw_data_dir)
     calendar_df = pd.read_csv(
         root_dir
-        / "datasets"
+        / "staging_datasets"
         / "season"
         / str(args.season_year)
         / "processed"

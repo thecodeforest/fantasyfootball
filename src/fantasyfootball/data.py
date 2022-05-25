@@ -50,6 +50,10 @@ class FantasyData:
         print(f"directory is: {root_dir.parent.parent}")
         print("-----")
         print(f"root directory is: {root_dir}")
+        print("-----")
+        from pathlib import Path
+
+        print(f"current directory is: {Path.cwd()}")
 
         min_year = min(season_years)
         max_year = max(season_years)

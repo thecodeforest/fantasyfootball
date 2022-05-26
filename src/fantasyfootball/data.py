@@ -273,7 +273,7 @@ class FantasyData:
         print(f"Scoring source '{source_name}' Added")
 
     @staticmethod
-    def _score_player(
+    def score_player(
         player_df: pd.DataFrame, scoring_columns: set, scoring_source_rules: dict
     ) -> List[float]:
         """Calculates the total number of points scored for a single week
@@ -323,7 +323,7 @@ class FantasyData:
             player_df = self.ff_data[
                 (self.ff_data["name"] == row.name) & (self.ff_data["pid"] == row.pid)
             ]
-            player_weekly_points = self._score_player(
+            player_weekly_points = self.score_player(
                 player_df, scoring_columns, scoring_source_rules
             )
             all_player_pts.append(

@@ -1,7 +1,5 @@
 
-<p align="center">
-
-<img src="docs/images/logo.png" width="1000" height="350">
+![logo](https://github.com/thecodeforest/fantasyfootball/blob/main/docs/images/logo.png?raw=true)
 
 
 -----------------

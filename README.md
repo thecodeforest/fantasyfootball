@@ -23,7 +23,7 @@ $ pip install fantasyfootball
 
 The **fantasyfootball** package provides football enthusiasts with the data and tools to create "industry-grade" player point projections customized for their league's scoring system. Indeed, a simple comparison between (1) a "naive" projection, and (2) a subscription-based, "industry-grade" projection, revealed that accurate weekly player-level point projections are achievable with **fantasyfootball**. Across all player positions, **fantasyfootball** projections were, on average, 18% more accurate relative to the naive projection (5.6 vs. 4.6), while the industry-grade projections were 4% more accurate than the **fantasyfootball** projections (4.6 vs. 4.4). The figure below further disaggregates projection performance by player position. More details surrounding this analysis can be found in the [benchmarking notebook](https://github.com/thecodeforest/fantasyfootball/blob/main/examples/benchmarking.ipynb). 
 
-<img src="docs/images/benchmark_performance_full.png" width="1000" height="500">
+![benchmark](https://github.com/thecodeforest/fantasyfootball/blob/main/docs/images/benchmark_performance_full.png?raw=true)
 
 ## Why fantasyfootball
 

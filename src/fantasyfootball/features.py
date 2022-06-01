@@ -1,3 +1,5 @@
+from __future__ import annotations  # noqa: F404
+
 from itertools import product
 from pathlib import PosixPath
 from typing import List, Union
@@ -12,12 +14,17 @@ from fantasyfootball.data import FantasyData
 
 
 class LagFeatureTransformer(BaseEstimator, TransformerMixin):
-    """Create a lag feature for each column in the dataframe by group.
+    """Create lag features for each column in the dataframe by group.
 
     Args:
-        n_week_lag (list): list of integers representing the number of weeks to lag
-        lag_columns (list): list of column names to lag
-        player_group_columns (list): list of column names to group by
+        n_week_lag (list): Number of weeks to lag the data
+        lag_columns (list): Names of columns to lag
+        player_group_columns (list): Names of columns to group by. For example,
+            if you want to lag the data by player and season,
+            you would pass in the list ["name", "season_year"]
+
+    Returns:
+        X (pd.DataFrame): Dataframe with lag features
     """
 
     def __init__(self, n_week_lag: list, lag_columns: list, player_group_columns: list):
@@ -42,11 +49,14 @@ class MAFeatureTransformer(BaseEstimator, TransformerMixin):
     """Create a moving average feature for each column in the dataframe by group
 
     Args:
-        n_week_window (list): list of integers representing
-            the number of weeks to window.
-        window_columns (list): list of column names to window
-        player_group_columns (list): list of column names to group by
+        n_week_window (list): Number of weeks to average over
+        window_columns (list): Names of columns to average over
+        player_group_columns (list): Names of columns to group by. For example,
+            if you want to lag the data by player and season,
+            you would pass in the list ["name", "season_year"]
 
+    Returns:
+        X (pd.DataFrame): Dataframe with moving average features
     """
 
     def __init__(
@@ -76,9 +86,21 @@ class MAFeatureTransformer(BaseEstimator, TransformerMixin):
 
 
 class CategoryConsolidatorFeatureTransformer(BaseEstimator, TransformerMixin):
-    def __init__(self, category_columns: Union[str, List[str]], threshold: float):
-        if not isinstance(category_columns, list):
-            category_columns = [category_columns]
+    """Reduce the number of categories in a categorical column.
+
+    Bins column values that fall below a threshold into a single 'other' category.
+
+    Args:
+        category_columns (list): Names of columns to consolidate
+        threshold (float): Threshold for consolidating categories. For example,
+            if you want to consolidate categories with less than 1% of the data,
+            you would pass in the float 0.01.
+
+    Returns:
+        X (pd.DataFrame): Dataframe with consolidated categories
+    """
+
+    def __init__(self, category_columns: list, threshold: float):
         self.category_columns = category_columns
         self.threshold = threshold
         print(self.category_columns)
@@ -111,9 +133,17 @@ class CategoryConsolidatorFeatureTransformer(BaseEstimator, TransformerMixin):
 
 
 class TargetEncoderFeatureTransformer(BaseEstimator, TransformerMixin):
-    def __init__(self, category_columns: Union[str, List[str]]):
-        if not isinstance(category_columns, list):
-            category_columns = [category_columns]
+    """Replace a categorical column with the average target value for each category.
+
+    Args:
+        category_columns (list): Names of columns to target encode.
+
+    Returns:
+        X (pd.DataFrame): Dataframe with target encoded columns
+
+    """
+
+    def __init__(self, category_columns: list):
         self.category_columns = category_columns
 
     # fit target encoder to x and y
@@ -142,7 +172,21 @@ class TargetEncoderFeatureTransformer(BaseEstimator, TransformerMixin):
 
 
 class FantasyFeatures:
-    """Create common fantasy football features for predictive modeling"""
+    """Create common fantasy football features for predictive modeling
+
+    Args:
+        df (pd.DataFrame): Dataframe containing player data by season
+        position (str): Position of players to include in the dataframe
+        player_group_columns (list, optional): Indicates which columns should
+            be used to group players by. Defaults to
+            ["pid", "name" ,"team" ,"season_year"].
+        game_week_column (str, optional): Indicates week of season.
+            Defaults to "week".
+
+    Raises:
+        ValueError: If position is not a valid position
+        ValueError: If player_group_columns are not present in the dataframe
+    """
 
     def __init__(
         self,
@@ -152,21 +196,6 @@ class FantasyFeatures:
         player_group_columns: list = ["pid", "name", "team", "season_year"],
         game_week_column: str = "week",
     ):
-        """
-
-        Args:
-            df (pd.DataFrame): Dataframe containing player data by season
-            position (str): Position of players to include in the dataframe
-            player_group_columns (list, optional): Indicates which columns should
-                be used to group players by. Defaults to
-                ["pid", "name" ,"team" ,"season_year"].
-            game_week_column (str, optional): Indicates week of season.
-                Defaults to "week".
-
-        Raises:
-            ValueError: If position is not a valid position
-            ValueError: If player_group_columns are not present in the dataframe
-        """
         if position not in ["QB", "RB", "WR", "TE"]:
             raise ValueError("Position must be one of QB, RB, WR, TE")
         print(f"Filtering to {position}s.")
@@ -192,7 +221,18 @@ class FantasyFeatures:
         """
         return self.df
 
-    def filter_inactive_games(self, status_column: str = "is_active") -> None:
+    def filter_inactive_games(
+        self, status_column: str = "is_active"
+    ) -> FantasyFeatures:
+        """Filter out inactive games.
+
+        Args:
+            status_column (str, optional): Name of column indicating whether
+            a player was active in a game. Defaults to "is_active".
+
+        Returns:
+            FantasyFeatures: FantasyFeatures object with inactive games removed.
+        """
         if not all(x in [0, 1] for x in self.df[status_column]):
             raise ValueError(
                 "status_column must be 0 or 1 indicating if player is active"
@@ -208,8 +248,9 @@ class FantasyFeatures:
         df: pd.DataFrame, player_group_columns: list
     ) -> pd.DataFrame:
         """Calculate the number of games played by each player in each season.
-           Helpful for filtering out players who have not played a certain number of
-           games in a season, which can lead to issues when creating lag features.
+
+        Helpful for filtering out players who have not played a certain number of
+        games in a season, which can lead to issues when creating lag features.
 
         Args:
             df (pd.DataFrame): Dataframe to calculate the number of games
@@ -219,7 +260,7 @@ class FantasyFeatures:
 
         Returns:
             pd.DataFrame: Dataframe with the number of games played for each
-                player in each season.
+            player in each season.
         """
         games_played_this_season_df = (
             df.groupby(player_group_columns)
@@ -235,14 +276,16 @@ class FantasyFeatures:
             )
         return games_played_this_season_df
 
-    def filter_n_games_played_by_season(self, min_games_played: int) -> None:
+    def filter_n_games_played_by_season(self, min_games_played: int) -> FantasyFeatures:
         """Filter out players who have not played a certain number
-           of games in a season.
+        of games in a season.
 
         Args:
             min_games_played (int): Minimum number of games a player
             must have played in a season.
 
+        Returns:
+            FantasyFeatures: FantasyFeatures object with filtered dataframe.
         """
         games_played_this_season_df = self._calculate_n_games_played(
             self.df, self.player_group_columns
@@ -287,12 +330,12 @@ class FantasyFeatures:
         columns: List[str], feature_type: str, *values: Union[int, str]
     ) -> List[str]:
         """Saves the names of the features created by the pipeline to a string.
-           The feature names are saved in the format:
-              <column_name>_<feature_type>_<value>
-              For example:
-                * is_active_lag_1
-                * rush_yds_lag_4
-                * passing_yds_ma_2
+
+        The feature names are saved in the format: <column_name>_<feature_type>_<value>
+        For example:
+            * is_active_lag_1
+            * rush_yds_lag_4
+            * passing_yds_ma_2
 
         Args:
             columns List[str]: List of column names to save.
@@ -314,7 +357,7 @@ class FantasyFeatures:
     @staticmethod
     def _validate_max_week(season_year: int, week_number: int) -> None:
         """Validates that the week number is not greater than the max
-           week for the season.
+        week for the season.
 
         Args:
            season_year (int): Year of the season.
@@ -322,9 +365,9 @@ class FantasyFeatures:
 
         Raises:
             ValueError: If the week number is greater than the max week (18)
-            for the season for games after 2020.
+                for the season for games after 2020.
             ValueError: If the week number is greater than the max week (17)
-            for the season for games prior to 2020.
+                for the season for games prior to 2020.
         """
         if season_year > 2020 and week_number > 17:
             raise ValueError(
@@ -338,6 +381,18 @@ class FantasyFeatures:
 
     @staticmethod
     def _validate_future_data_is_present(ff_data_dir: PosixPath, max_week: int) -> None:
+        """Validates that the future data is present for the max week.
+
+        Args:
+            ff_data_dir (PosixPath): Path to the directory containing the future data.
+            max_week (int): Max week number for the season + 1. For example,
+                if the max week is 8, then the future, yet to-be-played week is 9
+
+        Raises:
+            ValueError: If 'week' or 'date' is not proesent
+
+            ValueError: If 'week' is not equal to max_week
+        """
         future_week = max_week + 1
         calendar_df = pd.read_csv(ff_data_dir / "calendar.gz", compression="gzip")
         future_data_sources = [
@@ -363,24 +418,29 @@ class FantasyFeatures:
                 )
         return None
 
-    def log_transform_y(self) -> None:
+    def log_transform_y(self) -> FantasyFeatures:
+        """Log transform the y column.
+
+        Args:
+            None
+
+        Returns:
+            FantasyFeatures: FantasyFeatures object with log transformed y.
+
+        """
         print(f"Adding 1 and log transforming {self.y}")
         # convert any negative scores to 0
         self.df[self.y] = self.df[self.y].transform(lambda x: 0 if x < 0 else x)
         self.df[self.y] = self.df[self.y].transform(lambda x: np.log1p(x))
 
-    def create_future_week(self):
+    def create_future_week(self) -> FantasyFeatures:
         """Creates a dataframe of future features for an upcoming NFL game week.
         For example, if 'Week 8' is the most recent completed set of games,
         a single row of features will be created for each player for 'Week 9'.
 
-        The future features include:
-           * The defensive strength of the upcoming opponent against
-             the passing, rushing, and receiving.
-           * The projected number of offensive points for each team.
-             Point projections are calculated based on the opening spread
-             and the over/under.
-           * The forecasted daily weather for the game location.
+        returns:
+            FantasyFeatures: Appends a dataframe of future features to the
+            historical data.
         """
         current_season_year = max(self.df["season_year"])
         current_season_df = self.df[self.df["season_year"] == current_season_year]
@@ -432,9 +492,16 @@ class FantasyFeatures:
         step_str = f"('{step}', {transformer_name}({param_str}))"
         return step_str
 
-    def _validate_column_present(
-        self, feature_columns: Union[int, str, float, list]
-    ) -> None:
+    def _validate_column_present(self, feature_columns: Union[str, list]) -> None:
+        """Validates that a column in present in the dataframe prior to
+        adding a new feature.
+
+        Args:
+            feature_columns (Union[str,list]): Columns to validate as present.
+
+        Raises:
+            ValueError: If any of the feature columns are not present.
+        """
         if not isinstance(feature_columns, list):
             feature_columns = [feature_columns]
         for column in feature_columns:
@@ -444,7 +511,16 @@ class FantasyFeatures:
 
     def add_lag_feature(
         self, n_week_lag: Union[int, List[int]], lag_columns: Union[str, List[str]]
-    ):
+    ) -> FantasyData:
+        """Adds string representation of a lag step to the pipeline.
+
+        Args:
+            n_week_lag (Union[int, List[int]]): Number of weeks to lag.
+            lag_columns (Union[str, List[str]]): Columns to lag.
+
+        Returns:
+            FantasyData: Updated string representation of the pipeline steps.
+        """
         feature_type = "lag"
         if isinstance(n_week_lag, int):
             n_week_lag = [n_week_lag]
@@ -471,7 +547,16 @@ class FantasyFeatures:
         self,
         n_week_window: Union[int, List[int]],
         window_columns: Union[str, List[str]],
-    ):
+    ) -> FantasyData:
+        """Adds string representation of a moving average step to the pipeline.
+
+        Args:
+            n_week_window (Union[int, List[int]]): Number of weeks to average across.
+            window_columns (Union[str, List[str]]): Columns to average.
+
+        Returns:
+            FantasyData: Updated string representation of the pipeline steps.
+        """
         feature_type = "ma"
         if isinstance(n_week_window, int):
             n_week_window = [n_week_window]
@@ -493,7 +578,17 @@ class FantasyFeatures:
         self._pipeline_steps += ma_step_str + ","
         return self
 
-    def add_target_encoded_feature(self, category_columns: Union[str, list]):
+    def add_target_encoded_feature(
+        self, category_columns: Union[str, list]
+    ) -> FantasyData:
+        """Adds string representation of a target encoded step to the pipeline.
+
+        Args:
+            category_columns (Union[str, list]): Columns to target encode.
+
+        Returns:
+            FantasyData: Updated string representation of the pipeline steps.
+        """
         feature_type = "te"
         if isinstance(category_columns, str):
             category_columns = [category_columns]
@@ -513,7 +608,18 @@ class FantasyFeatures:
 
     def consolidate_category_feature(
         self, category_columns: Union[str, list], threshold: float
-    ):
+    ) -> FantasyData:
+        """Adds string representation of a category consolidator step to the pipeline.
+
+        Args:
+            category_columns (Union[str, list]): Columns to consolidate.
+            threshold (float): Threshold for consolidating categories.
+
+        Returns:
+            FantasyData: Updated string representation of the pipeline steps.
+        """
+        if isinstance(category_columns, str):
+            category_columns = [category_columns]
         self._validate_column_present(feature_columns=category_columns)
         cc_step_str = self._create_step_str(
             step="Consolidate Categorical Feature",
@@ -526,6 +632,22 @@ class FantasyFeatures:
         return self
 
     def _remove_missing_feature_values(self, feature_df: pd.DataFrame) -> pd.DataFrame:
+        """Removes rows that have missing values related to lag or salary columns.
+
+        When creating a lag, the first N weeks of data will be NA. This function
+        removes those rows.
+        Likewise, Draftkings and Fanduel do not publish salary data for the
+        first week of each season. This function removes those rows if
+        any fields from the salary data are included.
+        If both salary and lag data are included, the maximum of the two
+        will be used when removing rows.
+
+        Args:
+            feature_df (pd.DataFrame): Dataframe to remove rows from.
+
+        Returns:
+            pd.DataFrame: Dataframe with missing lag values or salary data removed.
+        """
         # max weeks to drop conditions
         lag_fields = [x for x in feature_df.columns if "lag" in x]
         if lag_fields:
@@ -546,15 +668,47 @@ class FantasyFeatures:
         )
         return feature_df
 
-    def create_ff_signature(self):
-        all_feature_steps = "[" + self._pipeline_steps + "]"
-        pipeline = Pipeline(steps=eval(all_feature_steps))
-        feature_df = pipeline.fit_transform(self.df, y=self.df[self.y])
-        feature_df = self._remove_missing_feature_values(feature_df)
-        # TO DO: break into separate function
+    def _replace_missing_salary_values_with_zero(
+        self, feature_df: pd.DataFrame
+    ) -> pd.DataFrame:
+        """Replaces missing salary values with zero.
+
+        Salary data is missing for the first week of each season. Also,
+        when players are injured and questionable to play, a salary
+        value may not be published.
+
+        Args:
+            feature_df (pd.DataFrame): Dataframe to replace missing
+            salary values with zero.
+
+        Returns:
+            pd.DataFrame: Dataframe with missing salary values replaced with zero.
+        """
         salary_columns = [x for x in feature_df.columns if "salary" in x]
         if salary_columns:
             for column in salary_columns:
                 feature_df[column] = feature_df[column].fillna(0)
-        ##########
-        return self.new_pipeline_features, feature_df
+            return feature_df
+        else:
+            return feature_df
+
+    def create_ff_signature(self) -> dict:
+        """Creates a fantasy football 'signature', which includes the following steps:
+
+            * Executes the previously created pipeline data transformations
+            * Removes missing values stemming from lagged features or salary features
+            * Replaces missing salary values with zero
+
+        Returns:
+            dict: The names of the new features created by the pipeline and the
+            transformed dataframe.
+        """
+        all_feature_steps = "[" + self._pipeline_steps + "]"
+        pipeline = Pipeline(steps=eval(all_feature_steps))
+        feature_df = pipeline.fit_transform(self.df, y=self.df[self.y])
+        feature_df = self._remove_missing_feature_values(feature_df)
+        feature_df = self._replace_missing_salary_values_with_zero(feature_df)
+        return {
+            "pipeline_feature_names": self.new_pipeline_features,
+            "feature_df": feature_df,
+        }

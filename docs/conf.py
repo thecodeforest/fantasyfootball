@@ -3,19 +3,18 @@
 # This file only contains a selection of the most common options. For a full
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
-import sys
-import os
+# import sys
+# import os
 
-sys.path.append(os.path.join(os.path.abspath(os.pardir)))
-autodoc_mock_imports = ["pandas"]
+# sys.path.append(os.path.join(os.path.abspath(os.pardir)))
+# autodoc_mock_imports = ["pandas"]
 
-cwd = os.getcwd()
-print(f"CWD IS : {cwd}")
-project_root = os.path.dirname(cwd)
+# cwd = os.getcwd()
+# project_root = os.path.dirname(cwd)
 
-sys.path.insert(0, project_root)
+# sys.path.insert(0, project_root)
 
-import pandas  # noqa E402
+# import pandas  # noqa E402
 
 
 # -- Project information -----------------------------------------------------

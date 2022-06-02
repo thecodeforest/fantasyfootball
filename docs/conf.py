@@ -10,6 +10,7 @@ sys.path.append(os.path.join(os.path.abspath(os.pardir)))
 autodoc_mock_imports = ["pandas"]
 
 cwd = os.getcwd()
+print(f"CWD IS : {cwd}")
 project_root = os.path.dirname(cwd)
 
 sys.path.insert(0, project_root)

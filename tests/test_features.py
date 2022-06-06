@@ -1,5 +1,3 @@
-from multiprocessing.sharedctypes import Value
-import numpy as np
 import pandas as pd
 import pytest
 from fantasyfootball.config import data_sources, root_dir

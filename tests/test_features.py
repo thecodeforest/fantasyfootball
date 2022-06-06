@@ -1,7 +1,8 @@
+from multiprocessing.sharedctypes import Value
 import numpy as np
 import pandas as pd
 import pytest
-
+from fantasyfootball.config import data_sources, root_dir
 from fantasyfootball.features import (
     FantasyFeatures,
     CategoryConsolidatorFeatureTransformer,
@@ -319,3 +320,22 @@ def test_TargetEncoderFeatureTransformer(df):
     y = df[df.columns.tolist()[-1]]
     result = te.fit_transform(X, y)[te_category_column].tolist()
     assert result == expected
+
+
+def test__validate_future_data_is_present():
+    expected = True
+    season_year = 2021
+    max_week = 16
+    ff_data_dir = root_dir / "datasets" / "season" / str(season_year)
+    _validate_future_data_is_present = FantasyFeatures._validate_future_data_is_present
+    result = _validate_future_data_is_present(ff_data_dir, max_week, data_sources)
+    assert result == expected
+
+
+def test__validate_future_data_is_present_error():
+    season_year = 2021
+    max_week = 18
+    ff_data_dir = root_dir / "datasets" / "season" / str(season_year)
+    _validate_future_data_is_present = FantasyFeatures._validate_future_data_is_present
+    with pytest.raises(ValueError):
+        assert _validate_future_data_is_present(ff_data_dir, max_week, data_sources)

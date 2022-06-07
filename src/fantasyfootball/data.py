@@ -1,46 +1,46 @@
+from __future__ import annotations  # noqa: F404
+
+import logging
 from pathlib import PosixPath
 from typing import List
+from urllib.error import HTTPError
 
 import numpy as np
 import pandas as pd
 from janitor import clean_names
-from typing_extensions import Self
 
 from fantasyfootball.config import data_sources, root_dir, scoring
 
+logger = logging.getLogger("fantasydata")
+logger.setLevel(logging.INFO)
+
 
 class FantasyData:
-    """Collects and loads all historical fantasy football datasets
-       based on the range years provided. Currently, the following
-       weekly data sources are included:
-         * Player stats
-         * Betting data, which includes opening point spreads and over-under lines
-         * Defense data, which ranks the strength of the opposing team's defense
-       See the README for more details on how to interpret each field.
+    """Loads historical fantasy football data.
 
     Args:
         season_year_start (int): The first year of the season.
         season_year_end (int): The last year of the season.
-        ff_data (pd.DataFrame): The dataframe containing all historical
-        fantasy football data.
-        scoring (dict): The scoring rules for calculating weekly fantasy points.
-
     """
 
-    def __init__(self, season_year_start: int, season_year_end: int) -> None:
+    def __init__(self, season_year_start: int, season_year_end: int):
         self.season_year_start = season_year_start
         self.season_year_end = season_year_end
-        self.ff_data = None
         self._validate_season_year_range()
+        # Set when FantasyData object is created.
+        self.ff_data = None
         self.load_data()
         self.scoring = scoring
 
-    def _validate_season_year_range(self) -> None:
+    def _validate_season_year_range(self) -> bool:
         """Ensures that the season year range is valid.
 
         Raises:
             ValueError: If the season year is less than the minimum year
             ValueError: If the season year is greater than the maximum year
+
+        Returns:
+            bool: True if the season year range is valid.
         """
         season_years = [
             int(str(x).split("/")[-1])
@@ -60,19 +60,23 @@ class FantasyData:
                 f"Season year end {self.season_year_end}\n"
                 f" is greater than maximum year {max_year}"
             )
+        return True
 
     @staticmethod
-    def _refresh_data(ff_data_dir: PosixPath) -> None:
-        """Uses the datasets specified in the configuration file to identify
-           if a dataset is missing from the installed version of the package.
-           If a missing dataset is identified, the most recent version
-           will be downloaded from Git.
+    def _refresh_data(ff_data_dir: PosixPath, data_sources: dict) -> bool:
+        """Use the datasets specified in the `config.py` to identify
+        if a dataset is missing from the installed version of the package.
+        When a missing dataset is identified, the most recent version
+        is downloaded from Git.
 
         Args:
             ff_data_dir (PosixPath): The directory containing the seasonal data.
+            data_sources (dict): A dictionary indicating the names of
+            the data sources used in the fantasyfootball package.
 
         Returns:
-            None: None
+            bool: True if data in current package is up to date or
+            data was succesfully downloaded from remote repo.
         """
         season_year = ff_data_dir.name
         base_url = f"https://github.com/thecodeforest/fantasyfootball/blob/main/datasets/season/{season_year}"  # noqa E501
@@ -87,37 +91,33 @@ class FantasyData:
             for missing_data in missing_local_data_sources:
                 missing_data_url = f"{base_url}/{missing_data}.gz?raw=true"
                 try:
-                    print(f"Fetching most recent {missing_data} data from remote")
+                    logger.info(f"Fetching most recent {missing_data} data from remote")
                     missing_data_df = pd.read_csv(missing_data_url, compression="gzip")
                     missing_data_df.to_csv(
                         ff_data_dir / f"{missing_data}.gz",
                         index=False,
                         compression="gzip",
                     )
-                except Exception as e:
-                    print(f"{missing_data} data not present in local or remote: {e}")
-        return None
-
-    # TO DO: Once you have season's calendar, you
-    @staticmethod
-    def _is_data_stale(ff_data_dir: PosixPath) -> bool:
-        """
-
-        Args:
-            ff_data_dir (PosixPath): The directory containing the seasonal data.
-
-        Returns:
-            bool: True if the data is stale, False otherwise.
-        """
-        pass
+                    logger.info(
+                        f"Succussfully downloaded {missing_data} data from remote"
+                    )
+                except HTTPError as error:
+                    logger.error("Error:", error)
+                    logger.error(f"{missing_data} data not available on remote")
+                    raise
+        return True
 
     @staticmethod
-    def _load_data(ff_data_dir: PosixPath, *exclude: str) -> pd.DataFrame:
+    def _load_data(
+        ff_data_dir: PosixPath, data_sources: dict, *exclude: str
+    ) -> pd.DataFrame:
         """Helper method to load all other data, excluding the
-           season calendar and roster of active players for a season.
+        season calendar and roster of active players for a season.
 
         Args:
             ff_data_dir (PosixPath): The directory containing the season data.
+            data_sources (dict): A dictionary indicating the names of
+                the data sources used in the fantasyfootball package.
             exclude (str): The names of the files to exclude from the data load.
 
         Raises:
@@ -126,7 +126,7 @@ class FantasyData:
 
         Returns:
             pd.DataFrame: The dataframe containing all
-                historical fantasy football data for a single season.
+            historical fantasy football data for a single season.
         """
 
         required_data = [
@@ -156,28 +156,49 @@ class FantasyData:
                 season_ff_df = pd.merge(season_ff_df, dataset_df, on=keys, how="left")
         return season_ff_df
 
-    def load_data(self, filter_final_season_week: bool = True) -> None:
+    def load_data(
+        self, data_sources: dict = data_sources, filter_final_season_week: bool = True
+    ) -> FantasyData:
         """Loads all historical fantasy football data from the season year
         range provided. Each season year is loaded separately and
         then concatenated together.
+
+        Args:
+            data_sources (dict): A dictionary indicating the names of
+                the data sources used in the fantasyfootball package.
+            filter_final_season_week (bool): If True, the final week of each
+                season is filtered out. These weeks are filtered because many players
+                are 'active' but have minimal participation in
+                the game to avoid injury when their team has secured a playoff spot.
+                Excluding these weeks allows for more accurate predictions.
+                Default is True.
+
+        Returns:
+            FantasyData: The dataframe containing all historical
+                fantasy football data for the specified season year range.
         """
-        print(f"Loading data from {self.season_year_start} to {self.season_year_end}")
+        logger.info(
+            f"Loading data from {self.season_year_start} to {self.season_year_end}"
+        )
         ff_data_dir = root_dir / "datasets" / "season"
         ff_df = pd.DataFrame()
         for season_year in range(self.season_year_start, self.season_year_end + 1):
             if season_year < 2016:
-                print("Player injury data not available prior to 2016 season")
-            self._refresh_data(ff_data_dir / str(season_year))
-            season_ff_df = self._load_data(ff_data_dir / str(season_year))
+                logger.warning("Player injury data not available prior to 2016 season")
+            self._refresh_data(ff_data_dir / str(season_year), data_sources)
+            season_ff_df = self._load_data(ff_data_dir / str(season_year), data_sources)
             if filter_final_season_week:
                 max_week = max(season_ff_df["week"])
-                print(f"Dropping final week (week {max_week}) of season {season_year}")
+                logger.info(
+                    f"Dropping final week (week {max_week}) of season {season_year}"
+                )
                 season_ff_df = season_ff_df[season_ff_df["week"] != max_week]
             ff_df = pd.concat([ff_df, season_ff_df])
         self.ff_data = ff_df
+        return FantasyData
 
     @staticmethod
-    def validate_scoring_source_rules(source_rules: dict, ff_df_columns: list) -> None:
+    def _validate_scoring_source_rules(source_rules: dict, ff_df_columns: list) -> None:
         """Validates the scoring source rules provided.
 
         Args:
@@ -188,13 +209,13 @@ class FantasyData:
             ValueError: If the scoring source rules are not valid.
             TypeError: If the scoring source rules are not a dictionary.
             KeyError: If the scoring source keys do not include
-            'scoring_columns' or 'multiplier'.
+                'scoring_columns' or 'multiplier'.
             KeyError: If scoring columns are not a subset of the dataframe columns.
             TypeError: If the scoring multiplier is not a dictionary.
             KeyError: If the scoring multiplier keys do not include
-            'threshold' and 'points'.
+                'threshold' and 'points'.
             KeyError: If the multiplier values are not a subset of
-            the dataframe columns.
+                the dataframe columns.
         """
         # validate that source name is present
         source_name = list(source_rules.keys())[0]
@@ -235,12 +256,17 @@ class FantasyData:
                     "Multiplier scoring column must be a subset of scoring columns"
                 )
 
-    def add_scoring_source(self, source_rules: dict) -> None:
+    def add_scoring_source(self, source_rules: dict) -> FantasyData:
         """Updates the scoring source rules.
 
         Args:
             source_rules (dict): Scoring source rules. Required keys
-            are the source name (e.g., 'custom'), 'scoring_columns', and 'multiplier'.
+                are the source name (e.g., 'custom'), 'scoring_columns',
+                and 'multiplier'.
+
+        Returns:
+            FantasyData: An updated FantasyData object with
+                the new scoring source rules.
 
         Example:
             >>> from fantasyfootball.data import FantasyData
@@ -267,15 +293,16 @@ class FantasyData:
                     }}
             >>> fantasy_data.add_scoring_source(new_scoring_source)
         """
-        self.validate_scoring_source_rules(source_rules, self.ff_data.columns.tolist())
+        self._validate_scoring_source_rules(source_rules, self.ff_data.columns.tolist())
         source_name = list(source_rules.keys())[0]
         self.scoring[source_name] = source_rules
-        print(f"Scoring source '{source_name}' Added")
+        logger.info(f"Scoring source '{source_name}' Added")
+        return FantasyData
 
     @staticmethod
     def score_player(
         player_df: pd.DataFrame, scoring_columns: set, scoring_source_rules: dict
-    ) -> List[float]:
+    ) -> np.array:
         """Calculates the total number of points scored for a single week
 
         Args:
@@ -284,7 +311,7 @@ class FantasyData:
             scoring_source_rules (dict): Rules for scoring
 
         Returns:
-            List[float]: A total score for the week
+            np.array: The total number of points scored for a single week.
         """
         player_weekly_points = [0] * player_df.shape[0]
         for column in scoring_columns:
@@ -306,13 +333,16 @@ class FantasyData:
                     )
         return player_weekly_points
 
-    def create_fantasy_points_column(self, scoring_source: str):
+    def create_fantasy_points_column(self, scoring_source: str) -> FantasyData:
         """Creates a fantasy points column for the scoring source provided.
 
         Args:
             scoring_source (str): Name of the scoring source to use
-            (e.g., 'draft kings', 'yahoo', 'custom').
+                (e.g., 'draft kings', 'yahoo', 'custom').
 
+        Returns:
+            FantasyData: An updated FantasyData object with the new
+                fantasy points column.
         """
         scoring_source_rules = self.scoring[scoring_source]
         scoring_columns = set(scoring_source_rules["scoring_columns"].keys()) & set(
@@ -342,10 +372,11 @@ class FantasyData:
         self.ff_data = pd.merge(
             self.ff_data, all_pts_df, on=["name", "pid", "date"], how="inner"
         )
-        print(f"Fantasy points column '{self.ff_data.columns[-1]}' added")
+        logger.info(f"Fantasy points column '{self.ff_data.columns[-1]}' added")
+        return FantasyData
 
     def show_scoring_sources(self) -> List[str]:
-        return f"Current scoring sources: {list(self.scoring.keys())}"
+        return {list(self.scoring.keys())}
 
     @property
     def data(self) -> pd.DataFrame:

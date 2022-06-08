@@ -471,7 +471,7 @@ class FantasyFeatures:
         ff_data_dir = root_dir / "datasets" / "season" / str(current_season_year)
         self._validate_future_data_is_present(ff_data_dir, max_week, data_sources)
         _load_data = FantasyData._load_data
-        season_ff_data = _load_data(ff_data_dir, "stats")
+        season_ff_data = _load_data(ff_data_dir, data_sources, "stats")
         future_week_df = season_ff_data[
             (season_ff_data[self.game_week_column] == max_week + 1)
             & (season_ff_data["season_year"] == current_season_year)

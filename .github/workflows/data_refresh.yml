@@ -37,26 +37,30 @@ jobs:
       run: |
         source .venv/bin/activate
         mkdir staging_datasets
-        python pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
-        python pipeline/process/process_calendar.py --season_year $SEASON_YEAR      
-        # python pipeline/collect/collect_players.py --season_year $SEASON_YEAR
-        # python pipeline/process/process_players.py --season_year $SEASON_YEAR
-        # python pipeline/collect/collect_stats.py --season_year $SEASON_YEAR
-        # python pipeline/process/process_stats.py --season_year $SEASON_YEAR
-        # python pipeline/collect/collect_weather.py --season_year $SEASON_YEAR
-        # python pipeline/process/process_weather.py --season_year $SEASON_YEAR      
-        # python pipeline/process/process_defense.py --season_year $SEASON_YEAR   
-        # python pipeline/load/load_data.py --season_year $SEASON_YEAR
-    - name: Commit new data to datasets directory
-      shell: bash
-      run: |
-        echo "Loading data to git"
-        if [[ "$(git status --porcelain)" != "" ]]; then
-            git config --global user.name 'MarkLeBoeuf'
-            git config --global user.email 'markleboeuf2015@u.northwestern.edu'
-            git add src/fantasyfootball/datasets/*.gz        
-            git commit -m "data: auto update historical NFL data"
-            git push
-        fi
+        echo "contents of root dir"
+        ls
+        echo "root directory"
+        pwd
+    #     python pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
+    #     python pipeline/process/process_calendar.py --season_year $SEASON_YEAR      
+    #     python pipeline/collect/collect_players.py --season_year $SEASON_YEAR
+    #     python pipeline/process/process_players.py --season_year $SEASON_YEAR
+    #     python pipeline/collect/collect_stats.py --season_year $SEASON_YEAR
+    #     python pipeline/process/process_stats.py --season_year $SEASON_YEAR
+    #     python pipeline/collect/collect_weather.py --season_year $SEASON_YEAR
+    #     python pipeline/process/process_weather.py --season_year $SEASON_YEAR      
+    #     python pipeline/process/process_defense.py --season_year $SEASON_YEAR   
+    #     python pipeline/load/load_data.py --season_year $SEASON_YEAR
+    # - name: Commit new data to datasets directory
+    #   shell: bash
+    #   run: |
+    #     echo "Loading data to git"
+    #     if [[ "$(git status --porcelain)" != "" ]]; then
+    #         git config --global user.name 'MarkLeBoeuf'
+    #         git config --global user.email 'markleboeuf2015@u.northwestern.edu'
+    #         git add src/fantasyfootball/datasets/*.gz        
+    #         git commit -m "data: auto update historical NFL data"
+    #         git push
+    #     fi
 
 

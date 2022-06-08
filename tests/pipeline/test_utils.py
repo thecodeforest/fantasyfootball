@@ -2,9 +2,10 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+import sys
 
-
-from fantasyfootball.pipeline.utils import (
+sys.path.append(str(Path.cwd()))
+from pipeline.utils import (  # noqa: E402
     concat_ff_csv,
     create_dir,
     get_module_purpose,

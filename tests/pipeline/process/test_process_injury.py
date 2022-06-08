@@ -1,8 +1,11 @@
+import sys
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
 
-from fantasyfootball.pipeline.process.process_injury import (
+sys.path.append(str(Path.cwd()))
+from pipeline.process.process_injury import (  # noqa: E402
     add_injury_feature_columns,
     _convert_plural_injury_to_singular,
     process_injury_type,

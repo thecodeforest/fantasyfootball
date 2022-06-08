@@ -1,8 +1,11 @@
+import sys
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
 
-from fantasyfootball.pipeline.process.process_stats import (
+sys.path.append(str(Path.cwd()))
+from pipeline.process.process_stats import (  # noqa: E402
     add_missing_stats_columns,
     clean_column_names,
     clean_stats_column,

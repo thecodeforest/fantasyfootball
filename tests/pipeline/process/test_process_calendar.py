@@ -1,7 +1,10 @@
+from pathlib import Path
 import pandas as pd
 import pytest
+import sys
 
-from fantasyfootball.pipeline.process.process_calendar import process_calendar
+sys.path.append(str(Path.cwd()))
+from pipeline.process.process_calendar import process_calendar  # noqa: E402
 
 
 @pytest.fixture(scope="module")

@@ -1,7 +1,10 @@
+from pathlib import Path
 import pandas as pd
 import pytest
+import sys
 
-from fantasyfootball.pipeline.process.process_betting import (
+sys.path.append(str(Path.cwd()))
+from pipeline.process.process_betting import (  # noqa: E402
     clean_game_date,
     create_game_id,
     create_point_spread_df,

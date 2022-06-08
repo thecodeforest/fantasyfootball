@@ -1,8 +1,11 @@
 import numpy as np
 import pandas as pd
 import pytest
+from pathlib import Path
+import sys
 
-from fantasyfootball.pipeline.process.process_defense import (
+sys.path.append(str(Path.cwd()))
+from pipeline.process.process_defense import (  # noqa: E402
     aggregate_season_defense_stats,
     rank_defense,
     scale_defense_stats,

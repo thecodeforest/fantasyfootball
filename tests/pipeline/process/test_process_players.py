@@ -1,8 +1,10 @@
-# def test_process_players.py
+import sys
+from pathlib import Path
 import pandas as pd
 import pytest
 
-from fantasyfootball.pipeline.process.process_players import process_players
+sys.path.append(str(Path.cwd()))
+from pipeline.process.process_players import process_players  # noqa: E402
 
 
 @pytest.fixture(scope="module")

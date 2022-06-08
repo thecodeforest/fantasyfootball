@@ -1,6 +1,6 @@
 name: DataPipeline
 
-# on: [push]
+on: [push]
 
 jobs: 
   data-pipeline: 
@@ -36,16 +36,17 @@ jobs:
     - name: NFL data refresh
       run: |
         source .venv/bin/activate
-        python src/fantasyfootball/pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
-        python src/fantasyfootball/pipeline/process/process_calendar.py --season_year $SEASON_YEAR      
-        python src/fantasyfootball/pipeline/collect/collect_players.py --season_year $SEASON_YEAR
-        python src/fantasyfootball/pipeline/process/process_players.py --season_year $SEASON_YEAR
-        python src/fantasyfootball/pipeline/collect/collect_stats.py --season_year $SEASON_YEAR
-        python src/fantasyfootball/pipeline/process/process_stats.py --season_year $SEASON_YEAR
-        python src/fantasyfootball/pipeline/collect/collect_weather.py --season_year $SEASON_YEAR
-        python src/fantasyfootball/pipeline/process/process_weather.py --season_year $SEASON_YEAR      
-        python src/fantasyfootball/pipeline/process/process_defense.py --season_year $SEASON_YEAR   
-        python src/fantasyfootball/pipeline/load/load_data.py --season_year $SEASON_YEAR
+        mkdir staging_datasets
+        python pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
+        python pipeline/process/process_calendar.py --season_year $SEASON_YEAR      
+        # python pipeline/collect/collect_players.py --season_year $SEASON_YEAR
+        # python pipeline/process/process_players.py --season_year $SEASON_YEAR
+        # python pipeline/collect/collect_stats.py --season_year $SEASON_YEAR
+        # python pipeline/process/process_stats.py --season_year $SEASON_YEAR
+        # python pipeline/collect/collect_weather.py --season_year $SEASON_YEAR
+        # python pipeline/process/process_weather.py --season_year $SEASON_YEAR      
+        # python pipeline/process/process_defense.py --season_year $SEASON_YEAR   
+        # python pipeline/load/load_data.py --season_year $SEASON_YEAR
     - name: Commit new data to datasets directory
       shell: bash
       run: |
@@ -53,7 +54,7 @@ jobs:
         if [[ "$(git status --porcelain)" != "" ]]; then
             git config --global user.name 'MarkLeBoeuf'
             git config --global user.email 'markleboeuf2015@u.northwestern.edu'
-            git add datasets/*.gz        
+            git add src/fantasyfootball/datasets/*.gz        
             git commit -m "data: auto update historical NFL data"
             git push
         fi

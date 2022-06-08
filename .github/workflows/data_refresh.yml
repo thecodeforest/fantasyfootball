@@ -1,6 +1,6 @@
 name: DataPipeline
 
-on: [push]
+# on: [push]
 
 jobs: 
   data-pipeline: 
@@ -38,15 +38,15 @@ jobs:
         source .venv/bin/activate
         mkdir staging_datasets
         python pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
-        python pipeline/process/process_calendar.py --season_year $SEASON_YEAR      
-        python pipeline/load/load_data.py --season_year $SEASON_YEAR
-    #     python pipeline/collect/collect_players.py --season_year $SEASON_YEAR
-    #     python pipeline/process/process_players.py --season_year $SEASON_YEAR
-    #     python pipeline/collect/collect_stats.py --season_year $SEASON_YEAR
-    #     python pipeline/process/process_stats.py --season_year $SEASON_YEAR
-    #     python pipeline/collect/collect_weather.py --season_year $SEASON_YEAR
-    #     python pipeline/process/process_weather.py --season_year $SEASON_YEAR      
-    #     python pipeline/process/process_defense.py --season_year $SEASON_YEAR     
+        python pipeline/process/process_calendar.py --season_year $SEASON_YEAR              
+        python pipeline/collect/collect_players.py --season_year $SEASON_YEAR
+        python pipeline/process/process_players.py --season_year $SEASON_YEAR
+        python pipeline/collect/collect_stats.py --season_year $SEASON_YEAR
+        python pipeline/process/process_stats.py --season_year $SEASON_YEAR
+        python pipeline/collect/collect_weather.py --season_year $SEASON_YEAR
+        python pipeline/process/process_weather.py --season_year $SEASON_YEAR      
+        python pipeline/process/process_defense.py --season_year $SEASON_YEAR
+        python pipeline/load/load_data.py --season_year $SEASON_YEAR     
     - name: Commit new data to datasets directory
       shell: bash
       run: |

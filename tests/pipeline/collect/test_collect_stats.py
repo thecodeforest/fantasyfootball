@@ -1,6 +1,11 @@
+import sys
+from pathlib import Path
+
 import pytest
 
-from fantasyfootball.pipeline.collect.collect_stats import (
+sys.path.append(str(Path.cwd()))
+
+from pipeline.collect.collect_stats import (  # noqa: E402
     clean_player_name,
     create_abbr_name_combo,
     create_player_id,

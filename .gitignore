@@ -149,9 +149,9 @@ dmypy.json
 sandbox.*
 
 # Temporary football data
-src/fantasyfootball/datasets/season
+src/fantasyfootball/staging_datasets/
 datasets/season/[0-9]*/*.csv
-examples/benchmarking_data/season/[0-9]*/*.csv
-
+src/fantasyfootball/datasets/season/[0-9]*/*.csv
+staging_datasets/
 # VScode settings
 .vscode/

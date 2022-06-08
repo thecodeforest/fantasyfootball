@@ -1,5 +1,6 @@
 from __future__ import annotations  # noqa: F404
 
+import logging
 from itertools import product
 from pathlib import PosixPath
 from typing import List, Union
@@ -11,6 +12,9 @@ from sklearn.pipeline import Pipeline
 
 from fantasyfootball.config import data_sources, root_dir
 from fantasyfootball.data import FantasyData
+
+logger = logging.getLogger("fantasyfeatures")
+logger.setLevel(logging.INFO)
 
 
 class LagFeatureTransformer(BaseEstimator, TransformerMixin):
@@ -101,9 +105,10 @@ class CategoryConsolidatorFeatureTransformer(BaseEstimator, TransformerMixin):
     """
 
     def __init__(self, category_columns: list, threshold: float):
+        if isinstance(category_columns, str):
+            category_columns = [category_columns]
         self.category_columns = category_columns
         self.threshold = threshold
-        print(self.category_columns)
 
     def fit(self, X, y=None):
         return self
@@ -144,6 +149,8 @@ class TargetEncoderFeatureTransformer(BaseEstimator, TransformerMixin):
     """
 
     def __init__(self, category_columns: list):
+        if isinstance(category_columns, str):
+            category_columns = [category_columns]
         self.category_columns = category_columns
 
     # fit target encoder to x and y
@@ -198,7 +205,7 @@ class FantasyFeatures:
     ):
         if position not in ["QB", "RB", "WR", "TE"]:
             raise ValueError("Position must be one of QB, RB, WR, TE")
-        print(f"Filtering to {position}s.")
+        logger.info(f"Filtering to {position}s.")
         # check if group columns are subset of df columns
         if not set(player_group_columns).issubset(set(df.columns)):
             raise ValueError("`player_group_columns` must be a subset of df columns")
@@ -237,9 +244,9 @@ class FantasyFeatures:
             raise ValueError(
                 "status_column must be 0 or 1 indicating if player is active"
             )
-        print("Removing all rows where player was not active for game")
+        logger.info("Removing all rows where player was not active for game")
         self.df = self.df[self.df[status_column] == 1]
-        print(f"dropping {status_column} column")
+        logger.info(f"dropping {status_column} column")
         self.df = self.df.drop(columns=status_column)
         return self
 
@@ -380,17 +387,32 @@ class FantasyFeatures:
         return None
 
     @staticmethod
-    def _validate_future_data_is_present(ff_data_dir: PosixPath, max_week: int) -> None:
-        """Validates that the future data is present for the max week.
+    def _validate_future_data_is_present(
+        ff_data_dir: PosixPath, max_week: int, data_sources: dict
+    ) -> bool:
+        """Validates that the future data is present for the upcoming week.
+        For example, if it is week
 
         Args:
             ff_data_dir (PosixPath): Path to the directory containing the future data.
             max_week (int): Max week number for the season + 1. For example,
                 if the max week is 8, then the future, yet to-be-played week is 9
+            data_sources (dict): A dictionary indicating the names of
+                the data sources used in the fantasyfootball package. Note that
+                when validating the future data, only those data sources
+                with 'is_forward_looking' set to True are checked.
+                Example:
+                data_sources = {
+                            "calendar": {
+                                "keys": ["team", "season_year"],
+                                "cols": ["date", "week", "team", "opp",
+                                         "is_away", "season_year"],
+                                "is_required": True,
+                                "is_forward_looking": False,
+                            }}
 
         Raises:
-            ValueError: If 'week' or 'date' is not proesent
-
+            ValueError: If 'week' or 'date' is not present
             ValueError: If 'week' is not equal to max_week
         """
         future_week = max_week + 1
@@ -414,9 +436,9 @@ class FantasyFeatures:
             if future_week_df.empty:
                 raise ValueError(
                     f"No data for week {future_week} in {data}"
-                    f"{data} data is refreshed each week on Tuesday during season"
+                    f"{data} is refreshed each week on Tuesday during season"
                 )
-        return None
+        return True
 
     def log_transform_y(self) -> FantasyFeatures:
         """Log transform the y column.
@@ -428,7 +450,7 @@ class FantasyFeatures:
             FantasyFeatures: FantasyFeatures object with log transformed y.
 
         """
-        print(f"Adding 1 and log transforming {self.y}")
+        logger.info(f"Adding 1 and log transforming {self.y}")
         # convert any negative scores to 0
         self.df[self.y] = self.df[self.y].transform(lambda x: 0 if x < 0 else x)
         self.df[self.y] = self.df[self.y].transform(lambda x: np.log1p(x))
@@ -447,7 +469,7 @@ class FantasyFeatures:
         max_week = max(current_season_df[self.game_week_column])
         self._validate_max_week(season_year=current_season_year, week_number=max_week)
         ff_data_dir = root_dir / "datasets" / "season" / str(current_season_year)
-        self._validate_future_data_is_present(ff_data_dir, max_week)
+        self._validate_future_data_is_present(ff_data_dir, max_week, data_sources)
         _load_data = FantasyData._load_data
         season_ff_data = _load_data(ff_data_dir, "stats")
         future_week_df = season_ff_data[
@@ -539,7 +561,7 @@ class FantasyFeatures:
             lag_columns=lag_columns,
         )
 
-        print("add lag step")
+        logger.info("add lag step")
         self._pipeline_steps += lag_step_str + ","
         return self
 
@@ -574,7 +596,7 @@ class FantasyFeatures:
             n_week_window=n_week_window,
             window_columns=window_columns,
         )
-        print("add moving average")
+        logger.info("add moving average")
         self._pipeline_steps += ma_step_str + ","
         return self
 
@@ -602,7 +624,7 @@ class FantasyFeatures:
             transformer_name="TargetEncoderFeatureTransformer",
             category_columns=category_columns,
         )
-        print("add target encoding for categorical variables")
+        logger.info("add target encoding for categorical variables")
         self._pipeline_steps += te_step_str + ","
         return self
 
@@ -627,7 +649,7 @@ class FantasyFeatures:
             category_columns=category_columns,
             threshold=threshold,
         )
-        print("Consolidating levels for categorical variables")
+        logger.info("Consolidating levels for categorical variables")
         self._pipeline_steps += cc_step_str + ","
         return self
 

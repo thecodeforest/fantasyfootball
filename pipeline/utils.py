@@ -6,8 +6,6 @@ import pandas as pd
 import pandas_flavor as pf
 from fuzzywuzzy import fuzz
 
-from fantasyfootball.errors import FantasyFootballError
-
 
 def read_args() -> argparse.Namespace:
     """Helper function to read command line arguments.
@@ -201,12 +199,12 @@ def get_module_purpose(
             Defaults to "_".
 
     Raises:
-        FantasyFootballError: If the character used to seperate the module's
+        ValueError: If the character used to seperate the module's
             purpose from the data type
             is not present.
-        FantasyFootballError: If the module has more than one character used to
+        ValueError: If the module has more than one character used to
                               seperate the module's purpose from the data type.
-        FantasyFootballError: If the directory type is not an expected value.
+        ValueError: If the directory type is not an expected value.
 
     Returns:
         Tuple[str, str]: The module's purpose and data type.
@@ -215,20 +213,16 @@ def get_module_purpose(
     expected_directories = dir_type_mapping.keys()
     module_name = module_path.split("/")[-1]
     if module_name_split_char not in module_name:
-        raise FantasyFootballError(
-            f"{module_name_split_char} not found in {module_name}"
-        )
+        raise ValueError(f"{module_name_split_char} not found in {module_name}")
 
     if len([x for x in list(module_name) if x == module_name_split_char]) != 1:
-        raise FantasyFootballError(
+        raise ValueError(
             f"There must only be 1 '{module_name_split_char}' in {module_name}"
         )
 
     dir_type, data_type = module_name.split(module_name_split_char)
     if dir_type not in dir_type_mapping.keys():
-        raise FantasyFootballError(
-            f"Directory type must be one of {expected_directories}"
-        )
+        raise ValueError(f"Directory type must be one of {expected_directories}")
 
     data_type = data_type.replace(".py", "")
     dir_type = dir_type_mapping[dir_type]
@@ -256,14 +250,14 @@ def write_ff_csv(
         file_type (str, optional): The file type (e.g., csv, json). Defaults to "csv".
 
     Raises:
-        FantasyFootballError: If the file type is not an expected value.
+        ValueError: If the file type is not an expected value.
 
     Returns:
         None
     """
     dir_types = ["raw", "processed"]
     if dir_type not in dir_types:
-        raise FantasyFootballError(
+        raise ValueError(
             f"dir_type must be either 'raw' or 'processed', not {dir_type}"
         )
     dir_path = (

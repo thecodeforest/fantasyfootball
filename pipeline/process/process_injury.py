@@ -7,8 +7,8 @@ from janitor import coalesce
 from pandas.api.types import is_numeric_dtype, is_string_dtype
 
 sys.path.append(str(Path.cwd()))
-from config import root_dir  # noqa: E402
-from utils import (  # noqa: E402
+from pipeline.pipeline_config import root_dir  # noqa: E402
+from pipeline.utils import (  # noqa: E402
     get_module_purpose,
     map_player_names,
     read_args,

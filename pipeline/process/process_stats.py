@@ -8,9 +8,9 @@ import pandas_flavor as pf
 from janitor import clean_names
 
 sys.path.append(str(Path.cwd()))
-from config import root_dir  # noqa: E402
-from pipeline_logger import logger  # noqa: E402
-from utils import get_module_purpose, read_args, write_ff_csv  # noqa: E402
+from pipeline.pipeline_config import root_dir  # noqa: E402
+from pipeline.pipeline_logger import logger  # noqa: E402
+from pipeline.utils import get_module_purpose, read_args, write_ff_csv  # noqa: E402
 
 REQUIRED_COLUMNS = {
     "player_columns": ["pid", "name"],

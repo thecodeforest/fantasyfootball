@@ -4,8 +4,8 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.append(str(Path.cwd()))
-from pipeline_config import betting_url, root_dir  # noqa: E402
-from utils import get_module_purpose, read_args, write_ff_csv  # noqa: E402
+from pipeline.pipeline_config import betting_url, root_dir  # noqa: E402
+from pipeline.utils import get_module_purpose, read_args, write_ff_csv  # noqa: E402
 
 
 def collect_betting(betting_url: str, season_year: int) -> pd.DataFrame:

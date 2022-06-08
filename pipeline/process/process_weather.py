@@ -5,8 +5,8 @@ import pandas as pd
 import pandas_flavor as pf
 
 sys.path.append(str(Path.cwd()))
-from config import root_dir  # noqa: E402
-from utils import (  # noqa: E402
+from pipeline.pipeline_config import root_dir  # noqa: E402
+from pipeline.utils import (  # noqa: E402
     get_module_purpose,
     read_args,
     read_ff_csv,

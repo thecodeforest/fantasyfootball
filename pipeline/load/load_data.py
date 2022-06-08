@@ -5,9 +5,9 @@ import os
 import shutil
 
 sys.path.append(str(Path.cwd()))
-from pipeline_config import root_dir  # noqa: E402
-from pipeline_logger import logger  # noqa: E402
-from utils import concat_ff_csv, create_dir, read_args  # noqa: E402
+from pipeline.pipeline_config import root_dir  # noqa: E402
+from pipeline.pipeline_logger import logger  # noqa: E402
+from pipeline.utils import concat_ff_csv, create_dir, read_args  # noqa: E402
 
 
 def copy_to_git_data_dir(source_dir: PosixPath, dest_dir: PosixPath) -> None:

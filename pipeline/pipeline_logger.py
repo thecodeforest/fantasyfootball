@@ -2,7 +2,10 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-from utils import create_dir
+import sys
+
+sys.path.append(str(Path.cwd()))
+from pipeline.utils import create_dir  # noqa: E402
 
 pipeline_log_dir = Path(__file__).parent / "logs"
 create_dir(pipeline_log_dir)

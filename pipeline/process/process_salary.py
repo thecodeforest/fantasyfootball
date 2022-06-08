@@ -9,8 +9,8 @@ import pandas_flavor as pf
 from janitor import clean_names, coalesce
 
 sys.path.append(str(Path.cwd()))
-from config import root_dir  # noqa: E402
-from utils import (  # noqa: E402
+from pipeline.pipeline_config import root_dir  # noqa: E402
+from pipeline.utils import (  # noqa: E402
     get_module_purpose,
     map_abbr2_to_abbr3,
     map_player_names,

@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-sys.path.append(str(Path.cwd()))
+sys.path.append(str(Path.cwd().parent))
 from pipeline_config import root_dir, stats_url  # noqa: E402
 from utils import get_module_purpose, read_args, write_ff_csv  # noqa: E402
 
@@ -28,6 +28,7 @@ if __name__ == "__main__":
     dir_type, data_type = get_module_purpose(module_path=__file__)
     calendar_url = f"{stats_url}/years/{args.season_year}/games.htm"
     calendar_raw = collect_calendar(calendar_url=calendar_url)
+    print(root_dir)
     calendar_raw.write_ff_csv(
         root_dir=root_dir,
         season_year=args.season_year,

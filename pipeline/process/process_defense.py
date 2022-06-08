@@ -4,8 +4,8 @@ import pandas as pd
 import pandas_flavor as pf
 from sklearn.preprocessing import StandardScaler
 
-from fantasyfootball.config import root_dir
-from fantasyfootball.pipeline.utils import (
+from pipeline.pipeline_config import root_dir
+from pipeline.utils import (
     get_module_purpose,
     read_args,
     read_ff_csv,

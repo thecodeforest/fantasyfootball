@@ -11,9 +11,9 @@ from bs4 import BeautifulSoup as bs
 from bs4.element import Tag
 
 sys.path.append(str(Path.cwd()))
-from pipeline_config import injury_url, root_dir  # noqa: E402
-from pipeline_logger import logger  # noqa: E402
-from utils import get_module_purpose, read_args, write_ff_csv  # noqa: E402
+from pipeline.pipeline_config import injury_url, root_dir  # noqa: E402
+from pipeline.pipeline_logger import logger  # noqa: E402
+from pipeline.utils import get_module_purpose, read_args, write_ff_csv  # noqa: E402
 
 USER_AGENT = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7"  # noqa: E501
 HEADERS = headers = {"User-Agent": USER_AGENT}

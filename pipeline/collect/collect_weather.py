@@ -7,9 +7,9 @@ import pandas as pd
 from meteostat import Daily, Point
 
 sys.path.append(str(Path.cwd()))
-from pipeline_config import root_dir  # noqa: E402
-from pipeline_logger import logger  # noqa: E402
-from utils import get_module_purpose, read_args, write_ff_csv  # noqa: E402
+from pipeline.pipeline_config import root_dir  # noqa: E402
+from pipeline.pipeline_logger import logger  # noqa: E402
+from pipeline.utils import get_module_purpose, read_args, write_ff_csv  # noqa: E402
 
 
 def collect_daily_weather_conditions(

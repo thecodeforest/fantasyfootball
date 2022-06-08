@@ -3,11 +3,12 @@ from pathlib import Path
 
 import pandas as pd
 
-sys.path.append(str(Path.cwd().parent))
+sys.path.append(str(Path.cwd()))
 print("Here are paths:")
 for path in sys.path:
     print(path)
-# from pipeline.pipeline_config import root_dir, stats_url  # noqa: E402
+from pipeline.pipeline_config import root_dir, stats_url  # noqa: E402
+
 # from pipeline.utils import get_module_purpose, read_args, write_ff_csv  # noqa: E402
 
 

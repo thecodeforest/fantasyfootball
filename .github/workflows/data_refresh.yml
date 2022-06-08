@@ -37,11 +37,7 @@ jobs:
       run: |
         source .venv/bin/activate
         mkdir staging_datasets
-        echo "contents of root dir"
-        ls
-        echo "root directory"
-        pwd
-    #     python pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
+        python pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
     #     python pipeline/process/process_calendar.py --season_year $SEASON_YEAR      
     #     python pipeline/collect/collect_players.py --season_year $SEASON_YEAR
     #     python pipeline/process/process_players.py --season_year $SEASON_YEAR

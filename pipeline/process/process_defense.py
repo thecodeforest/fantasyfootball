@@ -101,7 +101,7 @@ def weight_defense_stats(df: pd.DataFrame, yds_weight: float) -> pd.DataFrame:
 
 
 @pf.register_dataframe_method
-def rank_defense(df: pd.DataFrame, stats_columns: list[str]) -> pd.DataFrame:
+def rank_defense(df: pd.DataFrame, stats_columns: List[str]) -> pd.DataFrame:
     """Creates a rank (1 = Best, 32 = Worst) for each team based on the
        cumulative offensive stats.For example, the team with the most rushing yards
        against the defense will have a `rushing_rank` of 32, while the team with

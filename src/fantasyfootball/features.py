@@ -475,6 +475,7 @@ class FantasyFeatures:
         future_week_df = season_ff_data[
             (season_ff_data[self.game_week_column] == max_week + 1)
             & (season_ff_data["season_year"] == current_season_year)
+            & (season_ff_data["position"] == self.position)
         ]
         # load in historical stats data to add in player id
         stats_df = pd.read_csv(ff_data_dir / "stats.gz", compression="gzip")

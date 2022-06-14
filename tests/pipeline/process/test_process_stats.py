@@ -86,8 +86,9 @@ def test_add_missing_stats_columns(df):
 
 def test_add_missing_stats_columns_error(df):
     missing_columns = ["date"]
-    required_columns = {"stats_columns": list(df.columns)} | {
-        "game_columns": missing_columns
+    required_columns = {
+        **{"stats_columns": list(df.columns)},
+        **{"game_columns": missing_columns},
     }
     with pytest.raises(ValueError):
         add_missing_stats_columns(df, required_columns=required_columns)

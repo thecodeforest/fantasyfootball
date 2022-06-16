@@ -248,7 +248,7 @@ class FantasyFeatures:
         self.df = self.df[self.df[status_column] == 1]
         logger.info(f"dropping {status_column} column")
         self.df = self.df.drop(columns=status_column)
-        return self
+        return FantasyFeatures
 
     @staticmethod
     def _calculate_n_games_played(
@@ -306,7 +306,7 @@ class FantasyFeatures:
             on=self.player_group_columns,
             how="inner",
         )
-        return self
+        return FantasyFeatures
 
     @staticmethod
     def _format_pd_filter_query(columns: List[str], row_values: List[str]) -> List[str]:
@@ -495,7 +495,7 @@ class FantasyFeatures:
             .reset_index(drop=True)
         )
         self.df["is_future_week"] = self.df["is_future_week"].fillna(0)
-        return self
+        return FantasyFeatures
 
     @staticmethod
     def _create_step_str(step: str, transformer_name: str, **params) -> str:
@@ -542,7 +542,7 @@ class FantasyFeatures:
             lag_columns (Union[str, List[str]]): Columns to lag.
 
         Returns:
-            FantasyData: Updated string representation of the pipeline steps.
+            FantasyFeatures: Updated string representation of the pipeline steps.
         """
         feature_type = "lag"
         if isinstance(n_week_lag, int):
@@ -564,13 +564,13 @@ class FantasyFeatures:
 
         logger.info("add lag step")
         self._pipeline_steps += lag_step_str + ","
-        return self
+        return FantasyFeatures
 
     def add_moving_avg_feature(
         self,
         n_week_window: Union[int, List[int]],
         window_columns: Union[str, List[str]],
-    ) -> FantasyData:
+    ) -> FantasyFeatures:
         """Adds string representation of a moving average step to the pipeline.
 
         Args:
@@ -578,7 +578,7 @@ class FantasyFeatures:
             window_columns (Union[str, List[str]]): Columns to average.
 
         Returns:
-            FantasyData: Updated string representation of the pipeline steps.
+            FantasyFeatures: Updated string representation of the pipeline steps.
         """
         feature_type = "ma"
         if isinstance(n_week_window, int):
@@ -599,18 +599,18 @@ class FantasyFeatures:
         )
         logger.info("add moving average")
         self._pipeline_steps += ma_step_str + ","
-        return self
+        return FantasyFeatures
 
     def add_target_encoded_feature(
         self, category_columns: Union[str, list]
-    ) -> FantasyData:
+    ) -> FantasyFeatures:
         """Adds string representation of a target encoded step to the pipeline.
 
         Args:
             category_columns (Union[str, list]): Columns to target encode.
 
         Returns:
-            FantasyData: Updated string representation of the pipeline steps.
+            FantasyFeatures: Updated string representation of the pipeline steps.
         """
         feature_type = "te"
         if isinstance(category_columns, str):
@@ -627,11 +627,11 @@ class FantasyFeatures:
         )
         logger.info("add target encoding for categorical variables")
         self._pipeline_steps += te_step_str + ","
-        return self
+        return FantasyFeatures
 
     def consolidate_category_feature(
         self, category_columns: Union[str, list], threshold: float
-    ) -> FantasyData:
+    ) -> FantasyFeatures:
         """Adds string representation of a category consolidator step to the pipeline.
 
         Args:
@@ -639,7 +639,7 @@ class FantasyFeatures:
             threshold (float): Threshold for consolidating categories.
 
         Returns:
-            FantasyData: Updated string representation of the pipeline steps.
+            FantasyFeatures: Updated string representation of the pipeline steps.
         """
         if isinstance(category_columns, str):
             category_columns = [category_columns]
@@ -652,7 +652,7 @@ class FantasyFeatures:
         )
         logger.info("Consolidating levels for categorical variables")
         self._pipeline_steps += cc_step_str + ","
-        return self
+        return FantasyFeatures
 
     def _remove_missing_feature_values(self, feature_df: pd.DataFrame) -> pd.DataFrame:
         """Removes rows that have missing values related to lag or salary columns.
@@ -763,7 +763,7 @@ class FantasyFeatures:
         )
         cv_df = cv_df.drop(columns=self.y)
         self.df = pd.merge(self.df, cv_df, on=keys, how="inner")
-        return self
+        return FantasyFeatures
 
     def create_ff_signature(self) -> dict:
         """Creates a fantasy football 'signature', which includes the following steps:

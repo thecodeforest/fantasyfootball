@@ -337,3 +337,12 @@ def test__validate_future_data_is_present_error():
     _validate_future_data_is_present = FantasyFeatures._validate_future_data_is_present
     with pytest.raises(ValueError):
         assert _validate_future_data_is_present(ff_data_dir, max_week, data_sources)
+
+
+def test_add_coefficient_of_variation(df):
+    expected = 47.0
+    features = FantasyFeatures(df, y="actual_pts", position="QB")
+    features.add_coefficient_of_variation(n_week_window=2)
+    # check for Aaron Rodgers most recent value
+    result = features.data.query("pid == 'RodgAa00'")["cv"].tolist()[-1]
+    assert expected == result

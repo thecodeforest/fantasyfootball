@@ -715,6 +715,56 @@ class FantasyFeatures:
         else:
             return feature_df
 
+    def _forward_fill_future_week_cv(self, feature_df: pd.DataFrame) -> pd.DataFrame:
+        """Forward fills CV values for future weeks."""
+        if "cv" in feature_df.columns and "is_future_week" in feature_df.columns:
+            feature_df["cv_ff"] = feature_df.groupby("pid")["cv"].transform(
+                lambda x: x.ffill()
+            )
+            feature_df["cv"] = feature_df.apply(
+                lambda row: row["cv"] if row["is_future_week"] == 0 else row["cv_ff"],
+                axis=1,
+            )
+            feature_df = feature_df.drop(columns="cv_ff")
+            return feature_df
+        else:
+            return feature_df
+
+    def add_coefficient_of_variation(self, n_week_window: int) -> FantasyFeatures:
+        """Add coefficient of variation (cv) for each player based
+        the trailing standard deviation and average of weekly
+        fantasy points scored.
+
+        Args:
+            n_week_window (int): Number of trailing weeks to
+            use for calculating the cv. Note that calculation
+            occurs across seasons.
+
+        Returns:
+            FantasyFeatures: Dataframe with cv added as a column.
+
+        """
+        keys = ["pid", "date"]
+        cv_df = self.df[keys + [self.y]]
+        cv_df = cv_df.sort_values(by=keys).reset_index(drop=True)
+        # replace any negative point values with zero when calculating cv
+        cv_df[self.y] = cv_df[self.y].apply(lambda x: 0 if x < 0 else x)
+        sd = cv_df.groupby("pid")[self.y].apply(
+            lambda x: x.rolling(n_week_window).std()
+        )
+        mu = cv_df.groupby("pid")[self.y].apply(
+            lambda x: x.rolling(n_week_window).mean()
+        )
+        cv_df["cv"] = (sd / mu) * 100
+        # replace any inf values with nan
+        cv_df["cv"] = cv_df["cv"].apply(lambda x: np.nan if np.isinf(x) else x)
+        cv_df["cv"] = cv_df["cv"].apply(
+            lambda x: round(x) if not np.isnan(x) else np.nan
+        )
+        cv_df = cv_df.drop(columns=self.y)
+        self.df = pd.merge(self.df, cv_df, on=keys, how="inner")
+        return self
+
     def create_ff_signature(self) -> dict:
         """Creates a fantasy football 'signature', which includes the following steps:
 
@@ -731,6 +781,8 @@ class FantasyFeatures:
         feature_df = pipeline.fit_transform(self.df, y=self.df[self.y])
         feature_df = self._remove_missing_feature_values(feature_df)
         feature_df = self._replace_missing_salary_values_with_zero(feature_df)
+        # carry forward cv for each player to future week if cv in columns
+        feature_df = self._forward_fill_future_week_cv(feature_df)
         return {
             "pipeline_feature_names": self.new_pipeline_features,
             "feature_df": feature_df,

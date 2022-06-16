@@ -9,7 +9,7 @@
 
 
 
-**fantasyfootball** is a Python package that provides up-to-date offensive game statistics, betting lines, defensive rankings, and game-day weather data. While many websites provide NFL game data, obtaining it in a format appropriate for analysis or inference requires either (1) a paid subscription or (2) manual weekly downloads with extensive data cleaning. **fantasy football** centralizes game data in a single location while also ensuring it is up-to-date throughout the season.
+**fantasyfootball** is a Python package that provides up-to-date game data, including player statistics, betting lines, injuries, defensive rankings, and game-day weather data. While many websites offer NFL game data, obtaining it in a format appropriate for analysis or inference requires either (1) a paid subscription or (2) manual weekly downloads with extensive data cleaning. **fantasy football** centralizes game data in a single location while ensuring it is up-to-date throughout the season.
 
 Additionally, **fantasyfootball** streamlines the creation of features for in-season, player-level fantasy point projections. The resulting projections can then determine weekly roster decisions. 
 
@@ -21,14 +21,14 @@ $ pip install fantasyfootball
 
 ## Benchmarking
 
-The **fantasyfootball** package provides football enthusiasts with the data and tools to create "industry-grade" player point projections customized for their league's scoring system. Indeed, a simple comparison between (1) a "naive" projection, and (2) a subscription-based, "industry-grade" projection, revealed that accurate weekly player-level point projections are achievable with **fantasyfootball**. Across all player positions, **fantasyfootball** projections were, on average, 18% more accurate relative to the naive projection (5.6 pts vs. 4.6 pts), while the industry-grade projections were 4% more accurate than the **fantasyfootball** projections (4.6 pts vs. 4.4 pts). The figure below further disaggregates projection performance by player position. More details surrounding this analysis can be found in the [benchmarking notebook](https://github.com/thecodeforest/fantasyfootball/blob/main/examples/benchmarking.ipynb). 
+The **fantasyfootball** package provides football enthusiasts with the data and tools to create player point projections customized for their league's scoring system. Indeed, a simple comparison between (1) a "naive" projection, and (2) a subscription-based, "industry-grade" projection, revealed that accurate weekly player-level point projections are achievable with **fantasyfootball**. Across all player positions, **fantasyfootball** projections were, on average, 18% more accurate relative to the naive projection (5.6 pts vs. 4.6 pts), while the industry-grade projections were 4% more accurate than the **fantasyfootball** projections (4.6 pts vs. 4.4 pts). The figure below further disaggregates projection performance by player position. More details surrounding this analysis can be found in the [benchmarking notebook](https://github.com/thecodeforest/fantasyfootball/blob/main/examples/benchmarking.ipynb). 
 
 ![benchmark](https://github.com/thecodeforest/fantasyfootball/blob/main/docs/images/benchmark_performance_full.png?raw=true)
 
 ## Quickstart
 
 Let's walk through an example to illustrate a core use-case of **fantasyfootball**: weekly roster decisions. Imagine it's Tuesday, Week 15 of the 2021 NFL regular season. Your somewhat mediocre team occupies 5th place in the league standings, one spot away from the coveted playoff threshold. It is a must-win week, and you are in the unenviable position of deciding who starts in the Flex roster spot. 
-You have two wide-receivers available to start, Hunter Renfrow or Chris Godwin, and you want to estimate which player will score more points in Week 15. Accordingly, you use the data and feature engineering capabilities in **fantasyfootball** to create player-level point projections. The player with the highest point projection will be slotted into the Flex roster spot, propelling your team to fantasy victory!
+You have three wide receivers available to start, Keenan Allen, Chris Godwin, or Tyler Lockett, and you want to estimate which player will score more points in Week 15. Accordingly, you use the data and feature engineering capabilities in **fantasyfootball** to create player-level point projections. The player with the highest point projection will be slotted into the Flex roster spot, propelling your team to fantasy victory!
 
 Let's start by importing several packages and reading all game data from the 2015-2021 seasons.
 
@@ -51,22 +51,22 @@ Next, we'll create our outcome variable (y) that defines each player's total wee
 fantasy_data.create_fantasy_points_column(scoring_source="yahoo")
 ```
 
-Now that we've added our outcome variable, we'll extract the data and look at a few fields for Hunter Renfrow over the past four weeks. Note that a subset of all fields appears below. 
+Now that we've added our outcome variable, we'll extract the data and look at a few fields for Tyler Lockett over the past four weeks. Note that a subset of all fields appears below. 
 
 ```python
 # extract data from fantasy_data object
 fantasy_df = fantasy_data.data
 # filter to player-season-week in question
-renfh_df = fantasy_df.query("name=='Hunter Renfrow' & season_year==2021 & 11<=week<=14")   
-print(renfh_df)
+lockty_df = fantasy_df.query("name=='Tyler Lockett' & season_year==2021 & 11<=week<=14")   
+print(lockty_df)
 ```
 
 | pid      |   week |   is_away |   receiving_rec |   receiving_td |   receiving_yds |   draftkings_salary |   ff_pts_yahoo |
 |:---------|-------:|----------:|----------------:|---------------:|----------------:|--------------------:|---------------:|
-| RenfHu00 |     11 |         0 |               4 |              0 |              30 |                5800 |            5.5 |
-| RenfHu00 |     12 |         1 |               8 |              0 |             134 |                5600 |           17.6 |
-| RenfHu00 |     13 |         0 |               9 |              0 |             102 |                5800 |           14.7 |
-| RenfHu00 |     14 |         1 |              13 |              1 |             117 |                6100 |           22.2 |
+| LockTy00 |     11 |         0 |               4 |              0 |             115 |                6000 |           13.5 |
+| LockTy00 |     12 |         1 |               3 |              0 |              96 |                6300 |           11.1 |
+| LockTy00 |     13 |         0 |               7 |              1 |              68 |                6500 |           16.3 |
+| LockTy00 |     14 |         1 |               5 |              1 |             142 |                6700 |           24.7 |
 
 We'll create the feature set that will feed our predictive model in the following section. The first step is to filter to the most recently completed week for all wide receivers (WR). 
 
@@ -79,16 +79,16 @@ backtest_df = fantasy_df.filter_to_prior_week(season_year=2021, week_number=14)
 features = FantasyFeatures(backtest_df, position="WR", y=y)   
 ```
 
-Now, we'll apply the following transformating to prepare our data for modeling: 
+Now, we'll apply a few filters and transformations to prepare our data for modeling: 
 
-* `filter_inactive_games` - Removes games where player did not play, and therefore recorded zero points.
+* `filter_inactive_games` - Removes games where a player did not play, and therefore recorded zero points.
 
-* `filter_n_games_played_by_season` - Removes players who played only a few games in a season. Setting a threshold is necessary when creating lagged features (which happen to be some of the best predictors of future performance), and removing noise associated with players who played few games. 
-
+* `filter_n_games_played_by_season` - Removes players who played only a few games in a season. Setting a threshold is necessary when creating lagged features (which happen to be some of the best predictors of future performance). Removing non-essential players, or those who play only one or two games in a season, also reduces noise and leads to more accurate models. 
 
 * `create_future_week` - Adds leading indicators that we can use to make predictions for Week 15. Recall that, in the current example, we only have game data up to Week 14, so we need to create features for a future, unplayed game. For example, the over/under point projections combined with the point spread estimate how much each team will score. A high-scoring estimate would likely translate into more fantasy points for all players on a team. Another example is weather forecasts. An exceptionally windy game may favor a "run-centric" offense, leading to fewer passing/receiving plays and more rushing plays. Such an occurrence would benefit runnings backs while hurting wide receivers and quarterbacks. 
-The *is_future_week* field is also added during this step and allows for an easy split between past and future data during the modeling process. 
+The *is_future_week* field is also added during this step and allows an easy split between past and future data during the modeling process. 
  
+* `add_coefficient_of_variation` - Adds a Coefficient of Variation (CV) for each player based on their past N games. CV shows how much scoring variability there is for each player on a week-to-week basis. While the CV will not serve as an input for predicting player performance in Week 15, it will help us to gauge the consistency of each player when deciding between multiple players. 
 
 * `add_lag_feature` - Add lags of a specified length for lagging indicators, such as receptions, receiving yards, or rushing touchdowns from previous weeks. 
 
@@ -101,12 +101,13 @@ The *is_future_week* field is also added during this step and allows for an easy
 features.filter_inactive_games(status_column="is_active")
 features.filter_n_games_played_by_season(min_games_played=1)
 features.create_future_week()
+features.add_coefficient_of_variation(n_week_window=16)
 features.add_lag_feature(n_week_lag=1, lag_columns=y)
 features.add_moving_avg_feature(n_week_window=4, window_columns=y)
 features_signature_dict = features.create_ff_signature()
 ```
 
-Having created our feature set and extracted the names of the newly created features, we'll seperate our historical data (training), denoted `hist_df`, from the future, unplayed game data (testing), denoted `future_df`, using the indicator added above during the `create_future_week` step. 
+Having created our feature set, we'll seperate our historical (training) data , denoted `hist_df`, from the future (testing), unplayed game data, denoted `future_df`, using the indicator added above during the `create_future_week` step. 
 
 ```python
 feature_df = features_signature_dict.get("feature_df")
@@ -132,24 +133,27 @@ Now we can fit a simple model and make predictions for the upcoming week.
 ```python
 rf = RandomForestRegressor(n_estimators=1000, max_depth=4, random_state=0)
 rf.fit(X_hist.values, y_hist.values)
-y_future = rf.predict(X_future.values)
+y_future = rf.predict(X_future.values).round(1)
 ```
 
-Below we'll assign our point predictions back to the `future_df` we created for Week 15 and filter to the two players in questions. 
+Below we'll assign our point predictions back to the `future_df` we created for Week 15 and filter to the two players in question.
 
 ```python
 future_df = future_df.assign(**{f"{y}_pred": y_future})
-players = ["Hunter Renfrow", "Chris Godwin"]
+players = ["Chris Godwin", "Tyler Lockett", "Keenan Allen"]
 future_df[["name", "team", "opp", "week", "date", f"{y}_pred"]].query(
     "name in @players"
 )
 ```
-| name           | team   | opp   |   week | date       |   ff_pts_yahoo_pred |
-|:---------------|:-------|:------|-------:|:-----------|--------------------:|
-| Chris Godwin   | TAM    | NOR   |     15 | 2021-12-19 |             10.9169 |
-| Hunter Renfrow | LVR    | CLE   |     15 | 2021-12-20 |             14.4742 |
+| name          | team   | opp   |   week | date       |   ff_pts_yahoo_pred |   cv |
+|:--------------|:-------|:------|-------:|:-----------|--------------------:|-----:|
+| Keenan Allen  | LAC    | KAN   |     15 | 2021-12-16 |                14.1 |   35 |
+| Chris Godwin  | TAM    | NOR   |     15 | 2021-12-19 |                11   |   49 |
+| Tyler Lockett | SEA    | LAR   |     15 | 2021-12-21 |                14   |   74 |
 
-Based on our point projections, we should start Hunter Renfrow over Chris Godwin, as he is expected to score ~3.5 more points this week. 
+
+
+Keenan Allen and Tyler Lockett are projected to score ~3 more points than Chris Godwin. And while Keenan Allen and Tyler Lockett have similar projections, over the past 16 games, Allen is much more consistent than Lockett. That is, we should put more faith in Allen's 14-point forecast relative to Lockett. When point projections are equivalent, CV can be a second input when deciding between two players. For example, if the goal is to score many points and win the week, a player with a large CV might be the better option, as they have a higher potential ceiling. In contrast, if the goal is to win, and the total points scored are less critical, then a more consistent player with a small CV is the better option. 
 
 
 
@@ -216,7 +220,7 @@ The package provides the following seven datasets by season:
 
 <br>
 
-* **weather** - The game-day weather conditions. Historical data are actual weather conditions, while  data collected prior to a game are based on weather forecasts. Weather forecast data are update each on week 
+* **weather** - The game-day weather conditions. Historical data are actual weather conditions, while  data collected prior to a game are based on weather forecasts. Weather data is updated daily throughout the season.
     * `date` - Date (yyyy-mm-dd) of the game
     * `team` - The three letter abbreviation of the team
     * `opp` - The three letter abbreviation of the team's opponent

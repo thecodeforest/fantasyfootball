@@ -6,6 +6,49 @@ import pandas as pd
 import pandas_flavor as pf
 from fuzzywuzzy import fuzz
 
+TEAM_ABBREVIATION_MAPPING = {
+    ("Arizona", "Arizona Cardinals"): "ARI",
+    ("Atlanta", "Atlanta Falcons"): "ATL",
+    ("Buffalo", "Buffalo Bills"): "BUF",
+    ("Baltimore", "Baltimore Ravens"): "BAL",
+    ("Carolina", "Carolina Panthers"): "CAR",
+    ("Chicago", "Chicago Bears"): "CHI",
+    ("Cincinnati", "Cincinnati Bengals"): "CIN",
+    ("Cleveland", "Cleveland Browns"): "CLE",
+    ("Dallas", "Dallas Cowboys"): "DAL",
+    ("Denver", "Denver Broncos"): "DEN",
+    ("Detroit", "Detroit Lions"): "DET",
+    ("GreenBay", "Green Bay Packers"): "GNB",
+    ("Houston", "Houston Texans"): "HOU",
+    ("Indianapolis", "Indianapolis Colts"): "IND",
+    ("Jacksonville", "Jacksonville Jaguars"): "JAX",
+    ("KansasCity", "Kansas City Chiefs", "KCChiefs", "Kansas"): "KAN",
+    ("LAChargers", "Los Angeles Chargers", "LosAngeles"): "LAC",
+    ("Oakland", "Oakland Raiders"): "OAK",
+    ("LARams", "Los Angeles Rams"): "LAR",
+    ("LasVegas", "Las Vegas Raiders", "LVRaiders"): "LVR",
+    ("Miami", "Miami Dolphins"): "MIA",
+    ("Minnesota", "Minnesota Vikings"): "MIN",
+    ("NewEngland", "New England Patriots"): "NWE",
+    ("NewOrleans", "New Orleans Saints"): "NOR",
+    ("NYGiants", "New York Giants"): "NYG",
+    ("NYJets", "New York Jets"): "NYJ",
+    ("Philadelphia", "Philadelphia Eagles"): "PHI",
+    ("Pittsburgh", "Pittsburgh Steelers"): "PIT",
+    ("San Diego", "San Diego Chargers", "SanDiego"): "SDG",
+    ("SanFrancisco", "San Francisco 49ers"): "SFO",
+    ("St Louis", "St. Louis Rams", "St.Louis"): "STL",
+    ("Seattle", "Seattle Seahawks"): "SEA",
+    ("TampaBay", "Tampa Bay Buccaneers", "Tampa"): "TAM",
+    ("Tennessee", "Tennessee Titans"): "TEN",
+    (
+        "Washington",
+        "Washingtom",
+        "Washington Football Team",
+        "Washington Redskins",
+    ): "WAS",
+}
+
 
 def read_args() -> argparse.Namespace:
     """Helper function to read command line arguments.
@@ -32,48 +75,7 @@ def retrieve_team_abbreviation(team_name: str) -> str:
     Returns:
         str: The team abbreviation.
     """
-    team_abbreviation_mapping = {
-        ("Arizona", "Arizona Cardinals"): "ARI",
-        ("Atlanta", "Atlanta Falcons"): "ATL",
-        ("Buffalo", "Buffalo Bills"): "BUF",
-        ("Baltimore", "Baltimore Ravens"): "BAL",
-        ("Carolina", "Carolina Panthers"): "CAR",
-        ("Chicago", "Chicago Bears"): "CHI",
-        ("Cincinnati", "Cincinnati Bengals"): "CIN",
-        ("Cleveland", "Cleveland Browns"): "CLE",
-        ("Dallas", "Dallas Cowboys"): "DAL",
-        ("Denver", "Denver Broncos"): "DEN",
-        ("Detroit", "Detroit Lions"): "DET",
-        ("GreenBay", "Green Bay Packers"): "GNB",
-        ("Houston", "Houston Texans"): "HOU",
-        ("Indianapolis", "Indianapolis Colts"): "IND",
-        ("Jacksonville", "Jacksonville Jaguars"): "JAX",
-        ("KansasCity", "Kansas City Chiefs", "KCChiefs", "Kansas"): "KAN",
-        ("LAChargers", "Los Angeles Chargers", "LosAngeles"): "LAC",
-        ("Oakland", "Oakland Raiders"): "OAK",
-        ("LARams", "Los Angeles Rams"): "LAR",
-        ("LasVegas", "Las Vegas Raiders", "LVRaiders"): "LVR",
-        ("Miami", "Miami Dolphins"): "MIA",
-        ("Minnesota", "Minnesota Vikings"): "MIN",
-        ("NewEngland", "New England Patriots"): "NWE",
-        ("NewOrleans", "New Orleans Saints"): "NOR",
-        ("NYGiants", "New York Giants"): "NYG",
-        ("NYJets", "New York Jets"): "NYJ",
-        ("Philadelphia", "Philadelphia Eagles"): "PHI",
-        ("Pittsburgh", "Pittsburgh Steelers"): "PIT",
-        ("San Diego", "San Diego Chargers", "SanDiego"): "SDG",
-        ("SanFrancisco", "San Francisco 49ers"): "SFO",
-        ("St Louis", "St. Louis Rams", "St.Louis"): "STL",
-        ("Seattle", "Seattle Seahawks"): "SEA",
-        ("TampaBay", "Tampa Bay Buccaneers", "Tampa"): "TAM",
-        ("Tennessee", "Tennessee Titans"): "TEN",
-        (
-            "Washington",
-            "Washingtom",
-            "Washington Football Team",
-            "Washington Redskins",
-        ): "WAS",
-    }
+    team_abbreviation_mapping = TEAM_ABBREVIATION_MAPPING
     for k, v in team_abbreviation_mapping.items():
         if team_name in k:
             return v
@@ -209,7 +211,11 @@ def get_module_purpose(
     Returns:
         Tuple[str, str]: The module's purpose and data type.
     """
-    dir_type_mapping = {"collect": "raw", "process": "processed"}
+    dir_type_mapping = {
+        "collect": "raw",
+        "process": "processed",
+        "validate": "validate",
+    }
     expected_directories = dir_type_mapping.keys()
     module_name = module_path.split("/")[-1]
     if module_name_split_char not in module_name:

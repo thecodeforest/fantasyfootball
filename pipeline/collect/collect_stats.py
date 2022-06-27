@@ -207,7 +207,24 @@ def collect_stats(
             stats = pd.read_html(player_url)[0]
             stats.columns = ["_".join(x) for x in stats.columns.to_flat_index()]
             # Ensures player is on correct team
-            if player_team in stats["Unnamed: 5_level_0_Tm"].dropna().unique():
+            correct_team = (
+                player_team in stats["Unnamed: 5_level_0_Tm"].dropna().unique()
+            )
+            # Ensure player doesn't already exist in staging data
+            # (e.g., Derek Carrier & Derek Carr)
+            raw_stats_csvs = (
+                root_dir
+                / "staging_datasets"
+                / "season"
+                / str(season_year)
+                / "raw"
+                / "stats"
+            ).glob("*.csv")
+            stats_do_not_exist = player_id not in [
+                x.stem.replace("_stats", "") for x in raw_stats_csvs
+            ]
+            # If both conditions are met, add player to staging data
+            if correct_team and stats_do_not_exist:
                 stats["pid"] = player_id
                 stats["name"] = player_name
                 return stats

@@ -226,6 +226,44 @@ def recode_str_to_numeric(
     return df
 
 
+def remove_duplicate_inactive_weeks(df: pd.DataFrame) -> pd.DataFrame:
+    """Addresses data error where players are reported as
+    being both active and inactive for the same week. When
+    this occurs, players are always inactive. Filter
+    only to the inactive week.
+
+    Args:
+        df (pd.DataFrame): Clean stats dataframe
+
+    Returns:
+        pd.DataFrame: Clean stats dataframe without duplicate weeks
+    """
+    # find dates that occur more than once for each player
+    duplicate_date_df = (
+        df["date"].value_counts().to_frame().reset_index().query("date > 1")
+    )
+    n_duplicated_dates = duplicate_date_df.shape[0]
+    max_n_duplicates = max(duplicate_date_df["date"])
+    if n_duplicated_dates > 1 or max_n_duplicates > 2:
+        player_id = df["pid"].iloc[0]
+        logger.info(f"Found {n_duplicated_dates} duplicate dates")
+        logger.info(f"Found {max_n_duplicates} duplicate dates")
+        logger.info(f"Check data for {player_id}")
+        raise ValueError("Found multiple duplicate dates")
+    if not duplicate_date_df.empty:
+        # extract index when player is active (they are actually inactive)
+        duplicate_index = (
+            df[df["date"] == duplicate_date_df["index"][0]]
+            .query("is_active == 1")
+            .index[0]
+        )
+        df = df.drop([df.index[duplicate_index]])
+        df = df.reset_index(drop=True)
+        return df
+    else:
+        return df
+
+
 if __name__ == "__main__":
     args = read_args()
     dir_type, data_type = get_module_purpose(module_path=__file__)
@@ -258,6 +296,7 @@ if __name__ == "__main__":
             )
             .rename(columns={"tm": "team"})
         )
+        clean_stats_df = remove_duplicate_inactive_weeks(clean_stats_df)
         clean_stats_df.write_ff_csv(
             root_dir, args.season_year, dir_type, data_type, pid
         )

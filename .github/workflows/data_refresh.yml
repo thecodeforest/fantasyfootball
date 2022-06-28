@@ -71,8 +71,6 @@ jobs:
 
         python pipeline/process/process_defense.py --season_year $SEASON_YEAR
 
-# python pipeline/validate/validate_data.py --season_year $SEASON_YEAR
-
         python pipeline/load/load_data.py --season_year $SEASON_YEAR
     - name: Save logs to S3
       run: | 

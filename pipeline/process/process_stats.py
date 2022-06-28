@@ -243,13 +243,14 @@ def remove_duplicate_inactive_weeks(df: pd.DataFrame) -> pd.DataFrame:
         df["date"].value_counts().to_frame().reset_index().query("date > 1")
     )
     n_duplicated_dates = duplicate_date_df.shape[0]
-    max_n_duplicates = max(duplicate_date_df["date"])
-    if n_duplicated_dates > 1 or max_n_duplicates > 2:
-        player_id = df["pid"].iloc[0]
-        logger.info(f"Found {n_duplicated_dates} duplicate dates")
-        logger.info(f"Found {max_n_duplicates} duplicate dates")
-        logger.info(f"Check data for {player_id}")
-        raise ValueError("Found multiple duplicate dates")
+    if n_duplicated_dates > 1:
+        max_n_duplicates = max(duplicate_date_df["date"])
+        if max_n_duplicates > 2:
+            player_id = df["pid"].iloc[0]
+            logger.info(f"Found {n_duplicated_dates} duplicate dates")
+            logger.info(f"Found {max_n_duplicates} duplicate dates")
+            logger.info(f"Check data for {player_id}")
+            raise ValueError("Found multiple duplicate dates")
     if not duplicate_date_df.empty:
         # extract index when player is active (they are actually inactive)
         duplicate_index = (

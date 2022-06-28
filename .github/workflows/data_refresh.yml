@@ -45,8 +45,6 @@ jobs:
     - name: NFL data refresh
       run: |
         source .venv/bin/activate
-
-        mkdir staging_datasets
         
         python pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
         python pipeline/process/process_calendar.py --season_year $SEASON_YEAR

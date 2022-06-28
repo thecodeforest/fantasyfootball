@@ -152,6 +152,6 @@ sandbox.*
 src/fantasyfootball/staging_datasets/
 datasets/season/[0-9]*/*.csv
 src/fantasyfootball/datasets/season/[0-9]*/*.csv
-staging_datasets/
+staging_datasets/season/
 # VScode settings
 .vscode/

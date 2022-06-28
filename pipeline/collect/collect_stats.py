@@ -1,7 +1,8 @@
 import sys
 from pathlib import Path
 import re
-import time
+
+# import time
 from itertools import chain, product
 from typing import List, Tuple
 
@@ -262,4 +263,4 @@ if __name__ == "__main__":
             continue
         pid = stats_raw["pid"].iloc[0]
         stats_raw.write_ff_csv(root_dir, args.season_year, dir_type, data_type, pid)
-        time.sleep(2)
+        # time.sleep(1)

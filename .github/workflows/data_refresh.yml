@@ -51,7 +51,10 @@ jobs:
 
         python pipeline/collect/collect_players.py --season_year $SEASON_YEAR
         python pipeline/process/process_players.py --season_year $SEASON_YEAR
-                    
+              
+        python pipeline/collect/collect_stats.py --season_year $SEASON_YEAR
+        python pipeline/process/process_stats.py --season_year $SEASON_YEAR
+      
         python pipeline/collect/collect_weather.py --season_year $SEASON_YEAR
         python pipeline/process/process_weather.py --season_year $SEASON_YEAR     
 

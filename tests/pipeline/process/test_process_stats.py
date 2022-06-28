@@ -11,6 +11,7 @@ from pipeline.process.process_stats import (  # noqa: E402
     clean_stats_column,
     clean_status_column,
     recode_str_to_numeric,
+    remove_duplicate_inactive_weeks,
 )
 
 
@@ -136,3 +137,32 @@ def test_recode_str_to_numeric(df):
     replacement_value = 1
     result = recode_str_to_numeric(df, column, target_value, replacement_value)
     assert result[column].tolist() == expected
+
+
+def test_remove_duplicate_inactive_weeks():
+    expected_rows = 4
+    columns = ["pid", "team", "opp", "date", "is_active"]
+    data = [
+        ["BellBl00", "KAN", "LAC", "2021-12-16", 1],
+        ["BellBl00", "KAN", "PIT", "2021-12-26", 1],
+        ["BellBl00", "KAN", "CIN", "2022-01-02", 1],
+        ["BellBl00", "KAN", "DEN", "2022-01-08", 1],
+        ["BellBl00", "KAN", "DEN", "2022-01-08", 0],
+        ["AdamDa01", "GNB", "BAL", "2021-12-19", 1],
+        ["AdamDa01", "GNB", "CLE", "2021-12-25", 1],
+        ["AdamDa01", "GNB", "MIN", "2022-01-02", 1],
+        ["AdamDa01", "GNB", "DET", "2022-01-09", 1],
+        ["JohnJu02", "NOR", "TAM", "2021-12-19", 1],
+        ["JohnJu02", "NOR", "MIA", "2021-12-27", 0],
+        ["JohnJu02", "NOR", "CAR", "2022-01-02", 1],
+        ["JohnJu02", "NOR", "CAR", "2022-01-02", 0],
+        ["JohnJu02", "NOR", "ATL", "2022-01-09", 1],
+    ]
+    duplicate_df = pd.DataFrame(data, columns=columns)
+    for pid in duplicate_df["pid"].unique():
+        df = duplicate_df.query("pid == @pid").reset_index(drop=True)
+        df = remove_duplicate_inactive_weeks(df)
+        resulting_rows = df.shape[0]
+        assert (
+            resulting_rows == expected_rows
+        ), f"{pid} did not have the expected number of rows {expected_rows}"

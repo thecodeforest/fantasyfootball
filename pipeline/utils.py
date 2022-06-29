@@ -59,6 +59,7 @@ def read_args() -> argparse.Namespace:
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--season_year", type=int, help="The season year")
+    parser.add_argument("--s3_bucket", type=str, help="The S3 bucket to write to")
     args = parser.parse_args()
     return args
 

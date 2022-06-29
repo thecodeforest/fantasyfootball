@@ -8,7 +8,7 @@ on:
 
 jobs: 
   data-pipeline: 
-    name: Data Pipeline
+    name: Data Pipeline 
     runs-on: ubuntu-latest 
     env:
       SEASON_YEAR: 2021

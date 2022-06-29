@@ -1,5 +1,6 @@
 from datetime import datetime
 import sys
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -249,10 +250,11 @@ if __name__ == "__main__":
             / "processed"
             / data_type
         )
-        processed_df = read_ff_csv(processed_data_dir)
-        ff_validate(
-            df=processed_df,
-            schema=schema,
-            data_type=data_type,
-            s3_bucket="fantasy-football-pipeline",
-        )
+        if f"{data_type}.csv" in os.listdir(processed_data_dir):
+            processed_df = read_ff_csv(processed_data_dir)
+            ff_validate(
+                df=processed_df,
+                schema=schema,
+                data_type=data_type,
+                s3_bucket="fantasy-football-pipeline",
+            )

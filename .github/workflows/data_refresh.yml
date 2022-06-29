@@ -41,11 +41,11 @@ jobs:
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
     # if no cache exists, install packages 
       run: poetry install --no-interaction --no-root
-    - name: Install AWS CLI
-      uses: unfor19/install-aws-cli-action@v1
-      with:
-        version: 2 
-        verbose: false 
+    # - name: Install AWS CLI
+    #   uses: unfor19/install-aws-cli-action@v1
+    #   with:
+    #     version: 2 
+    #     verbose: false 
     - name: NFL data refresh
       run: |
         source .venv/bin/activate
@@ -67,20 +67,32 @@ jobs:
 
       # python pipeline/process/process_defense.py --season_year $SEASON_YEAR
 
+      # python pipeline/validate/validate_data.py --season_year $SEASON_YEAR --s3_bucket $S3_BUCKET_NAME
+
         python pipeline/load/load_data.py --season_year $SEASON_YEAR
     # - name: Save logs to S3
     #   run: | 
     #     aws s3 cp "pipeline/logs/pipeline-run-$(date +'%Y-%m-%d').log" "s3://$S3_BUCKET_NAME/logs/"
-    - name: Commit new data to datasets directory
-      shell: bash
+    # - name: Commit new data to datasets directory
+    #   shell: bash
+    #   run: |
+    #     echo "Loading data to git"
+    #     if [[ "$(git status --porcelain)" != "" ]]; then
+            # git config --global user.name 'MarkLeBoeuf'
+            # git config --global user.email 'markleboeuf2015@u.northwestern.edu'
+            # git add src/fantasyfootball/datasets/*.gz        
+            # git commit -m "data: auto update historical NFL data"
+    #         git push --force
+    #     fi
+    - name: Commit Changes
       run: |
-        echo "Loading data to git"
-        if [[ "$(git status --porcelain)" != "" ]]; then
-            git config --global user.name 'MarkLeBoeuf'
-            git config --global user.email 'markleboeuf2015@u.northwestern.edu'
-            git add src/fantasyfootball/datasets/*.gz        
-            git commit -m "data: auto update historical NFL data"
-            git push --force
-        fi
+        git config --global user.name 'MarkLeBoeuf'
+        git config --global user.email 'markleboeuf2015@u.northwestern.edu'
+        git add src/fantasyfootball/datasets/*.gz        
+        git commit -m "data: auto update historical NFL data"
+    - name: Push Changes
+      uses: ad-m/github-push-action@master
+      with: 
+        github_token: ${{ secrets.GITHUB_TOKEN }}
 
 

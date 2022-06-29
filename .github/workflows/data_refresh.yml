@@ -76,7 +76,7 @@ jobs:
             git config --global user.email 'markleboeuf2015@u.northwestern.edu'
             git add src/fantasyfootball/datasets/*.gz        
             git commit -m "data: auto update historical NFL data"
-            git push
+            git push --force
         fi
 
 

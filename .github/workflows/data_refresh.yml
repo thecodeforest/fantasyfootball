@@ -1,6 +1,10 @@
 name: Data Pipeline
 
-on: [push]
+on: 
+  push:
+    branches:
+     - main
+
 
 jobs: 
   data-pipeline: 

@@ -1,10 +1,10 @@
-name: DataPipeline
+name: Data Pipeline
 
 on: [push]
 
 jobs: 
   data-pipeline: 
-    name: DataPipeline
+    name: Data Pipeline
     runs-on: ubuntu-latest 
     env:
       SEASON_YEAR: 2021

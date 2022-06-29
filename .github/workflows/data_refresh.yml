@@ -45,38 +45,38 @@ jobs:
     - name: NFL data refresh
       run: |
         source .venv/bin/activate
-        python pipeline/test_logger.py
-      # python pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
-      # python pipeline/process/process_calendar.py --season_year $SEASON_YEAR
 
-      # python pipeline/collect/collect_players.py --season_year $SEASON_YEAR
-      # python pipeline/process/process_players.py --season_year $SEASON_YEAR
-            
-      # python pipeline/collect/collect_stats.py --season_year $SEASON_YEAR
-      # python pipeline/process/process_stats.py --season_year $SEASON_YEAR
-    
-      # python pipeline/collect/collect_weather.py --season_year $SEASON_YEAR
-      # python pipeline/process/process_weather.py --season_year $SEASON_YEAR     
+        python pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
+        python pipeline/process/process_calendar.py --season_year $SEASON_YEAR
 
-      # python pipeline/collect/collect_injury.py --season_year $SEASON_YEAR
-      # python pipeline/process/process_injury.py --season_year $SEASON_YEAR
+        python pipeline/collect/collect_players.py --season_year $SEASON_YEAR
+        python pipeline/process/process_players.py --season_year $SEASON_YEAR
+              
+        python pipeline/collect/collect_stats.py --season_year $SEASON_YEAR
+        python pipeline/process/process_stats.py --season_year $SEASON_YEAR
+      
+        python pipeline/collect/collect_weather.py --season_year $SEASON_YEAR
+        python pipeline/process/process_weather.py --season_year $SEASON_YEAR     
 
-      # python pipeline/process/process_defense.py --season_year $SEASON_YEAR
+        python pipeline/collect/collect_injury.py --season_year $SEASON_YEAR
+        python pipeline/process/process_injury.py --season_year $SEASON_YEAR
 
-      # python pipeline/load/load_data.py --season_year $SEASON_YEAR
+        python pipeline/process/process_defense.py --season_year $SEASON_YEAR
+
+        python pipeline/load/load_data.py --season_year $SEASON_YEAR
     - name: Save logs to S3
       run: | 
         aws s3 cp "pipeline/logs/pipeline-run-$(date +'%Y-%m-%d').log" "s3://$S3_BUCKET_NAME/logs/"
-    # - name: Commit new data to datasets directory
-    #   shell: bash
-    #   run: |
-    #     echo "Loading data to git"
-    #     if [[ "$(git status --porcelain)" != "" ]]; then
-    #         git config --global user.name 'MarkLeBoeuf'
-    #         git config --global user.email 'markleboeuf2015@u.northwestern.edu'
-    #         git add src/fantasyfootball/datasets/*.gz        
-    #         git commit -m "data: auto update historical NFL data"
-    #         git push
-    #     fi
+    - name: Commit new data to datasets directory
+      shell: bash
+      run: |
+        echo "Loading data to git"
+        if [[ "$(git status --porcelain)" != "" ]]; then
+            git config --global user.name 'MarkLeBoeuf'
+            git config --global user.email 'markleboeuf2015@u.northwestern.edu'
+            git add src/fantasyfootball/datasets/*.gz        
+            git commit -m "data: auto update historical NFL data"
+            git push
+        fi
 
 

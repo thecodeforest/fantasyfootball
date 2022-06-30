@@ -250,11 +250,11 @@ if __name__ == "__main__":
             / "processed"
             / data_type
         )
-        if f"{data_type}.csv" in os.listdir(processed_data_dir):
+        if Path.exists(processed_data_dir):
             processed_df = read_ff_csv(processed_data_dir)
             ff_validate(
                 df=processed_df,
                 schema=schema,
                 data_type=data_type,
-                s3_bucket="fantasy-football-pipeline",
+                s3_bucket=args.s3_bucket,
             )

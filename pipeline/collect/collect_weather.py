@@ -2,9 +2,12 @@ import sys
 from pathlib import Path
 from datetime import datetime
 from time import sleep
+import warnings
 
-import pandas as pd
-from meteostat import Daily, Point
+warnings.simplefilter(action="ignore", category=FutureWarning)
+
+import pandas as pd  # noqa: E402
+from meteostat import Daily, Point  # noqa: E402
 
 sys.path.append(str(Path.cwd()))
 from pipeline.pipeline_config import root_dir  # noqa: E402
@@ -76,6 +79,7 @@ if __name__ == "__main__":
     )
     calendar_df = pd.read_csv(processed_calendar_path)
     stadium_df = pd.read_csv(root_dir / "staging_datasets" / "stadiums.csv")
+    logger.info("collecting weather data")
     weather_raw = collect_weather(calendar_df, stadium_df)
     weather_raw.write_ff_csv(
         root_dir=root_dir,
@@ -83,3 +87,4 @@ if __name__ == "__main__":
         dir_type=dir_type,
         data_type=data_type,
     )
+    logger.info("weather data collected")

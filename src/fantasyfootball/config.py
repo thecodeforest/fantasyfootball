@@ -110,6 +110,12 @@ data_sources = {
         "is_required": False,
         "is_forward_looking": True,
     },
+    "draft": {
+        "keys": ["name", "team", "position", "season_year"],
+        "cols": ["name", "team", "position", "season_year", "avg_draft_position"],
+        "is_required": False,
+        "is_forward_looking": False,
+    },
 }
 
 scoring = {

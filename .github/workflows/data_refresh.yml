@@ -65,6 +65,9 @@ jobs:
         python pipeline/collect/collect_injury.py --season_year $SEASON_YEAR
         python pipeline/process/process_injury.py --season_year $SEASON_YEAR
 
+        python pipeline/collect/collect_draft.py --season_year $SEASON_YEAR
+        python pipeline/process/process_draft.py --season_year $SEASON_YEAR
+
         python pipeline/process/process_defense.py --season_year $SEASON_YEAR
 
         python pipeline/validate/validate_data.py --season_year $SEASON_YEAR --s3_bucket $S3_BUCKET_NAME

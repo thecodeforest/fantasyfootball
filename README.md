@@ -43,7 +43,7 @@ from fantasyfootball.benchmarking import filter_to_prior_week
 # Instantiate FantasyData object for 2015-2021 seasons
 fantasy_data = FantasyData(season_year_start=2015, season_year_end=2021)
 ```
-At the time of writing this walkthrough, there are 44 fields available for each player-season-week. For more details on the data, see the [Datasets](#datasets) section below.
+At the time of writing this walkthrough, there are 45 fields available for each player-season-week. For more details on the data, see the [Datasets](#datasets) section below.
 
 Next, we'll create our outcome variable (y) that defines each player's total weekly fantasy points. Then, depending on your league's scoring rules, you can supply standard fantasy football scoring systems, including *yahoo*, *fanduel*, *draftkings*, or create your own *custom* configuration. In the current example, we'll assume you are part of a *yahoo* league with standard scoring.
 
@@ -136,7 +136,7 @@ rf.fit(X_hist.values, y_hist.values)
 y_future = rf.predict(X_future.values).round(1)
 ```
 
-Below we'll assign our point predictions back to the `future_df` we created for Week 15 and filter to the two players in question.
+Below we'll assign our point predictions back to the `future_df` we created for Week 15 and filter to the three players in question.
 
 ```python
 future_df = future_df.assign(**{f"{y}_pred": y_future})
@@ -271,6 +271,13 @@ The package provides the following seven datasets by season:
     * `most_recent_injury_status` - The most recent status for a player prior to game-day (DNP, Limited, Full, no injury).
     * `n_injured` - Indicates the number of injuries reported for a player. For example, "Shin, Ankle" indicates two injuries, or "Shoulder" indicates one injury.
 
+* **draft** - The average draft position (ADP) of each player prior to the season. Positions are based on a standard 12 person draft. 
+
+    * `name` - A player's first and last name 
+    * `position` - The two letter abbreviation of the player's position
+    * `team` - The three letter abbreviation of team with the point projections    
+    * `avg_draft_position` - The average position a player was drafted across many pre-season mock drafts. Players drafted earlier are expected to score more points over a season than those drafted later. 
+    * `season_year` - The year of the season
 
 ## Data Refresh
 

@@ -6,6 +6,7 @@ betting_url = (
     "https://www.sportsbookreviewsonline.com/scoresoddsarchives/nfl/nfl%20odds%2020"
 )
 injury_url = "https://www.footballdb.com/transactions/injuries.html"
+draft_url = "https://fantasyfootballcalculator.com/adp/standard/12-team/all/"
 data_sources = {
     "calendar": {
         "keys": ["team", "season_year"],

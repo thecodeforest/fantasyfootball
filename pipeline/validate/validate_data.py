@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 import pandera as pa
-from pandera.errors import SchemaError
+from pandera.errors import SchemaErrors
 import awswrangler as wr
 
 sys.path.append(str(Path.cwd()))
@@ -25,7 +25,7 @@ def ff_validate(
         schema.validate(df, lazy=True)
         logger.info(f"Validation of {data_type} dataframe passed.")
         return df
-    except SchemaError as err:
+    except SchemaErrors as err:
         logger.info(f"Validation of {data_type} dataframe failed.")
         failure_df = err.failure_cases
         # truncate 'check' field to include up to max of 50 characters
@@ -182,7 +182,7 @@ schemas = {
     ),
     "injury": pa.DataFrameSchema(
         {
-            "name": pa.Column(pa.String(), checks=pa.Check.isin(players_list)),
+            # "name": pa.Column(pa.String(), checks=pa.Check.isin(players_list)),
             "team": pa.Column(
                 pa.String, checks=pa.Check.isin(TEAM_ABBREVIATION_MAPPING.values())
             ),
@@ -240,7 +240,7 @@ schemas = {
     ),
     "draft": pa.DataFrameSchema(
         {
-            "name": pa.Column(pa.String(), checks=pa.Check.isin(players_list)),
+            # "name": pa.Column(pa.String(), checks=pa.Check.isin(players_list)),
             "position": pa.Column(
                 pa.String(), checks=pa.Check.isin(["QB", "RB", "WR", "TE"])
             ),

@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "fantasyfootball"
 version = "0.1.1"
-description = "A package for Fantasy Football"
+description = "A package for Fantasy Football data and analysis"
 authors = ["Mark LeBoeuf"]
 license = "MIT"
 readme = "README.md"
@@ -29,7 +29,6 @@ flake8 = "^4.0.1"
 meteostat = "^1.6.1"
 pytest-cov = "^3.0.0"
 fuzzywuzzy = "^0.18.0"
-python-Levenshtein = "^0.12.2"
 tabulate = "^0.8.9"
 xgboost = "^1.6.0"
 matplotlib = "^3.5.2"
@@ -40,7 +39,7 @@ sphinx-autoapi = "^1.8.4"
 sphinx-rtd-theme = "^1.0.0"
 pandera = "^0.11.0"
 awswrangler = "^2.15.1"
-deepchecks = "^0.8.0"
+python-Levenshtein = "^0.12.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

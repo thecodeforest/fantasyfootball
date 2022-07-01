@@ -16,7 +16,7 @@ from pipeline.pipeline_logger import logger  # noqa: E402
 from pipeline.utils import get_module_purpose, read_args, write_ff_csv  # noqa: E402
 
 USER_AGENT = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7"  # noqa: E501
-HEADERS = headers = {"User-Agent": USER_AGENT}
+HEADERS = {"User-Agent": USER_AGENT}
 
 
 def trim_weekly_injury_report_data(team_injury_report: Tag) -> str:

@@ -196,6 +196,9 @@ def collect_stats(
     Returns:
         pd.DataFrame: The season stats for a given player.
     """
+    # TO DO: Add improved handling for instances where
+    # players have same first, last, and team names.
+    player_id_edge_cases = {"Derek Carr": "CarrDe02", "Derek Carrier": "CarrDe00"}
     first_name, *last_name = player_name.split(" ")
     last_name = last_name[0]
     if len(last_name) < 4:
@@ -203,6 +206,8 @@ def collect_stats(
     last_name = clean_player_name(name=last_name, name_part="last")
     player_ids = create_player_id(first_name=first_name, last_name=last_name)
     for player_id in player_ids:
+        if player_name in player_id_edge_cases.keys():
+            player_id = player_id_edge_cases.get(player_name)
         player_url = create_url_by_season(stats_url, last_name, player_id, season_year)
         try:
             stats = pd.read_html(player_url)[0]

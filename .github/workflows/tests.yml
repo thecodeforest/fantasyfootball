@@ -1,8 +1,14 @@
 name: Tests
 
 on:
-  schedule:
-    - cron: "0 5 * * *"
+  pull_request:
+    paths:
+      - src/fantasyfootball/data.py
+      - src/fantasyfootball/features.py
+      - src/fantasyfootball/benchmarking.py
+      - tests/**
+      - pipeline/**
+      - .github/workflows/**
 
 jobs:
   unit-tests:

@@ -10,7 +10,7 @@ jobs:
     name: Data Pipeline 
     runs-on: ubuntu-latest 
     env:
-      SEASON_YEAR: 2018
+      SEASON_YEAR: 2017
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
       S3_BUCKET_NAME: fantasy-football-pipeline

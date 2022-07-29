@@ -15,10 +15,42 @@ from pipeline.utils import (  # noqa: E402
 )
 
 
+def fill_undrafted_player_positions(
+    df: pd.DataFrame,
+    players_df: pd.DataFrame,
+    avg_draft_position_column: str = "avg_draft_position",
+) -> pd.DataFrame:
+    """Replace undrafted players with the maximum drafted position + 1 to ensure no NAs
+
+    Args:
+        df (pd.DataFrame): Dataframe with all of the players who were drafted
+        players_df (pd.DataFrame): Dataframe with all of the
+            players who were active within a season
+        avg_draft_position_column (str, optional): Column indicating a player's
+            average draft position. Defaults to "avg_draft_position".
+
+    Returns:
+        pd.DataFrame: Dataframe with undrafted players filled
+            in with the maximum drafted position + 1
+    """
+    df = df.copy()
+    # join draft data w/ active players to identify undrafted players
+    df = pd.merge(players_df, df, on=["name", "team", "position"], how="left")
+    # find maximum draft position
+    max_draft_position = df[avg_draft_position_column].max() + 1
+    # replace any missing values with the maximum draft position
+    df[avg_draft_position_column] = df[avg_draft_position_column].fillna(
+        max_draft_position
+    )
+    return df
+
+
 def process_draft(df: pd.DataFrame) -> pd.DataFrame:
     df = df.rename(columns={"pos": "position", "overall": "avg_draft_position"})
     df = df[["name", "position", "team", "avg_draft_position"]]
     df = df[df["position"].isin(["QB", "RB", "WR", "TE"])]
+    # filter out players who are free agents
+    df = df[df["team"] != "FA"]
     df["team"] = df["team"].apply(lambda x: map_abbr2_to_abbr3(x))
     df = (
         pd.merge(
@@ -31,6 +63,7 @@ def process_draft(df: pd.DataFrame) -> pd.DataFrame:
         .drop(columns=["name", "mapped_name"])
         .rename(columns={"final_name": "name"})
     )
+    df = fill_undrafted_player_positions(df, players_df, "avg_draft_position")
     df = df[[df.columns[-1]] + df.columns[:-1].tolist()]
     return df
 

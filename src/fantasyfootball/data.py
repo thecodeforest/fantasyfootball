@@ -185,6 +185,7 @@ class FantasyData:
         for season_year in range(self.season_year_start, self.season_year_end + 1):
             if season_year < 2016:
                 logger.warning("Player injury data not available prior to 2016 season")
+            # TO DO: Do not throw expection if offline; raise warning instead
             self._refresh_data(ff_data_dir / str(season_year), data_sources)
             season_ff_df = self._load_data(ff_data_dir / str(season_year), data_sources)
             if filter_final_season_week:
@@ -373,10 +374,10 @@ class FantasyData:
             self.ff_data, all_pts_df, on=["name", "pid", "date"], how="inner"
         )
         logger.info(f"Fantasy points column '{self.ff_data.columns[-1]}' added")
-        return FantasyData
+        # return FantasyData
 
     def show_scoring_sources(self) -> List[str]:
-        return {list(self.scoring.keys())}
+        return list(self.scoring.keys())
 
     @property
     def data(self) -> pd.DataFrame:

@@ -196,8 +196,6 @@ def collect_stats(
     Returns:
         pd.DataFrame: The season stats for a given player.
     """
-    # TO DO: Add improved handling for instances where
-    # players have same first, last, and team names.
     player_id_edge_cases = {"Derek Carr": "CarrDe02", "Derek Carrier": "CarrDe00"}
     first_name, *last_name = player_name.split(" ")
     last_name = last_name[0]

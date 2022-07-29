@@ -1,9 +1,11 @@
 from itertools import product
 import pandas as pd
 import pandas_flavor as pf
+from pydantic import UrlError
 
 from fantasyfootball.data import FantasyData
 from fantasyfootball.config import root_dir, scoring
+from urllib.error import URLError
 
 
 @pf.register_dataframe_method
@@ -99,7 +101,13 @@ def get_benchmarking_data(
         range(1, 18), range(season_year_start, season_year_end + 1)
     ):
         benchmark_url = f"{base_url}/{year}/wk{week}.csv"
-        benchmark_df = pd.read_csv(benchmark_url)
-        benchmark_df["season_year"] = year
-        all_benchmark_df = pd.concat([all_benchmark_df, benchmark_df])
-    return all_benchmark_df
+        try:
+            benchmark_df = pd.read_csv(benchmark_url)
+            benchmark_df["season_year"] = year
+            all_benchmark_df = pd.concat([all_benchmark_df, benchmark_df])
+            return all_benchmark_df
+        except URLError:
+            raise URLError(
+                f"Could not find {benchmark_url}"
+                "Check if internet connection is working."
+            )

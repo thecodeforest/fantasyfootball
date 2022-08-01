@@ -281,7 +281,7 @@ The package provides the following seven datasets by season:
 
 ## Data Refresh
 
-While the PyPi version of **fantasyfootball** is updated monthly, the GitHub version is updated daily during the regular season (Sep 8 - Jan 8). New data is stored in [datasets](https://github.com/thecodeforest/fantasyfootball/tree/main/src/fantasyfootball/datasets/season) directory within the **fantasyfootball** package. If there is a difference between the data in Github and the installed version, creating a `FantasyData` object will download the new data. Note that differences in data persist when a session ends. Updating the installed version of **fantasyfooball** will correct this difference and is recommended at the end of each season. 
+While the PyPi version of **fantasyfootball** is updated monthly, the GitHub version is updated weekly during the regular season (Sep 8 - Jan 8). New data is stored in [datasets](https://github.com/thecodeforest/fantasyfootball/tree/main/src/fantasyfootball/datasets/season) directory within the **fantasyfootball** package. If there is a difference between the data in Github and the installed version, creating a `FantasyData` object will download the new data. Note that differences in data persist when a session ends. Updating the installed version of **fantasyfooball** will correct this difference and is recommended at the end of each season. 
 
 ## Contributing
 

@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.1.1 (2022-08-01)
+### Fix
+* Bump version ([`01cfcd7`](https://github.com/thecodeforest/fantasyfootball/commit/01cfcd7cbd1963f9a122f804fda28e461ec538fa))
+* Bump version ([`b6577dd`](https://github.com/thecodeforest/fantasyfootball/commit/b6577dd2d7195c51e0c766721515539881dcf9a0))
+
 ## v0.1.0 (2022-08-01)
 ### Feature
 * Add draft url to pipeline config file ([`e070756`](https://github.com/thecodeforest/fantasyfootball/commit/e0707568574d33db748b3515bb029447e6cf41a8))

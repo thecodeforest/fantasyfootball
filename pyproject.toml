@@ -59,3 +59,14 @@ multi_line_output = 3
 force_grid_wrap = 0
 use_parentheses = true
 ensure_newline_before_comments = true
+
+[tool.semantic_release]
+version_variable = "pyproject.toml:version" 
+branch = "main"                             
+changelog_file = "CHANGELOG.md"             
+build_command = "poetry build"              
+dist_path = "dist/"                         
+upload_to_release = true                    
+upload_to_pypi = false                      
+remove_dist = false                         
+patch_without_tag = true                    

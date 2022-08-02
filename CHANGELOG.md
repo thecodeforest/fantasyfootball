@@ -2,6 +2,9 @@
 
 <!--next-version-placeholder-->
 
+## v0.1.3 (2022-08-02)
+
+
 ## v0.1.2 (2022-08-01)
 ### Fix
 * Correct update cadence message in readme ([`f73127f`](https://github.com/thecodeforest/fantasyfootball/commit/f73127f5f7976fc6233490dd9fc359bf447ac412))

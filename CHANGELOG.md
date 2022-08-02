@@ -3,7 +3,8 @@
 <!--next-version-placeholder-->
 
 ## v0.1.3 (2022-08-02)
-
+### Test
+* Add tests for benchmarking module ([`6ffb721`](https://github.com/thecodeforest/fantasyfootball/commit/6ffb7217b739e406706c3dad7c5c73b10511bb22))
 
 ## v0.1.2 (2022-08-01)
 ### Fix

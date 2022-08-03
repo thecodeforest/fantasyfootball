@@ -1,7 +1,6 @@
 from itertools import product
 import pandas as pd
 import pandas_flavor as pf
-from pydantic import UrlError
 
 from fantasyfootball.data import FantasyData
 from fantasyfootball.config import root_dir, scoring

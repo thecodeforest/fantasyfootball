@@ -269,6 +269,10 @@ class FantasyFeatures:
             pd.DataFrame: Dataframe with the number of games played for each
             player in each season.
         """
+        # remove inactive games before calculating games played
+        if "is_active" in df.columns:
+            df = df[df["is_active"] == 1]
+
         games_played_this_season_df = (
             df.groupby(player_group_columns)
             .size()
@@ -281,6 +285,7 @@ class FantasyFeatures:
             games_played_this_season_df["n_games_played"] = (
                 games_played_this_season_df["n_games_played"] - 1
             )
+
         return games_played_this_season_df
 
     def filter_n_games_played_by_season(self, min_games_played: int) -> FantasyFeatures:
@@ -307,30 +312,6 @@ class FantasyFeatures:
             how="inner",
         )
         return FantasyFeatures
-
-    @staticmethod
-    def _format_pd_filter_query(columns: List[str], row_values: List[str]) -> List[str]:
-        """Helper function to format a query to filter out rows
-        Args:
-            columns List[str] : Column names to filter by
-            row_values List[str]: Pandas row as a list
-        Returns:
-            List[str]: Query to filter out rows
-        """
-        query = list(zip(columns, row_values))
-        value_types = [type(x[1]) for x in query]
-        query = [[x[0], str(x[1])] for x in query]
-        # add "" if type of value is string
-        for index, value in enumerate(value_types):
-            if value is str:
-                query[index][1] = '"' + query[index][1] + '"'
-        # add equality sign to query
-        query = ["==".join(x) for x in query]
-        if len(query) > 1:
-            query = " and ".join(query)
-        else:
-            query = query[0]
-        return query
 
     @staticmethod
     def _save_pipeline_feature_names(
@@ -516,7 +497,7 @@ class FantasyFeatures:
         return step_str
 
     def _validate_column_present(self, feature_columns: Union[str, list]) -> None:
-        """Validates that a column in present in the dataframe prior to
+        """Validates that a column is present in the dataframe prior to
         adding a new feature.
 
         Args:
@@ -530,11 +511,11 @@ class FantasyFeatures:
         for column in feature_columns:
             if column not in self.df.columns:
                 raise ValueError(f"{column} not in dataframe")
-        return None
+        return True
 
     def add_lag_feature(
         self, n_week_lag: Union[int, List[int]], lag_columns: Union[str, List[str]]
-    ) -> FantasyData:
+    ) -> FantasyFeatures:
         """Adds string representation of a lag step to the pipeline.
 
         Args:
@@ -671,15 +652,17 @@ class FantasyFeatures:
         Returns:
             pd.DataFrame: Dataframe with missing lag values or salary data removed.
         """
-        # max weeks to drop conditions
+        # max weeks to drop conditions.
+        weeks_to_drop_lag = 0
+        weeks_to_drop_salary = 0
         lag_fields = [x for x in feature_df.columns if "lag" in x]
         if lag_fields:
             weeks_to_drop_lag = max([int(x.split("_")[-1]) for x in lag_fields])
         salary_fields = [x for x in feature_df.columns if "salary" in x]
+        # always drop week 1 if salary data is included, since it is not published
         if salary_fields:
             weeks_to_drop_salary = 1
         weeks_to_drop = max(weeks_to_drop_lag, weeks_to_drop_salary)
-
         feature_df["player_game_index"] = (
             feature_df.sort_values(self.player_group_columns + [self.game_week_column])
             .groupby(self.player_group_columns)
@@ -780,9 +763,11 @@ class FantasyFeatures:
         pipeline = Pipeline(steps=eval(all_feature_steps))
         feature_df = pipeline.fit_transform(self.df, y=self.df[self.y])
         feature_df = self._remove_missing_feature_values(feature_df)
-        feature_df = self._replace_missing_salary_values_with_zero(feature_df)
+        if "salary" in feature_df.columns:
+            feature_df = self._replace_missing_salary_values_with_zero(feature_df)
         # carry forward cv for each player to future week if cv in columns
-        feature_df = self._forward_fill_future_week_cv(feature_df)
+        if "cv" in feature_df.columns:
+            feature_df = self._forward_fill_future_week_cv(feature_df)
         return {
             "pipeline_feature_names": self.new_pipeline_features,
             "feature_df": feature_df,

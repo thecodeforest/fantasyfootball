@@ -16,6 +16,7 @@ def df():
         "team",
         "opp",
         "is_away",
+        "is_active",
         "season_year",
         "name",
         "pid",
@@ -34,10 +35,34 @@ def df():
     ]
     data = [
         [
+            "2021-10-07",
+            5,
+            "TAM",
+            "CIN",
+            1,
+            0,
+            2021,
+            "Tom Brady",
+            "BradTo00",
+            "QB",
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.0,
+            0,
+            0,
+            "head",
+            0,
+        ],
+        [
             "2021-10-14",
             6,
             "TAM",
             "PHI",
+            1,
             1,
             2021,
             "Tom Brady",
@@ -61,6 +86,7 @@ def df():
             "TAM",
             "CHI",
             0,
+            1,
             2021,
             "Tom Brady",
             "BradTo00",
@@ -82,6 +108,7 @@ def df():
             8,
             "TAM",
             "NOR",
+            1,
             1,
             2021,
             "Tom Brady",
@@ -105,6 +132,7 @@ def df():
             "DAL",
             "NWE",
             1,
+            1,
             2021,
             "Dak Prescott",
             "PresDa01",
@@ -126,6 +154,7 @@ def df():
             8,
             "DAL",
             "MIN",
+            1,
             1,
             2021,
             "Dak Prescott",
@@ -149,6 +178,7 @@ def df():
             "NYJ",
             "CIN",
             0,
+            1,
             2021,
             "Joe Flacco",
             "FlacJo00",
@@ -170,6 +200,7 @@ def df():
             6,
             "GNB",
             "CHI",
+            1,
             1,
             2021,
             "Aaron Rodgers",
@@ -193,6 +224,7 @@ def df():
             "GNB",
             "WAS",
             0,
+            1,
             2021,
             "Aaron Rodgers",
             "RodgAa00",
@@ -214,6 +246,7 @@ def df():
             8,
             "GNB",
             "ARI",
+            1,
             1,
             2021,
             "Aaron Rodgers",
@@ -246,17 +279,25 @@ def test_filter_n_games_played_by_season(df):
     assert result_players == expected_players
 
 
-@pytest.mark.parametrize(
-    "columns, row_values, expected",
-    [
-        (["col1", "col2"], [1, "z"], 'col1==1 and col2=="z"'),
-        (["col1"], [1], "col1==1"),
-        (["col2"], ["a"], 'col2=="a"'),
-    ],
-)
-def test__format_pd_query(columns, row_values, expected):
-    _format_pd_filter_query = FantasyFeatures._format_pd_filter_query
-    assert _format_pd_filter_query(columns, row_values) == expected
+def test_filter_inactive_games(df):
+    # Remove week 5 for Tom Brady where he is inactive and drop the `is_active` column
+    status_column = "is_active"
+    expected_rows = df.shape[0] - 1
+    features = FantasyFeatures(df, y="actual_pts", position="QB")
+    features.filter_inactive_games(status_column=status_column)
+    result_rows = features.data.shape[0]
+    # verify that week 5 dropped
+    assert result_rows == expected_rows
+    # verify that the `is_active` column is dropped
+    assert status_column not in features.data.columns
+
+
+def test__calculate_n_games_played(df):
+    expected = [3, 1, 2, 3]
+    player_group_columns = ["pid", "name", "team", "season_year"]
+    calculate_n_games_played = FantasyFeatures._calculate_n_games_played
+    result = calculate_n_games_played(df, player_group_columns)
+    assert result["n_games_played"].tolist() == expected
 
 
 @pytest.mark.parametrize(
@@ -292,14 +333,15 @@ def test_CategoryConsolidatorFeatureTransformer(df):
     category_column = "injury_type"
     threshold = 0.3
     expected = [
+        "other",  # changed from 'head' to 'other', given it appears below the threshold
         "no injury",
-        "hip",
-        "hip",
+        "other",  # hip
+        "other",  # hip
         "other",  # changed from 'head' to 'other', given it appears below the threshold
         "no injury",
         "no injury",
         "no injury",
-        "hip",
+        "other",  # hip
         "no injury",
     ]
     cc = CategoryConsolidatorFeatureTransformer(
@@ -312,7 +354,7 @@ def test_CategoryConsolidatorFeatureTransformer(df):
 def test_TargetEncoderFeatureTransformer(df):
     category_column = "injury_type"
     te_category_column = f"{category_column}_te"
-    expected = [1.0, 2.0, 2.0, 3.0, 1.0, 1.0, 1.0, 2.0, 1.0]
+    expected = [1.5, 1.0, 2.0, 2.0, 1.5, 1.0, 1.0, 1.0, 2.0, 1.0]
     te = TargetEncoderFeatureTransformer(category_columns="injury_type")
     X = df[df.columns.tolist()[:-1]]
     y = df[df.columns.tolist()[-1]]
@@ -346,3 +388,92 @@ def test_add_coefficient_of_variation(df):
     # check for Aaron Rodgers most recent value
     result = features.data.query("pid == 'RodgAa00'")["cv"].tolist()[-1]
     assert expected == result
+
+
+def test__validate_column_present(df):
+    column = "passing_yds"
+    expected = True
+    features = FantasyFeatures(df, y="actual_pts", position="QB")
+    result = features._validate_column_present(column)
+    assert result == expected
+
+
+def test__validate_column_present_error(df):
+    column = "invalid_column_name"
+    features = FantasyFeatures(df, y="actual_pts", position="QB")
+    with pytest.raises(ValueError):
+        features._validate_column_present(column)
+
+
+def test_add_lag_feature(df):
+    lag_columns = "passing_yds"
+    n_week_lag = 1
+    expected_column_name = "passing_yds_lag_1"
+    expected_values = [0.0, 297.0, 211.0, 0, 195.0, 274.0]
+    features = FantasyFeatures(df, y="actual_pts", position="QB")
+    features.add_lag_feature(n_week_lag=n_week_lag, lag_columns=lag_columns)
+    result = features.create_ff_signature().get("feature_df")
+
+    # check column name correctly formatted
+    assert expected_column_name in result.columns
+
+    # check column values correct
+    assert result[expected_column_name].fillna(0).values.tolist() == expected_values
+
+
+def test_add_moving_average_feature(df):
+    window_columns = "passing_yds"
+    n_week_window = 2
+    expected_column_name = "passing_yds_ma_2"
+    expected_values = [0.0, 148.5, 254.0, 293.0, 0.0, 445.0, 222.5, 195.0, 234.5, 229.0]
+    features = FantasyFeatures(df, y="actual_pts", position="QB")
+    features.add_moving_avg_feature(
+        n_week_window=n_week_window, window_columns=window_columns
+    )
+    result = features.create_ff_signature().get("feature_df")
+
+    # check column name correctly formatted
+    assert expected_column_name in result.columns
+
+    # check column values correct
+    assert result[expected_column_name].values.tolist() == expected_values
+
+
+def test_add_target_encoded_feature(df):
+    category_columns = "injury_type"
+    expected_column_name = "injury_type_te"
+    expected_values = [1.5, 1.0, 2.0, 2.0, 1.0, 1.5, 1.0, 1.0, 2.0, 1.0]
+    features = FantasyFeatures(df, y="actual_pts", position="QB")
+    features.add_target_encoded_feature(category_columns=category_columns)
+    result = features.create_ff_signature().get("feature_df")
+
+    # check column name correctly formatted
+    assert expected_column_name in result.columns
+
+    # check column values correct
+    assert result[expected_column_name].values.tolist() == expected_values
+
+
+def test_add_category_consolidator_feature(df):
+    category_columns = "injury_type"
+    threshold = 0.2
+    expected_values = [
+        "other",
+        "no injury",
+        "hip",
+        "hip",
+        "no injury",
+        "other",
+        "no injury",
+        "no injury",
+        "hip",
+        "no injury",
+    ]
+    features = FantasyFeatures(df, y="actual_pts", position="QB")
+    features.consolidate_category_feature(
+        category_columns=category_columns, threshold=threshold
+    )
+    result = features.create_ff_signature().get("feature_df")
+
+    # check column values correct
+    assert result[category_columns].values.tolist() == expected_values

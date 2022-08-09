@@ -7,6 +7,7 @@ betting_url = (
 )
 injury_url = "https://www.footballdb.com/transactions/injuries.html"
 draft_url = "https://fantasyfootballcalculator.com/adp/standard/12-team/all/"
+pipeline_output_s3_bucket = "fantasy-football-pipeline"
 data_sources = {
     "calendar": {
         "keys": ["team", "season_year"],

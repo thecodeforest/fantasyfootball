@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.0 (2022-08-09)
+### Feature
+* Verify compatability with python 3.7 ([`b67a199`](https://github.com/thecodeforest/fantasyfootball/commit/b67a199f2188a071fc6e8a31216aab2d9ed71885))
+* Verify compatability with python 3.7 ([`e505e5f`](https://github.com/thecodeforest/fantasyfootball/commit/e505e5f0e3d9feafc260568988b71937c6b31ec2))
+* Save processed data to s3 ([`3afb0de`](https://github.com/thecodeforest/fantasyfootball/commit/3afb0de11f3e99a366ad9106af8d848b1251581f))
+
 ## v0.1.4 (2022-08-03)
 
 

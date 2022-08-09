@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.1 (2022-08-09)
+### Fix
+* **init:** Fix issue with automatically detecting version in python <3.8 ([`9538200`](https://github.com/thecodeforest/fantasyfootball/commit/953820079fccd1e5f781b2d4439d389a607673a0))
+
 ## v0.2.0 (2022-08-09)
 ### Feature
 * Verify compatability with python 3.7 ([`b67a199`](https://github.com/thecodeforest/fantasyfootball/commit/b67a199f2188a071fc6e8a31216aab2d9ed71885))

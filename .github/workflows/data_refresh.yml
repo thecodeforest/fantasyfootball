@@ -50,8 +50,6 @@ jobs:
         python pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
         python pipeline/process/process_calendar.py --season_year $SEASON_YEAR
 
-        python pipeline/validate/validate_data.py --season_year $SEASON_YEAR --s3_bucket $S3_BUCKET_NAME
-
         python pipeline/load/load_data.py --season_year $SEASON_YEAR
 
         python pipeline/save/save_data.py --season_year $SEASON_YEAR --s3_bucket $S3_BUCKET_NAME

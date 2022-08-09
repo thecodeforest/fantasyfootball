@@ -2,7 +2,10 @@ name: ci-cd
 
 on:
   push:
-    branches: master
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 
 jobs:
   ci:
@@ -35,8 +38,13 @@ jobs:
       run: poetry run make html --directory docs/
 
   cd:
+
     # Ensure that tests pass
     needs: ci
+
+    # Only run this job if new work is pushed to "main"
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
     
     runs-on: ubuntu-latest
 

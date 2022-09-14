@@ -46,6 +46,7 @@ TEAM_ABBREVIATION_MAPPING = {
         "Washingtom",
         "Washington Football Team",
         "Washington Redskins",
+        "Washington Commanders",
     ): "WAS",
 }
 

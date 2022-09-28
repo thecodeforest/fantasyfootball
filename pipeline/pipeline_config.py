@@ -1,10 +1,16 @@
 from pathlib import Path
 
 root_dir = Path(__file__).parent.parent
+
+# betting_url = (
+#     "https://www.sportsbookreviewsonline.com/scoresoddsarchives/nfl/nfl%20odds%2020"
+# )
+header = {
+    "User-Agent": "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7",  # noqa: E501
+    "X-Requested-With": "XMLHttpRequest",
+}
 stats_url = "https://www.pro-football-reference.com"
-betting_url = (
-    "https://www.sportsbookreviewsonline.com/scoresoddsarchives/nfl/nfl%20odds%2020"
-)
+betting_url = "https://sportsdata.usatoday.com/football/nfl/odds"
 injury_url = "https://www.footballdb.com/transactions/injuries.html"
 draft_url = "https://fantasyfootballcalculator.com/adp/standard/12-team/all/"
 data_sources = {
@@ -60,12 +66,9 @@ data_sources = {
         "cols": [
             "name",
             "position",
-            "week",
-            "team",
-            "opp",
-            "fanduel_salary",
-            "draftkings_salary",
             "season_year",
+            "week",
+            "fanduel_salary",
         ],
         "is_required": False,
         "is_forward_looking": True,

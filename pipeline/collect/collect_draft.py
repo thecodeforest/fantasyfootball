@@ -1,45 +1,55 @@
-import sys
-from pathlib import Path
-import requests
-
 import pandas as pd
+from pathlib import Path
+import sys
+
+from bs4 import BeautifulSoup as bs
+from bs4.element import Tag
+import urllib.request
 
 sys.path.append(str(Path.cwd()))
-from pipeline.pipeline_config import root_dir, draft_url  # noqa: E402
+from pipeline.pipeline_config import root_dir, draft_url, header  # noqa: E402
 from pipeline.pipeline_logger import logger  # noqa: E402
 from pipeline.utils import get_module_purpose, read_args, write_ff_csv  # noqa: E402
 
 
-def collect_average_draft_position(draft_url: str) -> pd.DataFrame:
-    """Collects the average draft position for each player by year.
+def collect_draft() -> bs:
+    url = "https://www.fantasypros.com/nfl/adp/overall.php"
+    request = urllib.request.Request(url, None, header)
+    response = urllib.request.urlopen(request)
+    draft_data_soup = bs(response.read(), "html.parser")
+    return draft_data_soup
 
-    Args:
-        draft_url (str): The url to scrape the draft data from.
 
-    Returns:
-        pd.DataFrame: The raw draft data for a single season.
-
-    """
-    header = {
-        "User-Agent": "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7",  # noqa: E501
-        "X-Requested-With": "XMLHttpRequest",
-    }
-    request = requests.get(draft_url, headers=header)
-    draft_df = pd.read_html(request.text)[0]
-    draft_df = draft_df.drop(columns=["#", "Unnamed: 10"])
-    return draft_df
+def prep_raw_draft(draft_data_soup: bs) -> pd.DataFrame:
+    player_labels = draft_data_soup.find_all("td", class_="player-label")
+    player_draft_info = []
+    for index, player_label in enumerate(player_labels):
+        player_name = player_label.find("a").text
+        try:
+            player_team = player_label.find("small").text
+        # handle empty values
+        except Exception as e:
+            print(e)
+            player_team = "FA"
+        player_draft_position = index
+        player_draft_info.append([player_name, player_team, player_draft_position])
+    raw_draft_df = pd.DataFrame(
+        player_draft_info, columns=["name", "team", "avg_draft_position"]
+    )
+    return raw_draft_df
 
 
 if __name__ == "__main__":
     args = read_args()
     dir_type, data_type = get_module_purpose(module_path=__file__)
     draft_url = f"{draft_url}{args.season_year}"
-    logger.info("Collecting average draft position")
-    draft_raw = collect_average_draft_position(draft_url=draft_url)
-    draft_raw.write_ff_csv(
+    logger.info("Collecting draft position")
+    draft_raw_bs = collect_draft()
+    draft_raw_df = prep_raw_draft(draft_raw_bs)
+    draft_raw_df.write_ff_csv(
         root_dir=root_dir,
         season_year=args.season_year,
         dir_type=dir_type,
         data_type=data_type,
     )
-    logger.info("Finished collecting average draft position")
+    logger.info("Finished collecting draft position")

@@ -1,5 +1,6 @@
 import argparse
 from pathlib import Path, PosixPath
+from datetime import datetime, timedelta
 from typing import List, Tuple
 
 import pandas as pd
@@ -7,46 +8,47 @@ import pandas_flavor as pf
 from fuzzywuzzy import fuzz
 
 TEAM_ABBREVIATION_MAPPING = {
-    ("Arizona", "Arizona Cardinals"): "ARI",
-    ("Atlanta", "Atlanta Falcons"): "ATL",
-    ("Buffalo", "Buffalo Bills"): "BUF",
-    ("Baltimore", "Baltimore Ravens"): "BAL",
-    ("Carolina", "Carolina Panthers"): "CAR",
-    ("Chicago", "Chicago Bears"): "CHI",
-    ("Cincinnati", "Cincinnati Bengals"): "CIN",
-    ("Cleveland", "Cleveland Browns"): "CLE",
-    ("Dallas", "Dallas Cowboys"): "DAL",
-    ("Denver", "Denver Broncos"): "DEN",
-    ("Detroit", "Detroit Lions"): "DET",
-    ("GreenBay", "Green Bay Packers"): "GNB",
-    ("Houston", "Houston Texans"): "HOU",
-    ("Indianapolis", "Indianapolis Colts"): "IND",
-    ("Jacksonville", "Jacksonville Jaguars"): "JAX",
-    ("KansasCity", "Kansas City Chiefs", "KCChiefs", "Kansas"): "KAN",
-    ("LAChargers", "Los Angeles Chargers", "LosAngeles"): "LAC",
-    ("Oakland", "Oakland Raiders"): "OAK",
-    ("LARams", "Los Angeles Rams"): "LAR",
-    ("LasVegas", "Las Vegas Raiders", "LVRaiders"): "LVR",
-    ("Miami", "Miami Dolphins"): "MIA",
-    ("Minnesota", "Minnesota Vikings"): "MIN",
-    ("NewEngland", "New England Patriots"): "NWE",
-    ("NewOrleans", "New Orleans Saints"): "NOR",
-    ("NYGiants", "New York Giants"): "NYG",
-    ("NYJets", "New York Jets"): "NYJ",
-    ("Philadelphia", "Philadelphia Eagles"): "PHI",
-    ("Pittsburgh", "Pittsburgh Steelers"): "PIT",
-    ("San Diego", "San Diego Chargers", "SanDiego"): "SDG",
-    ("SanFrancisco", "San Francisco 49ers"): "SFO",
-    ("St Louis", "St. Louis Rams", "St.Louis"): "STL",
-    ("Seattle", "Seattle Seahawks"): "SEA",
-    ("TampaBay", "Tampa Bay Buccaneers", "Tampa"): "TAM",
-    ("Tennessee", "Tennessee Titans"): "TEN",
+    ("Arizona", "Arizona Cardinals", "Cardinals"): "ARI",
+    ("Atlanta", "Atlanta Falcons", "Falcons"): "ATL",
+    ("Buffalo", "Buffalo Bills", "Bills"): "BUF",
+    ("Baltimore", "Baltimore Ravens", "Ravens"): "BAL",
+    ("Carolina", "Carolina Panthers", "Panthers"): "CAR",
+    ("Chicago", "Chicago Bears", "Bears"): "CHI",
+    ("Cincinnati", "Cincinnati Bengals", "Bengals"): "CIN",
+    ("Cleveland", "Cleveland Browns", "Browns"): "CLE",
+    ("Dallas", "Dallas Cowboys", "Cowboys"): "DAL",
+    ("Denver", "Denver Broncos", "Broncos"): "DEN",
+    ("Detroit", "Detroit Lions", "Lions"): "DET",
+    ("GreenBay", "Green Bay Packers", "Packers"): "GNB",
+    ("Houston", "Houston Texans", "Texans"): "HOU",
+    ("Indianapolis", "Indianapolis Colts", "Colts"): "IND",
+    ("Jacksonville", "Jacksonville Jaguars", "Jaguars"): "JAX",
+    ("KansasCity", "Kansas City Chiefs", "KCChiefs", "Kansas", "Chiefs"): "KAN",
+    ("LAChargers", "Los Angeles Chargers", "LosAngeles", "Chargers"): "LAC",
+    ("Oakland", "Oakland Raiders", "Raiders"): "OAK",
+    ("LARams", "Los Angeles Rams", "Rams"): "LAR",
+    ("LasVegas", "Las Vegas Raiders", "LVRaiders", "Raiders"): "LVR",
+    ("Miami", "Miami Dolphins", "Dolphins"): "MIA",
+    ("Minnesota", "Minnesota Vikings", "Vikings"): "MIN",
+    ("NewEngland", "New England Patriots", "Patriots"): "NWE",
+    ("NewOrleans", "New Orleans Saints", "Saints"): "NOR",
+    ("NYGiants", "New York Giants", "Giants"): "NYG",
+    ("NYJets", "New York Jets", "Jets"): "NYJ",
+    ("Philadelphia", "Philadelphia Eagles", "Eagles"): "PHI",
+    ("Pittsburgh", "Pittsburgh Steelers", "Steelers"): "PIT",
+    ("San Diego", "San Diego Chargers", "SanDiego", "Chargers"): "SDG",
+    ("SanFrancisco", "San Francisco 49ers", "49ers"): "SFO",
+    ("St Louis", "St. Louis Rams", "St.Louis", "Rams"): "STL",
+    ("Seattle", "Seattle Seahawks", "Seahawks"): "SEA",
+    ("TampaBay", "Tampa Bay Buccaneers", "Tampa", "Buccaneers"): "TAM",
+    ("Tennessee", "Tennessee Titans", "Titans"): "TEN",
     (
         "Washington",
         "Washingtom",
         "Washington Football Team",
         "Washington Redskins",
         "Washington Commanders",
+        "Commanders",
     ): "WAS",
 }
 
@@ -97,6 +99,7 @@ def map_abbr2_to_abbr3(team_name: str) -> str:
         "NO": "NOR",
         "PH": "PHI",
         "SD": "SDG",
+        "NO": "NOR",
     }
     if len(team_name) == 2:
         if team_name not in abbr2_mapping.keys():
@@ -319,3 +322,25 @@ def read_ff_csv(dir_path: PosixPath) -> pd.DataFrame:
     else:
         df = pd.read_csv(file_paths[0], keep_default_na=False)
         return df
+
+
+def fetch_current_week(calendar_df: pd.DataFrame) -> str:
+    """Fetches the current week from the calendar dataframe."""
+    # first determine which day of the week it is
+    todays_date = datetime.today()
+    todays_day_of_week = todays_date.strftime("%A")
+    if todays_day_of_week == "Tuesday":
+        sunday_date = todays_date + timedelta(days=5)
+    elif todays_day_of_week == "Wednesday":
+        sunday_date = todays_date + timedelta(days=4)
+    elif todays_day_of_week == "Thursday":
+        sunday_date = todays_date + timedelta(days=3)
+    elif todays_day_of_week == "Friday":
+        sunday_date = todays_date + timedelta(days=2)
+    elif todays_day_of_week == "Saturday":
+        sunday_date = todays_date + timedelta(days=1)
+    # convert to datetime string
+    sunday_date = sunday_date.strftime("%Y-%m-%d")
+    # filter calendar to get the week
+    week = str(calendar_df.query("date == @sunday_date")["week"].values[0])
+    return week

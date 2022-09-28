@@ -2,6 +2,26 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.0 (2022-09-28)
+### Feature
+* Add logic to only run certain pipeline steps during the season ([`f27de5e`](https://github.com/thecodeforest/fantasyfootball/commit/f27de5e2682c4772b87379fe12d48141f22d31a2))
+* Add module for processing historical draft data ([`afc3d1b`](https://github.com/thecodeforest/fantasyfootball/commit/afc3d1b54ae1425edb6baf89d5a976e1f0324ad4))
+* Add module for processing new draft data ([`985ef37`](https://github.com/thecodeforest/fantasyfootball/commit/985ef37a5b17d8dfce456cb78f8b72f9480c7a1c))
+* New module for processing salary data ([`a2b9cfe`](https://github.com/thecodeforest/fantasyfootball/commit/a2b9cfe2998b7c49f40cee0803e4afb5e13f11e4))
+* Module for collecting historical draft data ([`1c6ea65`](https://github.com/thecodeforest/fantasyfootball/commit/1c6ea65ef57da7cfeb1427a05cb044d064051f54))
+* Add module to collect betting data for historicla purposes ([`56e51c3`](https://github.com/thecodeforest/fantasyfootball/commit/56e51c39572c9920bf14d95dac22868678eafec9))
+* Add new module to collect weekly fanduel salary data for players ([`bf92ce1`](https://github.com/thecodeforest/fantasyfootball/commit/bf92ce1a3ac4227322d18e74b12f10d817997809))
+* Add new module for collecting current year draft data ([`449e936`](https://github.com/thecodeforest/fantasyfootball/commit/449e9365f7156b5b0e2223b68f8c7ffa80d38782))
+* Module for collecting current betting data ([`52b0f07`](https://github.com/thecodeforest/fantasyfootball/commit/52b0f0786a73fc3134b804dccde6c5b45e50b8b7))
+* 1. update team mappings ([`1e6d6ab`](https://github.com/thecodeforest/fantasyfootball/commit/1e6d6ab979a0bc7efea41d8dd4437b29615a5c2a))
+
+### Fix
+* Update fields in salary data in config file ([`699aa90`](https://github.com/thecodeforest/fantasyfootball/commit/699aa90a561a4c45d5e6987eea7f6760c0cdd3ed))
+* Account for weather location that only have historical weather and do not have forecast data ([`154a80d`](https://github.com/thecodeforest/fantasyfootball/commit/154a80d8b3fc41678fd8c300f02c008a31592cda))
+
+### Documentation
+* Add data update cadence for pipeline to readme ([`b9e5983`](https://github.com/thecodeforest/fantasyfootball/commit/b9e59835155e20b800014a8e91a395534e3c3005))
+
 ## v0.2.1 (2022-08-09)
 ### Fix
 * **init:** Fix issue with automatically detecting version in python <3.8 ([`9538200`](https://github.com/thecodeforest/fantasyfootball/commit/953820079fccd1e5f781b2d4439d389a607673a0))

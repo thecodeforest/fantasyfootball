@@ -7,6 +7,7 @@ from pathlib import Path
 import pandas as pd
 import pandas_flavor as pf
 from janitor import clean_names, coalesce
+import awswrangler as wr
 
 sys.path.append(str(Path.cwd()))
 from pipeline.pipeline_config import root_dir  # noqa: E402
@@ -19,48 +20,54 @@ from pipeline.utils import (  # noqa: E402
 )
 
 
+def _name_format(player_name: str) -> str:
+    player_name = player_name.split(", ")
+    player_name = player_name[-1] + " " + "".join(player_name[:-1])
+    return player_name
+
+
 @pf.register_dataframe_method
-def process_salary(df: pd.DataFrame, season_year: int) -> pd.DataFrame:
-    column_mapping = {
-        "player": "name",
-        "p": "position",
-        "player": "name",
-        "opp_rank": "opp_position_rank",
-        "opp_position_rank": "fanduel_salary",
-        "fdsal": "draftkings_salary",
-    }
-    df = df.rename(columns=column_mapping)
-    df = df[
-        [
-            "name",
-            "position",
-            "week",
-            "team",
-            "opp",
-            "opp_position_rank",
-            "fanduel_salary",
-            "draftkings_salary",
-        ]
-    ]
-    df["team"] = df["team"].apply(lambda x: map_abbr2_to_abbr3(x))
-    df["opp"] = df["opp"].apply(lambda x: map_abbr2_to_abbr3(x))
-    df["season_year"] = season_year
+def process_salary(df: pd.DataFrame) -> pd.DataFrame:
+    # select relevant fields
+    df = df[["player", "pos", "year", "week", "salary"]]
+    # rename to consistent column names
+    df = df.rename(
+        columns={
+            "player": "name",
+            "pos": "position",
+            "year": "season_year",
+            "salary": "fanduel_salary",
+        }
+    )
+    # filter only to relevant positions (QB, RB, WR, TE)
+    df = df[df["position"].isin(["QB", "RB", "WR", "TE"])]
+    # remove dollar sign from salary and convert to int
+    df["fanduel_salary"] = (
+        df["fanduel_salary"].str.replace("$", "", regex=True).astype(int)
+    )
+    # convert season_year & week to int
+    df["season_year"] = df["season_year"].astype(int)
+    df["week"] = df["week"].astype(int)
+    # format player name by switching position of first and last name
+    df["name"] = df["name"].apply(lambda x: _name_format(x))
     return df
 
 
 if __name__ == "__main__":
     args = read_args()
     dir_type, data_type = get_module_purpose(module_path=__file__)
+    s3_io_path = f"s3://{args.s3_bucket}/datasets/season/{args.season_year}/processed/{data_type}"  # noqa: E501
     players_df = pd.read_csv(
         root_dir
-        / "datasets"
+        / "staging_datasets"
         / "season"
         / str(args.season_year)
         / "processed"
         / "players"
         / "players.csv"
     )
-    raw_data_dir = (
+
+    raw_data_dir = Path(
         root_dir
         / "staging_datasets"
         / "season"
@@ -68,18 +75,16 @@ if __name__ == "__main__":
         / "raw"
         / data_type
     )
+
     clean_salary_df = read_ff_csv(raw_data_dir)
+    clean_salary_df = clean_salary_df.clean_names()
+    clean_salary_df = clean_salary_df.process_salary()
     clean_salary_df = (
-        clean_salary_df.clean_names()
-        .process_salary(season_year=args.season_year)
-        .query("position != 'FB'")
-    )
-    player_name_map_df = map_player_names(
-        players_df, clean_salary_df, "name", "position", "team"
-    )
-    clean_salary_df = (
-        clean_salary_df.merge(
-            player_name_map_df, on=["name", "position", "team"], how="left"
+        pd.merge(
+            clean_salary_df,
+            map_player_names(players_df, clean_salary_df, "name", "position"),
+            on=["name", "position"],
+            how="left",
         )
         .coalesce("mapped_name", "name", target_column_name="final_name")
         .drop(columns=["name", "mapped_name"])
@@ -88,4 +93,11 @@ if __name__ == "__main__":
     clean_salary_df = clean_salary_df[
         [clean_salary_df.columns.tolist()[-1]] + clean_salary_df.columns.tolist()[:-1]
     ]
+    # write this weeks clean data to S3
+    week = str(clean_salary_df["week"].iloc[0])
+    file_name = f"week_{week}_salary.csv"
+    wr.s3.to_csv(clean_salary_df, f"{s3_io_path}/{file_name}", index=False)
+
+    all_files = wr.s3.list_objects(s3_io_path)
+    clean_salary_df = wr.s3.read_csv(all_files)
     clean_salary_df.write_ff_csv(root_dir, args.season_year, dir_type, data_type)

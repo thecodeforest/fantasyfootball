@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import sleep
 import warnings
 
@@ -13,6 +13,26 @@ sys.path.append(str(Path.cwd()))
 from pipeline.pipeline_config import root_dir  # noqa: E402
 from pipeline.pipeline_logger import logger  # noqa: E402
 from pipeline.utils import get_module_purpose, read_args, write_ff_csv  # noqa: E402
+
+
+def filter_calendar_horizon(
+    calendar_df: pd.DataFrame, fcast_horizon_days: int = 6
+) -> pd.DataFrame:
+    """Filter calendar to only include games prior to and within the forecast horizon.
+
+    Args:
+        calendar_df (pd.DataFrame): Calendar dataframe.
+        fcast_horizon_days (int, optional): How many days into the future to consider
+            for weather forecast. Defaults to 6.
+
+    Returns:
+        pd.DataFrame: Filtered calendar dataframe with
+            only games within the forecast horizon.
+    """
+
+    dt_range_end = datetime.today() + timedelta(days=fcast_horizon_days)
+    calendar_df = calendar_df[calendar_df["date"] <= dt_range_end.strftime("%Y-%m-%d")]
+    return calendar_df
 
 
 def collect_daily_weather_conditions(
@@ -31,6 +51,7 @@ def collect_weather(
 ) -> pd.DataFrame:
     game_location_fields = ["date", "team", "opp", "stadium_name", "roof_type"]
     game_weather_df = pd.DataFrame(columns=game_location_fields)
+    calendar_df = filter_calendar_horizon(calendar_df)
     for row in calendar_df.itertuples(index=False):
         logger.info(f"collecting data for {row}")
         game_date, team, opp, is_away = (row.date, row.team, row.opp, row.is_away)
@@ -55,13 +76,19 @@ def collect_weather(
             game_day_weather_df = collect_daily_weather_conditions(
                 game_date=game_date, latitude=lat, longitude=lon
             )
+            # some stations do not have a weather forecast, only historical weather
+            if game_day_weather_df.empty:
+                logger.info(
+                    f"No weather forecast for {game_date}-{team}-{opp}-{stadium_name}"
+                )
+                continue
             game_day_weather_df = game_day_weather_df.drop(columns="time")
             game_day_weather_df = pd.DataFrame(
                 [game_location_data + game_day_weather_df.iloc[0].tolist()],
                 columns=game_location_fields + game_day_weather_df.columns.tolist(),
             )
         game_weather_df = pd.concat([game_weather_df, game_day_weather_df])
-        sleep(2)
+        sleep(1)
     return game_weather_df
 
 

@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.1 (2022-09-28)
+### Fix
+* Address version issue of pandera during testing ([`d709711`](https://github.com/thecodeforest/fantasyfootball/commit/d7097112ae4f74ea0ac89eb7116df6c769e3f2f0))
+
 ## v0.3.0 (2022-09-28)
 ### Feature
 * Add logic to only run certain pipeline steps during the season ([`f27de5e`](https://github.com/thecodeforest/fantasyfootball/commit/f27de5e2682c4772b87379fe12d48141f22d31a2))

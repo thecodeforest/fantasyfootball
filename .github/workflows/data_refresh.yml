@@ -45,6 +45,7 @@ jobs:
         verbose: false      
     - name: NFL data refresh
       run: |
+        YEAR=$(date +%Y)
         source .venv/bin/activate
 
         python pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
@@ -52,7 +53,16 @@ jobs:
 
         python pipeline/collect/collect_players.py --season_year $SEASON_YEAR
         python pipeline/process/process_players.py --season_year $SEASON_YEAR
+# cannot collect historical salary or betting data; can only be run in the current season
 
+        if [ $SEASON_YEAR -ge $YEAR ]; then
+          python pipeline/collect/collect_salary.py --season_year $SEASON_YEAR
+          python pipeline/process/process_salary.py --season_year $SEASON_YEAR --s3_bucket $S3_BUCKET_NAME
+
+          python pipeline/collect/collect_betting.py --season_year $SEASON_YEAR
+          python pipeline/process/process_betting.py --season_year $SEASON_YEAR --s3_bucket $S3_BUCKET_NAME
+        fi
+        
         python pipeline/collect/collect_stats.py --season_year $SEASON_YEAR
         python pipeline/process/process_stats.py --season_year $SEASON_YEAR
 

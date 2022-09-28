@@ -279,9 +279,9 @@ The package provides the following seven datasets by season:
     * `avg_draft_position` - The average position a player was drafted across many pre-season mock drafts. Players drafted earlier are expected to score more points over a season than those drafted later. 
     * `season_year` - The year of the season
 
-## Data Refresh
+## Data Pipeline
 
-While the PyPi version of **fantasyfootball** is updated monthly, the GitHub version is updated weekly during the regular season (Sep 8 - Jan 8). New data is stored in [datasets](https://github.com/thecodeforest/fantasyfootball/tree/main/src/fantasyfootball/datasets/season) directory within the **fantasyfootball** package. If there is a difference between the data in Github and the installed version, creating a `FantasyData` object will download the new data. Note that differences in data persist when a session ends. Updating the installed version of **fantasyfooball** will correct this difference and is recommended at the end of each season. 
+While the PyPi version of **fantasyfootball** is updated monthly, the GitHub version is updated every Thursday during the regular season (Sep 8 - Jan 8). New data is stored in [datasets](https://github.com/thecodeforest/fantasyfootball/tree/main/src/fantasyfootball/datasets/season) directory within the **fantasyfootball** package. If there is a difference between the data in Github and the installed version, creating a `FantasyData` object will download the new data. Note that differences in data persist when a session ends. Updating the installed version of **fantasyfooball** will correct this difference and is recommended at the end of each season. 
 
 ## Contributing
 

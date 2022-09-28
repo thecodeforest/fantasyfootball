@@ -1,3 +1,4 @@
+from socket import if_indextoname
 import sys
 from pathlib import Path
 
@@ -9,62 +10,42 @@ from pipeline.pipeline_config import root_dir  # noqa: E402
 from pipeline.utils import (  # noqa: E402
     get_module_purpose,
     map_player_names,
+    retrieve_team_abbreviation,
     read_args,
     read_ff_csv,
     map_abbr2_to_abbr3,
 )
 
 
-def fill_undrafted_player_positions(
-    df: pd.DataFrame,
-    players_df: pd.DataFrame,
-    avg_draft_position_column: str = "avg_draft_position",
-) -> pd.DataFrame:
-    """Replace undrafted players with the maximum drafted position + 1 to ensure no NAs
-
-    Args:
-        df (pd.DataFrame): Dataframe with all of the players who were drafted
-        players_df (pd.DataFrame): Dataframe with all of the
-            players who were active within a season
-        avg_draft_position_column (str, optional): Column indicating a player's
-            average draft position. Defaults to "avg_draft_position".
-
-    Returns:
-        pd.DataFrame: Dataframe with undrafted players filled
-            in with the maximum drafted position + 1
-    """
-    df = df.copy()
-    # join draft data w/ active players to identify undrafted players
-    df = pd.merge(players_df, df, on=["name", "team", "position"], how="left")
-    # find maximum draft position
-    max_draft_position = df[avg_draft_position_column].max() + 1
-    # replace any missing values with the maximum draft position
-    df[avg_draft_position_column] = df[avg_draft_position_column].fillna(
-        max_draft_position
-    )
-    return df
-
-
-def process_draft(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.rename(columns={"pos": "position", "overall": "avg_draft_position"})
-    df = df[["name", "position", "team", "avg_draft_position"]]
-    df = df[df["position"].isin(["QB", "RB", "WR", "TE"])]
-    # filter out players who are free agents
+def process_draft(df: pd.DataFrame, players_df: pd.DataFrame) -> pd.DataFrame:
+    # remove defenses from the draft
+    df = df[~df["team"].apply(lambda x: x.replace("(", "").replace(")", "").isdigit())]
+    # filter out free agents
     df = df[df["team"] != "FA"]
+    # translate team abbreviations to 3 letter
     df["team"] = df["team"].apply(lambda x: map_abbr2_to_abbr3(x))
+    # map player names
     df = (
         pd.merge(
             df,
-            map_player_names(players_df, df, "name", "team", "position"),
-            on=["name", "team", "position"],
+            map_player_names(players_df, df, "name", "team"),
+            on=["name", "team"],
             how="left",
         )
         .coalesce("mapped_name", "name", target_column_name="final_name")
         .drop(columns=["name", "mapped_name"])
         .rename(columns={"final_name": "name"})
     )
-    df = fill_undrafted_player_positions(df, players_df, "avg_draft_position")
-    df = df[[df.columns[-1]] + df.columns[:-1].tolist()]
+    # add in player position
+    df = pd.merge(df, players_df, on=["name", "team"], how="inner")
+    # filter out players that are not QB, RB, WR, TE
+    df = df[df["position"].isin(["QB", "RB", "WR", "TE"])]
+    # bump avg_draft_positon by 1
+    df["avg_draft_position"] = df["avg_draft_position"] + 1
+    # convert avg_draft_position to float
+    df["avg_draft_position"] = df["avg_draft_position"].astype(float)
+    # rearrange column order
+    df = df[["avg_draft_position", "name", "team", "position", "season_year"]]
     return df
 
 
@@ -90,6 +71,5 @@ if __name__ == "__main__":
     )
     clean_draft_df = read_ff_csv(raw_data_dir)
     clean_draft_df = clean_names(clean_draft_df)
-    clean_draft_df = process_draft(clean_draft_df)
-    clean_draft_df["season_year"] = args.season_year
+    clean_draft_df = process_draft(clean_draft_df, players_df)
     clean_draft_df.write_ff_csv(root_dir, args.season_year, dir_type, data_type)

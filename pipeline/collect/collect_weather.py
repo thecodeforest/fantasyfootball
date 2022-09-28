@@ -16,14 +16,14 @@ from pipeline.utils import get_module_purpose, read_args, write_ff_csv  # noqa: 
 
 
 def filter_calendar_horizon(
-    calendar_df: pd.DataFrame, fcast_horizon_days: int = 5
+    calendar_df: pd.DataFrame, fcast_horizon_days: int = 6
 ) -> pd.DataFrame:
     """Filter calendar to only include games prior to and within the forecast horizon.
 
     Args:
         calendar_df (pd.DataFrame): Calendar dataframe.
         fcast_horizon_days (int, optional): How many days into the future to consider
-            for weather forecast. Defaults to 5.
+            for weather forecast. Defaults to 6.
 
     Returns:
         pd.DataFrame: Filtered calendar dataframe with
@@ -88,7 +88,7 @@ def collect_weather(
                 columns=game_location_fields + game_day_weather_df.columns.tolist(),
             )
         game_weather_df = pd.concat([game_weather_df, game_day_weather_df])
-        sleep(2)
+        sleep(1)
     return game_weather_df
 
 

@@ -476,7 +476,6 @@ class FantasyFeatures:
             .reset_index(drop=True)
         )
         self.df["is_future_week"] = self.df["is_future_week"].fillna(0)
-        return FantasyFeatures
 
     @staticmethod
     def _create_step_str(step: str, transformer_name: str, **params) -> str:
@@ -760,6 +759,8 @@ class FantasyFeatures:
             transformed dataframe.
         """
         all_feature_steps = "[" + self._pipeline_steps + "]"
+        if all_feature_steps == "[]":
+            return {"feature_df": self.df, "pipeline_feature_names": None}
         pipeline = Pipeline(steps=eval(all_feature_steps))
         feature_df = pipeline.fit_transform(self.df, y=self.df[self.y])
         feature_df = self._remove_missing_feature_values(feature_df)

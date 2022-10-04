@@ -37,15 +37,22 @@ def process_draft(df: pd.DataFrame, players_df: pd.DataFrame) -> pd.DataFrame:
         .rename(columns={"final_name": "name"})
     )
     # add in player position
-    df = pd.merge(df, players_df, on=["name", "team"], how="inner")
+    df = pd.merge(players_df, df, on=["name", "team"], how="left")
     # filter out players that are not QB, RB, WR, TE
     df = df[df["position"].isin(["QB", "RB", "WR", "TE"])]
     # bump avg_draft_positon by 1
     df["avg_draft_position"] = df["avg_draft_position"] + 1
-    # convert avg_draft_position to float
+    # convert avg_draft_position to int
     df["avg_draft_position"] = df["avg_draft_position"].astype(float)
+    # for undrafted players, set avg_draft_position to max avg_draft_position + 1
+    df["avg_draft_position"] = df["avg_draft_position"].fillna(
+        df["avg_draft_position"].max() + 1
+    )
+    df["avg_draft_position"] = df["avg_draft_position"].astype(int)
     # rearrange column order
     df = df[["avg_draft_position", "name", "team", "position", "season_year"]]
+    # sort by avg_draft_position
+    df = df.sort_values(by="avg_draft_position", ascending=True).reset_index(drop=True)
     return df
 
 

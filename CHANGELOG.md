@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.0 (2022-10-04)
+### Feature
+* Add in ability to populate future week defense strength ([`65e8eec`](https://github.com/thecodeforest/fantasyfootball/commit/65e8eecc1e3a9e562d698a4874d5643be42fa908))
+* Add ability to collect both historical and future betting lines ([`07ba6b0`](https://github.com/thecodeforest/fantasyfootball/commit/07ba6b0c3a7dd0ffd5a1ca0d2eae4a7de8c91e6a))
+* Add logic to collect both historical and future weather data ([`b0411a6`](https://github.com/thecodeforest/fantasyfootball/commit/b0411a607d6f815f1b7328231b5691b7c0d60c5e))
+
+### Fix
+* Enable future frame with no features ([`12946f7`](https://github.com/thecodeforest/fantasyfootball/commit/12946f7edc59c3f16564c45e37c82cfb27ec128b))
+* For players with NA for avg_draft_position, take the max value and add 1 to ensure no missing values for this field. ([`d8afb1a`](https://github.com/thecodeforest/fantasyfootball/commit/d8afb1a07cb18ef6d9b376f12e7fa3a53e408680))
+* Move 'Raiders' name to only be associated with LV ([`038cc40`](https://github.com/thecodeforest/fantasyfootball/commit/038cc40cfc66df5645c17102abd278cf034cb403))
+
 ## v0.3.1 (2022-09-28)
 ### Fix
 * Address version issue of pandera during testing ([`d709711`](https://github.com/thecodeforest/fantasyfootball/commit/d7097112ae4f74ea0ac89eb7116df6c769e3f2f0))

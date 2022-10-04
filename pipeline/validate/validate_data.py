@@ -172,11 +172,10 @@ schemas = {
             "stadium_name": pa.Column(
                 pa.String(), checks=pa.Check.isin(stadiums_df.stadium_name.unique())
             ),
-            "is_outdoor": pa.Column(pa.Int(), checks=pa.Check.isin([0, 1])),
-            "avg_windspeed": pa.Column(pa.Float(), checks=pa.Check.in_range(0, 100)),
-            "max_snow_depth": pa.Column(pa.Float(), checks=pa.Check.in_range(0, 100)),
-            "total_precip": pa.Column(pa.Float(), checks=pa.Check.in_range(0, 100)),
-            "avg_temp": pa.Column(pa.Float(), checks=pa.Check.in_range(-100, 100)),
+            "is_rain": pa.Column(pa.Int(), checks=pa.Check.isin([0, 1])),
+            "is_snow": pa.Column(pa.Int(), checks=pa.Check.isin([0, 1])),
+            "wind_speed": pa.Column(pa.Float(), checks=pa.Check.in_range(0, 100)),
+            "temperature": pa.Column(pa.Float(), checks=pa.Check.in_range(-100, 100)),
         },
         coerce=True,
     ),
@@ -248,7 +247,7 @@ schemas = {
                 pa.String(), checks=pa.Check.isin(TEAM_ABBREVIATION_MAPPING.values())
             ),
             "avg_draft_position": pa.Column(
-                pa.Float(), checks=pa.Check.in_range(0, 1000)
+                pa.Int(), checks=pa.Check.in_range(0, 1000)
             ),
             "season_year": pa.Column(pa.Int(), checks=pa.Check.eq(args.season_year)),
         }

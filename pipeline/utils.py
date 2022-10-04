@@ -25,7 +25,7 @@ TEAM_ABBREVIATION_MAPPING = {
     ("Jacksonville", "Jacksonville Jaguars", "Jaguars"): "JAX",
     ("KansasCity", "Kansas City Chiefs", "KCChiefs", "Kansas", "Chiefs"): "KAN",
     ("LAChargers", "Los Angeles Chargers", "LosAngeles", "Chargers"): "LAC",
-    ("Oakland", "Oakland Raiders", "Raiders"): "OAK",
+    ("Oakland", "Oakland Raiders"): "OAK",
     ("LARams", "Los Angeles Rams", "Rams"): "LAR",
     ("LasVegas", "Las Vegas Raiders", "LVRaiders", "Raiders"): "LVR",
     ("Miami", "Miami Dolphins", "Dolphins"): "MIA",
@@ -63,6 +63,12 @@ def read_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--season_year", type=int, help="The season year")
     parser.add_argument("--s3_bucket", type=str, help="The S3 bucket to write to")
+    parser.add_argument(
+        "--open_weather_api_key", type=str, help="The S3 bucket to write to"
+    )
+    parser.add_argument(
+        "--is_historical", type=bool, help="If the data is historical or future looking"
+    )
     args = parser.parse_args()
     return args
 

@@ -13,7 +13,7 @@ requests = "^2.27.1"
 lxml = "^4.7.1"
 pyjanitor = "^0.22.0"
 pandas-flavor = "^0.2.0"
-scikit-learn = "^1.0.2"
+scikit-learn = {version = "^1.0.2", python = "^3.8"}
 sklearn = "^0.0"
 openpyxl = "^3.0.9"
 html5lib = "^1.1"
@@ -42,6 +42,7 @@ awswrangler = "^2.15.1"
 python-Levenshtein = "^0.12.2"
 python-semantic-release = "^7.31.2"
 jsonschema = "^4.16.0"
+pyowm = "^3.3.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

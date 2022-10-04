@@ -18,11 +18,9 @@ from pipeline.utils import (  # noqa: E402
 def process_weather_df(df: pd.DataFrame) -> pd.DataFrame:
     """Cleans raw weather data by applying the following transformations:
         * Add feature indicating if the game was played outdoors or indoors
-        * Convert windspeed from km to mph
-        * Add '0' value for windspeed when game is played indoors
-        * Add feature indicating total amount of snow (inches)
-        * Add feature indicating total amount of rain (inches)
-        * Convert temperature from F to C
+        * Add '0' value for windspeed when game is played indoors or retractable roof
+        * Add '0' value for snow when game is played indoors or retractable roof
+        * Add '0' value for rain when game is played indoors or retractable roof
         * Assign constant of 75 degrees F when game was played indoors
 
     Args:
@@ -31,44 +29,21 @@ def process_weather_df(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: _description_
     """
-    df = df.drop(columns=["tmin", "tmax", "wdir", "wpgt", "pres", "tsun"])
-    # add dome feature
     df = df.assign(
-        **{"is_outdoor": df["roof_type"].apply(lambda x: 1 if x == "Outdoor" else 0)}
-    ).drop("roof_type", axis=1)
-    # convert wind speed to mph
+        **{"temperature": df["temperature"].apply(lambda x: 75 if x == "" else x)}
+    )
+    # add zero windspeed for indoor games
     df = df.assign(
-        **{
-            "avg_windspeed": df["wspd"].apply(
-                lambda x: 0 if x == "" else float(x) * 2.237
-            )
-        }
-    ).drop("wspd", axis=1)
-    # convert mm to inches for snow
-    df = df.assign(
-        **{
-            "max_snow_depth": df["snow"].apply(
-                lambda x: 0 if x == "" else float(x) * 0.0393701
-            )
-        }
-    ).drop("snow", axis=1)
-    # convert total daily precip to inches
-    df = df.assign(
-        **{
-            "total_precip": df["prcp"].apply(
-                lambda x: 0 if x == "" else float(x) * 0.0393701
-            )
-        }
-    ).drop("prcp", axis=1)
-    # convert average temp to fahrenheit
-    avg_temp_for_dome = 75
-    df = df.assign(
-        **{
-            "avg_temp": df["tavg"].apply(
-                lambda x: avg_temp_for_dome if x == "" else float(x) * 1.8 + 32
-            )
-        }
-    ).drop("tavg", axis=1)
+        **{"wind_speed": df["wind_speed"].apply(lambda x: 0 if x == "" else x)}
+    )
+    # add zero for is_rain for indoor games
+    df = df.assign(**{"is_rain": df["is_rain"].apply(lambda x: 0 if x == "" else x)})
+    # add zero for is_snow for indoor games
+    df = df.assign(**{"is_snow": df["is_snow"].apply(lambda x: 0 if x == "" else x)})
+    df["temperature"] = pd.to_numeric(df["temperature"], errors="coerce").round(1)
+    df["wind_speed"] = pd.to_numeric(df["wind_speed"], errors="coerce").round(1)
+    # # if the roof_type is outdoor, assign 1 else 0
+    df["is_outdoor"] = df["roof_type"].apply(lambda x: 1 if x == "Outdoor" else 0)
     return df
 
 

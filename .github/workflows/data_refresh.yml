@@ -10,6 +10,7 @@ jobs:
       SEASON_YEAR: 2016
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+      OPEN_WEATHER_API_KEY: ${{ secrets.OPEN_WEATHER_API_KEY }}
       S3_BUCKET_NAME: fantasy-football-pipeline
       AWS_DEFAULT_REGION: us-west-2   
     steps:

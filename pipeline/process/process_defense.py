@@ -13,6 +13,7 @@ from pipeline.utils import (  # noqa: E402
     read_args,
     read_ff_csv,
     write_ff_csv,
+    fetch_current_week,
 )
 
 STATS_COLUMNS = [
@@ -129,6 +130,32 @@ def rank_defense(df: pd.DataFrame, stats_columns: List[str]) -> pd.DataFrame:
     return df
 
 
+@pf.register_dataframe_method
+def create_future_defense_rankings(df: pd.DataFrame, current_week: str) -> pd.DataFrame:
+    """Creates a dataframe containing the future defense rankings for each team based
+       their ranking from the prior week. Simply carries over the prior week's ranking.
+
+    Args:
+        df (pd.DataFrame): The dataframe containing the defense rankings.
+        current_week (str): The current week of the season. Note that
+            this week should not have any games played yet.
+
+    Returns:
+        pd.DataFrame: The future defense rankings for each team along with the
+            historical defense rankings.
+    """
+    most_recent_actual_week = max(df["week"])
+    if most_recent_actual_week < int(current_week):
+        most_recent_week_df = df.query(f"week == {most_recent_actual_week}")
+        # replace week with current_week
+        most_recent_week_df["week"] = int(current_week)
+        # concat with defense_stats_df
+        df = pd.concat([df, most_recent_week_df])
+        return df
+    else:
+        return df
+
+
 if __name__ == "__main__":
     args = read_args()
     dir_type, data_type = get_module_purpose(module_path=__file__)
@@ -136,10 +163,10 @@ if __name__ == "__main__":
         root_dir / "staging_datasets" / "season" / str(args.season_year) / dir_type
     )
     stats_df = read_ff_csv(data_dir / "stats")
-    cal_df = read_ff_csv(data_dir / "calendar")
+    calendar_df = read_ff_csv(data_dir / "calendar")
     # add week field to player stats
     processed_stats_df = pd.merge(
-        stats_df, cal_df, on=["date", "team", "opp"], how="inner"
+        stats_df, calendar_df, on=["date", "team", "opp"], how="inner"
     )
     defense_stats_df = pd.DataFrame()
     for week in sorted(processed_stats_df["week"].unique()):
@@ -152,5 +179,9 @@ if __name__ == "__main__":
         )
         cumulative_stats.insert(0, "week", week)
         defense_stats_df = pd.concat([defense_stats_df, cumulative_stats])
+    current_week = fetch_current_week(calendar_df)
+    defense_stats_df = defense_stats_df.create_future_defense_rankings(
+        current_week=current_week
+    )
     defense_stats_df["season_year"] = args.season_year
     defense_stats_df.write_ff_csv(root_dir, args.season_year, dir_type, data_type)

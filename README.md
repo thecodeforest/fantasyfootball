@@ -61,7 +61,7 @@ lockty_df = fantasy_df.query("name=='Tyler Lockett' & season_year==2021 & 11<=we
 print(lockty_df)
 ```
 
-| pid      |   week |   is_away |   receiving_rec |   receiving_td |   receiving_yds |   draftkings_salary |   ff_pts_yahoo |
+| pid      |   week |   is_away |   receiving_rec |   receiving_td |   receiving_yds |   fanduel_salary |   ff_pts_yahoo |
 |:---------|-------:|----------:|----------------:|---------------:|----------------:|--------------------:|---------------:|
 | LockTy00 |     11 |         0 |               4 |              0 |             115 |                6000 |           13.5 |
 | LockTy00 |     12 |         1 |               3 |              0 |              96 |                6300 |           11.1 |
@@ -118,7 +118,7 @@ For the sake of simplicity, we'll leverage a small subset of raw, untransformed 
 
 ```python
 derived_feature_names = features_signature_dict.get("pipeline_feature_names")
-raw_feature_names = ["avg_windspeed", "draftkings_salary"]
+raw_feature_names = ["avg_windspeed", "fanduel_salary"]
 all_features = derived_feature_names + raw_feature_names
 ```
 
@@ -166,7 +166,7 @@ The package provides the following seven datasets by season:
     * `week` - The week of the season
     * `team` - The three letter abbreviation of the team
     * `opp` - The the letter abbreviation of the team's opponent
-    * `is_away` - Boolean indicator if the `team` is playing at the opponent's field
+    * `is_away` - Boolean indicator if the `team` is playing at the opponent's field (1 = away, 0 = home)
     * `season_year` - The year of the season
 
 <br>
@@ -184,18 +184,22 @@ The package provides the following seven datasets by season:
     * `name` - A player's first and last name 
     * `team` - The three letter abbreviation of the player's team
     * `opp` - The three letter abbreviation of the players's weekly opponent 
-    * `is_active` - A boolean indicator if the player is active (1) or inactive (0)
+    * `is_active` - Boolean indicator if the player is active for the game (1 = active, 0 = inactive)
     * `date` - Date (yyyy-mm-dd) of the game
     * `result` - The box score of the game, along with an indicator of the outcome (W or L)
     * `is_away` - Boolean indicator if the game was played at the opponent's field (1 = away, 0 = home)
-    * `is_start` - Boolean indicator if the player started the game (1 or 0)
+    * `is_start` - Boolean indicator if the player started the game (1 = starter, 0 = bench)
+    * `age` - The age of the player in years
     * `g_nbr` - The game number for the player. This differs from the week number, as it accounts for team buy weeks. 
+    * `receiving_tgt` - The number of targets the player received
     * `receiving_rec` - The total number of receptions
     * `receiving_yds` - The total number of receiving yards
     * `receiving_td` - The total number of receiving touchdowns
     * `rushing_yds` - The total number or rushing yards
     * `rushing_td` - The total number or rushing yards
+    * `rushing_att` - The total number of rushing attempts
     * `receiving_td` - The total number of rushing touchdowns
+    * `passing_att` - The total number of passing attempts
     * `passing_cmp` - The total number of completed passes
     * `passing_yds` - The total number of passing yards
     * `passing_td` - The total number of passing touchdowns
@@ -203,20 +207,16 @@ The package provides the following seven datasets by season:
     * `passing_int` - The total number of passing interceptions
     * `scoring_2pm` - The total number of 2-point conversions
     * `punt_return_tds` - The total number punt return touchdowns
+    * `off_snaps_pct` - The percentage of offensive snaps the player played
 
 <br>
 
 * **salary** - The player salaries from DraftKings and FanDuel.
     * `name` - A player's first and last name 
     * `position` - The two letter abbreviation of the player's position
-    * `week` - The week of the season
-    * `team` - The three letter abbreviation of the team
-    * `opp` - The three letter abbreviation of the team's opponent
-    * `opp_position_rank` - Opponent rank based on fantasy points allowed by position
-    * `fanduel_salary` - Fanduel player salary
-    * `draftkings_salary` - DraftKings player salary
     * `season_year` - The year of the season
-    
+    * `week` - The week of the season
+    * `fanduel_salary` - Fanduel player salary
 
 <br>
 
@@ -226,11 +226,13 @@ The package provides the following seven datasets by season:
     * `opp` - The three letter abbreviation of the team's opponent
     * `stadium_name` - Name of the stadium hosting the game. Updated as of 2020. 
     * `roof_type` - Indicates if stadium has dome, retractable roof, or is outdoor. 
-    * `is_outdoor` - boolean indicator if stadium is outdoor (1 = is outdoor, 0 = retractable/dome). Note that for stadiums with a retractable roof, it is not possible to determine if roof was open during the game. 
-    * `avg_windspeed` - Average daily windspeed (mph)
-    * `max_snow_depth` - The maximum depth of the snow (in)
-    * `total_precip` - Total daily precipitation (in)
-    * `avg_temp` - Average daily temperature (f&deg;). Note that the `avg_temp` of dome/retractable roof stadiums are set to 75&deg;.
+    * `temperature` - Average daily temperature (f&deg;). Note that the `temperature` of dome/retractable roof stadiums are set to 75&deg;.
+    * `is_rain` - Boolean indicator if rain occurred or is expected (1 = yes, 0 = no)
+    * `is_snow` - Boolean indicator if snow occurred or is expected (1 = yes, 0 = no)
+    * `windspeed` - Average daily windspeed (mph)
+    * `is_outdoor` - Boolean indicator if stadium is outdoor (1 = is outdoor, 0 = retractable/dome). Note that for stadiums with a retractable roof, it is not possible to determine if roof was open during the game. 
+    
+    
 
 
 
@@ -271,12 +273,14 @@ The package provides the following seven datasets by season:
     * `most_recent_injury_status` - The most recent status for a player prior to game-day (DNP, Limited, Full, no injury).
     * `n_injured` - Indicates the number of injuries reported for a player. For example, "Shin, Ankle" indicates two injuries, or "Shoulder" indicates one injury.
 
-* **draft** - The average draft position (ADP) of each player prior to the season. Positions are based on a standard 12 person draft. 
+<br>
 
+* **draft** - The average draft position (ADP) of each player prior to the season. Positions are based on a standard 12 person draft. 
+    * `avg_draft_position` - The average position a player was drafted across many pre-season mock drafts. Players drafted earlier are expected to score more points over a season than those drafted later. 
     * `name` - A player's first and last name 
     * `position` - The two letter abbreviation of the player's position
     * `team` - The three letter abbreviation of team with the point projections    
-    * `avg_draft_position` - The average position a player was drafted across many pre-season mock drafts. Players drafted earlier are expected to score more points over a season than those drafted later. 
+    
     * `season_year` - The year of the season
 
 ## Data Pipeline

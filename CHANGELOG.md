@@ -2,6 +2,9 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.2 (2022-10-05)
+
+
 ## v0.4.1 (2022-10-05)
 ### Fix
 * Enables addition of custom scoring scoring system. Fixes #25 ([`d35f723`](https://github.com/thecodeforest/fantasyfootball/commit/d35f723dfd2104690a7e532e2b96bf8b3b9729b4))

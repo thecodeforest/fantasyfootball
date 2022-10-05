@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.1 (2022-10-05)
+### Fix
+* Enables addition of custom scoring scoring system. Fixes #25 ([`d35f723`](https://github.com/thecodeforest/fantasyfootball/commit/d35f723dfd2104690a7e532e2b96bf8b3b9729b4))
+
 ## v0.4.0 (2022-10-04)
 ### Feature
 * Add in ability to populate future week defense strength ([`65e8eec`](https://github.com/thecodeforest/fantasyfootball/commit/65e8eecc1e3a9e562d698a4874d5643be42fa908))

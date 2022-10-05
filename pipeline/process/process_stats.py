@@ -16,12 +16,16 @@ REQUIRED_COLUMNS = {
     "player_columns": ["pid", "name"],
     "game_columns": ["tm", "opp", "is_active", "date", "result", "is_away", "is_start"],
     "stats_columns": [
+        "age",
         "g_nbr",
+        "receiving_tgt",
         "receiving_rec",
         "receiving_yds",
         "receiving_td",
+        "rushing_att",
         "rushing_yds",
         "rushing_td",
+        "passing_att",
         "passing_cmp",
         "passing_yds",
         "passing_td",
@@ -29,6 +33,7 @@ REQUIRED_COLUMNS = {
         "passing_int",
         "scoring_2pm",
         "punt_returns_td",
+        "off_snaps_pct",
     ],
 }
 

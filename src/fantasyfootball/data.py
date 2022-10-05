@@ -196,7 +196,6 @@ class FantasyData:
                 season_ff_df = season_ff_df[season_ff_df["week"] != max_week]
             ff_df = pd.concat([ff_df, season_ff_df])
         self.ff_data = ff_df
-        return FantasyData
 
     @staticmethod
     def _validate_scoring_source_rules(source_rules: dict, ff_df_columns: list) -> None:
@@ -257,11 +256,11 @@ class FantasyData:
                     "Multiplier scoring column must be a subset of scoring columns"
                 )
 
-    def add_scoring_source(self, source_rules: dict) -> FantasyData:
+    def add_scoring_source(self, scoring_source_rules: dict) -> FantasyData:
         """Updates the scoring source rules.
 
         Args:
-            source_rules (dict): Scoring source rules. Required keys
+            scoring_source_rules (dict): Scoring source rules. Required keys
                 are the source name (e.g., 'custom'), 'scoring_columns',
                 and 'multiplier'.
 
@@ -294,11 +293,13 @@ class FantasyData:
                     }}
             >>> fantasy_data.add_scoring_source(new_scoring_source)
         """
-        self._validate_scoring_source_rules(source_rules, self.ff_data.columns.tolist())
-        source_name = list(source_rules.keys())[0]
-        self.scoring[source_name] = source_rules
-        logger.info(f"Scoring source '{source_name}' Added")
-        return FantasyData
+        self._validate_scoring_source_rules(
+            scoring_source_rules, self.ff_data.columns.tolist()
+        )
+        new_scoring_source_name = [key for key in scoring_source_rules.keys()][0]
+        self.scoring = {**self.scoring, **scoring_source_rules}
+        print(f"Added scoring source: {new_scoring_source_name}")
+        logger.info(f"Scoring source '{new_scoring_source_name}' Added")
 
     @staticmethod
     def score_player(
@@ -345,6 +346,9 @@ class FantasyData:
             FantasyData: An updated FantasyData object with the new
                 fantasy points column.
         """
+        # ensure scoring source is valid
+        if scoring_source not in self.scoring.keys():
+            raise KeyError(f"Scoring source '{scoring_source}' not found")
         scoring_source_rules = self.scoring[scoring_source]
         scoring_columns = set(scoring_source_rules["scoring_columns"].keys()) & set(
             self.ff_data.columns

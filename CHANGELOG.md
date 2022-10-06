@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.4 (2022-10-06)
+### Fix
+* Add additional edge-cases for player id ([`4a7c1ec`](https://github.com/thecodeforest/fantasyfootball/commit/4a7c1ecb1275c43bfb2a0ce3309a27b601a82faa))
+
 ## v0.4.3 (2022-10-05)
 ### Documentation
 * Update readme with new fields ([`e227f05`](https://github.com/thecodeforest/fantasyfootball/commit/e227f053f330cce30a4f7260cb5fc637ed24e57c))

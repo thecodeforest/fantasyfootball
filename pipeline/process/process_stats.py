@@ -285,10 +285,6 @@ if __name__ == "__main__":
         / "raw"
         / data_type
     )
-    # if data exists in the processed directory, delete it
-    delete_files_in_staging_datasets_dir(
-        dir_path=raw_data_dir.parent.parent / "processed" / data_type
-    )
     raw_stats_files = raw_data_dir.glob("*.csv")
     for player_stats_path in raw_stats_files:
         clean_stats_df = pd.read_csv(player_stats_path, keep_default_na=False)

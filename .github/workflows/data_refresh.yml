@@ -54,8 +54,6 @@ jobs:
 
         python pipeline/collect/collect_players.py --season_year $SEASON_YEAR
         python pipeline/process/process_players.py --season_year $SEASON_YEAR
-# cannot collect historical salary or betting data; can only be run in the current season
-
         if [ $SEASON_YEAR -ge $YEAR ]; then
           python pipeline/collect/collect_salary.py --season_year $SEASON_YEAR
           python pipeline/process/process_salary.py --season_year $SEASON_YEAR --s3_bucket $S3_BUCKET_NAME

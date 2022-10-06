@@ -65,7 +65,7 @@ jobs:
         python pipeline/collect/collect_stats.py --season_year $SEASON_YEAR
         python pipeline/process/process_stats.py --season_year $SEASON_YEAR
 
-        python pipeline/collect/collect_weather.py --season_year $SEASON_YEAR
+        python pipeline/collect/collect_weather.py --season_year $SEASON_YEAR --open_weather_api_key $OPEN_WEATHER_API_KEY
         python pipeline/process/process_weather.py --season_year $SEASON_YEAR     
 
         python pipeline/collect/collect_injury.py --season_year $SEASON_YEAR

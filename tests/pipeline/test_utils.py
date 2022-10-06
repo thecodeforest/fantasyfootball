@@ -12,6 +12,7 @@ from pipeline.utils import (  # noqa: E402
     retrieve_team_abbreviation,
     collapse_cols_to_str,
     map_player_names,
+    dedup_with_agg,
 )
 
 
@@ -93,4 +94,31 @@ def test_concat_ff_csv(create_csv_files):
     expected = pd.DataFrame({"col1": ["a", "b", "c", "d"], "col2": [1, 2, 3, 4]})
     file_paths = create_csv_files
     result = concat_ff_csv(file_paths)
+    assert expected.equals(result)
+
+
+def test_dedup_with_agg():
+    columns = ["name", "position", "year", "week", "fanduel_salary"]
+    expected = pd.DataFrame(
+        [
+            ["Justin Herbert", "QB", 2022, 5, 8200],
+            ["Keenan Allen", "WR", 2022, 5, 7000],
+            ["Mike Williams", "WR", 2022, 5, 7400],
+        ],
+        columns=columns,
+    )
+
+    duplicated_df = pd.DataFrame(
+        [
+            ["Mike Williams", "WR", 2022, 5, 7400],
+            ["Keenan Allen", "WR", 2022, 5, 7000],
+            ["Mike Williams", "WR", 2022, 5, 4500],
+            ["Justin Herbert", "QB", 2022, 5, 8200],
+        ],
+        columns=columns,
+    )
+    keys = ["name", "position", "year", "week"]
+    agg_col = "fanduel_salary"
+    strategy = "max"
+    result = dedup_with_agg(duplicated_df, keys, agg_col, strategy)
     assert expected.equals(result)

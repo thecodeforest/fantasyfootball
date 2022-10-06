@@ -196,7 +196,12 @@ def collect_stats(
     Returns:
         pd.DataFrame: The season stats for a given player.
     """
-    player_id_edge_cases = {"Derek Carr": "CarrDe02", "Derek Carrier": "CarrDe00"}
+    player_id_edge_cases = {
+        "Derek Carr": "CarrDe02",
+        "Derek Carrier": "CarrDe00",
+        "Equanimeous St. Brown": "St.BEq00",
+        "Deonte Harty": "HarrDe07",
+    }
     first_name, *last_name = player_name.split(" ")
     last_name = last_name[0]
     if len(last_name) < 4:

@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.7 (2022-10-06)
+### Fix
+* Pull changes before commiting new data ([`2805025`](https://github.com/thecodeforest/fantasyfootball/commit/2805025885524245e547c142a1b0c59d74dfe1e8))
+
 ## v0.4.6 (2022-10-06)
 
 

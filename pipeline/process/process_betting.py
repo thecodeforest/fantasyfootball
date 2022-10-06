@@ -17,6 +17,7 @@ from pipeline.utils import (  # noqa: E402
     read_args,
     read_ff_csv,
     retrieve_team_abbreviation,
+    check_if_data_exists,
 )
 
 
@@ -115,9 +116,18 @@ if __name__ == "__main__":
         clean_betting_df = pd.concat([clean_betting_df, game_projections_df])
         row_start += 2
         row_end += 2
-    file_name = f"week_{current_week}_betting.csv"
-    wr.s3.to_csv(clean_betting_df, f"{s3_io_path}/{file_name}", index=False)
-    all_files = wr.s3.list_objects(s3_io_path)
-    clean_betting_df = wr.s3.read_csv(all_files)
 
-    clean_betting_df.write_ff_csv(root_dir, args.season_year, dir_type, data_type)
+    if wr.s3.list_objects(s3_io_path):
+        existing_data = wr.s3.read_csv(f"{s3_io_path}/{data_type}.csv")
+        data_exists = check_if_data_exists(
+            new_data=clean_betting_df, existing_data=existing_data, time_column="date"
+        )
+        if data_exists:
+            existing_data.write_ff_csv(root_dir, args.season_year, dir_type, data_type)
+        else:
+            clean_salary_df = pd.concat([existing_data, clean_betting_df])
+            clean_salary_df.write_ff_csv(
+                root_dir, args.season_year, dir_type, data_type
+            )
+    else:
+        clean_betting_df.write_ff_csv(root_dir, args.season_year, dir_type, data_type)

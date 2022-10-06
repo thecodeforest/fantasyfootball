@@ -10,13 +10,17 @@ from janitor import clean_names
 sys.path.append(str(Path.cwd()))
 from pipeline.pipeline_config import root_dir  # noqa: E402
 from pipeline.pipeline_logger import logger  # noqa: E402
-from pipeline.utils import get_module_purpose, read_args, write_ff_csv  # noqa: E402
+from pipeline.utils import (  # noqa: E402
+    get_module_purpose,
+    read_args,
+    write_ff_csv,
+    delete_files_in_staging_datasets_dir,
+)
 
 REQUIRED_COLUMNS = {
     "player_columns": ["pid", "name"],
     "game_columns": ["tm", "opp", "is_active", "date", "result", "is_away", "is_start"],
     "stats_columns": [
-        "age",
         "g_nbr",
         "receiving_tgt",
         "receiving_rec",
@@ -280,6 +284,10 @@ if __name__ == "__main__":
         / str(args.season_year)
         / "raw"
         / data_type
+    )
+    # if data exists in the processed directory, delete it
+    delete_files_in_staging_datasets_dir(
+        dir_path=raw_data_dir.parent.parent / "processed" / data_type
     )
     raw_stats_files = raw_data_dir.glob("*.csv")
     for player_stats_path in raw_stats_files:

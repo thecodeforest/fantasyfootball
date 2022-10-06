@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path, PosixPath
 from datetime import datetime, timedelta
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import pandas as pd
 import pandas_flavor as pf
@@ -350,3 +350,63 @@ def fetch_current_week(calendar_df: pd.DataFrame) -> str:
     # filter calendar to get the week
     week = str(calendar_df.query("date == @sunday_date")["week"].values[0])
     return week
+
+
+def check_if_data_exists(
+    new_data: pd.DataFrame, existing_data: pd.DataFrame, time_column: str
+) -> bool:
+    """For data that is updated as a weekly snapshot, check that is has not already been
+    updated for the current time period (week). If it has,
+    then do not append the new weekly data
+
+    Args:
+        new_data (pd.DataFrame): New data to be appended
+        existing_data (pd.DataFrame): Existing data to be appended to
+        time_column (str): Column name of the time period, such as week or date
+
+    Returns:
+        bool: True if the data has already been updated for the current time period,
+        False otherwise
+
+    Raises:
+        ValueError: If the most_recent_time_value_existing_data
+            is less than the most_recent_time_value_new_data
+    """
+    most_recent_time_value_new_data = max(new_data[time_column])
+    most_recent_time_value_existing_data = max(existing_data[time_column])
+    if most_recent_time_value_new_data == most_recent_time_value_existing_data:
+        return True
+    if most_recent_time_value_new_data > most_recent_time_value_existing_data:
+        return False
+    else:
+        raise ValueError("New data should not be less than existing data")
+
+
+def delete_files_in_staging_datasets_dir(dir_path: Path) -> None:
+    """Deletes all files in the staging_datasets directory"""
+    if "staging_datasets" not in str(dir_path):
+        raise ValueError("deletion is restricted to staging data only")
+    for file in dir_path.iterdir():
+        file.unlink()
+
+
+def dedup_with_agg(
+    df: pd.DataFrame, keys: Union[str, list], agg_col: str, strategy: str
+):
+    """Deduplicate dataframe based on keys and aggregate agg_col based on strategy.
+
+    Args:
+        df (pd.DataFrame): dataframe to deduplicate
+        keys (Union[str, list]): keys to group by
+        agg_col (str): column to aggregate
+        strategy (str): strategy to aggregate agg_col.
+        Options are 'sum', 'mean', 'max', 'min'
+
+    Returns:
+        pd.DataFrame: deduplicated dataframe
+    """
+    # check if strategy is valid
+    if strategy not in ["sum", "mean", "max", "min"]:
+        raise ValueError(f"Invalid strategy: {strategy}")
+    df = df.groupby(keys).agg({agg_col: strategy}).reset_index()
+    return df

@@ -17,6 +17,8 @@ from pipeline.utils import (  # noqa: E402
     map_player_names,
     read_args,
     read_ff_csv,
+    check_if_data_exists,
+    dedup_with_agg,
 )
 
 
@@ -93,11 +95,25 @@ if __name__ == "__main__":
     clean_salary_df = clean_salary_df[
         [clean_salary_df.columns.tolist()[-1]] + clean_salary_df.columns.tolist()[:-1]
     ]
-    # write this weeks clean data to S3
-    week = str(clean_salary_df["week"].iloc[0])
-    file_name = f"week_{week}_salary.csv"
-    wr.s3.to_csv(clean_salary_df, f"{s3_io_path}/{file_name}", index=False)
-
-    all_files = wr.s3.list_objects(s3_io_path)
-    clean_salary_df = wr.s3.read_csv(all_files)
-    clean_salary_df.write_ff_csv(root_dir, args.season_year, dir_type, data_type)
+    # ensure there is only 1 salary per player
+    clean_salary_df = dedup_with_agg(
+        clean_salary_df,
+        keys=["name", "position", "season_year", "week"],
+        agg_col="fanduel_salary",
+        strategy="max",
+    )
+    # check if directory in S3 exists
+    if wr.s3.list_objects(s3_io_path):
+        existing_data = wr.s3.read_csv(f"{s3_io_path}/{data_type}.csv")
+        data_exists = check_if_data_exists(
+            new_data=clean_salary_df, existing_data=existing_data, time_column="week"
+        )
+        if data_exists:
+            existing_data.write_ff_csv(root_dir, args.season_year, dir_type, data_type)
+        else:
+            clean_salary_df = pd.concat([existing_data, clean_salary_df])
+            clean_salary_df.write_ff_csv(
+                root_dir, args.season_year, dir_type, data_type
+            )
+    else:
+        clean_salary_df.write_ff_csv(root_dir, args.season_year, dir_type, data_type)

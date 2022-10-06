@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.5 (2022-10-06)
+### Fix
+* Add api key for open weather ([`efe1fd7`](https://github.com/thecodeforest/fantasyfootball/commit/efe1fd7d83bc5332d45559a69a2a315e0602c50f))
+* Remove delete files step from process stats ([`148b7f1`](https://github.com/thecodeforest/fantasyfootball/commit/148b7f1c6894f045056b858b780855263efe9203))
+* Remove incorrect comment from data refresh workflow ([`a961011`](https://github.com/thecodeforest/fantasyfootball/commit/a9610116b4613a845a0b21d2b1ce6b2a811e1bdf))
+
 ## v0.4.4 (2022-10-06)
 ### Fix
 * Add additional edge-cases for player id ([`4a7c1ec`](https://github.com/thecodeforest/fantasyfootball/commit/4a7c1ecb1275c43bfb2a0ce3309a27b601a82faa))

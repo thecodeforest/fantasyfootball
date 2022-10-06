@@ -2,6 +2,9 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.6 (2022-10-06)
+
+
 ## v0.4.5 (2022-10-06)
 ### Fix
 * Add api key for open weather ([`efe1fd7`](https://github.com/thecodeforest/fantasyfootball/commit/efe1fd7d83bc5332d45559a69a2a315e0602c50f))

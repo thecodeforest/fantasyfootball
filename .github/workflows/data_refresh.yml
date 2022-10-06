@@ -1,13 +1,13 @@
 name: Data Pipeline
 
-# on: [push]
+on: [push]
 
 jobs: 
   data-pipeline: 
     name: Data Pipeline 
     runs-on: ubuntu-latest 
     env:
-      SEASON_YEAR: 2016
+      SEASON_YEAR: 2022
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
       OPEN_WEATHER_API_KEY: ${{ secrets.OPEN_WEATHER_API_KEY }}
@@ -54,8 +54,6 @@ jobs:
 
         python pipeline/collect/collect_players.py --season_year $SEASON_YEAR
         python pipeline/process/process_players.py --season_year $SEASON_YEAR
-# cannot collect historical salary or betting data; can only be run in the current season
-
         if [ $SEASON_YEAR -ge $YEAR ]; then
           python pipeline/collect/collect_salary.py --season_year $SEASON_YEAR
           python pipeline/process/process_salary.py --season_year $SEASON_YEAR --s3_bucket $S3_BUCKET_NAME
@@ -67,7 +65,7 @@ jobs:
         python pipeline/collect/collect_stats.py --season_year $SEASON_YEAR
         python pipeline/process/process_stats.py --season_year $SEASON_YEAR
 
-        python pipeline/collect/collect_weather.py --season_year $SEASON_YEAR
+        python pipeline/collect/collect_weather.py --season_year $SEASON_YEAR --open_weather_api_key $OPEN_WEATHER_API_KEY
         python pipeline/process/process_weather.py --season_year $SEASON_YEAR     
 
         python pipeline/collect/collect_injury.py --season_year $SEASON_YEAR

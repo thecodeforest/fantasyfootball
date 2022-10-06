@@ -1,13 +1,13 @@
 name: Data Pipeline
 
-# on: [push]
+on: [push]
 
 jobs: 
   data-pipeline: 
     name: Data Pipeline 
     runs-on: ubuntu-latest 
     env:
-      SEASON_YEAR: 2016
+      SEASON_YEAR: 2022
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
       OPEN_WEATHER_API_KEY: ${{ secrets.OPEN_WEATHER_API_KEY }}

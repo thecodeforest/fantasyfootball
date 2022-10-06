@@ -153,7 +153,7 @@ class FantasyData:
                     raise ValueError(
                         f"{data} does not contain all the required keys: {keys}"
                     )
-                season_ff_df = pd.merge(season_ff_df, dataset_df, on=keys, how="left")
+                season_ff_df = pd.merge(season_ff_df, dataset_df, how="left")
         return season_ff_df
 
     def load_data(

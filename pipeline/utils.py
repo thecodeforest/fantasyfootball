@@ -330,6 +330,7 @@ def read_ff_csv(dir_path: PosixPath) -> pd.DataFrame:
         return df
 
 
+# TO DO: create logic to handle if function is called outside of the season
 def fetch_current_week(calendar_df: pd.DataFrame) -> str:
     """Fetches the current week from the calendar dataframe."""
     # first determine which day of the week it is

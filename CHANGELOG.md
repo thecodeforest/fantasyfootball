@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.8 (2022-10-07)
+### Fix
+* Address data leakage issue for defense rankings ([`22fedf7`](https://github.com/thecodeforest/fantasyfootball/commit/22fedf718272f953d9897093e1f6d1313cd8c0d2))
+* Address moving average issue ([`1f3a2e9`](https://github.com/thecodeforest/fantasyfootball/commit/1f3a2e94481fc4ff5bbafabd05edb537429a3471))
+
 ## v0.4.7 (2022-10-06)
 ### Fix
 * Pull changes before commiting new data ([`2805025`](https://github.com/thecodeforest/fantasyfootball/commit/2805025885524245e547c142a1b0c59d74dfe1e8))

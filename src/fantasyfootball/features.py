@@ -77,9 +77,17 @@ class MAFeatureTransformer(BaseEstimator, TransformerMixin):
         for col in self.window_columns:
             for window in self.n_week_window:
                 col_name = f"{col}_ma_{window}"
+                # sort by player_group_columns and week
+                X = X.sort_values(self.player_group_columns + ["week"])
+                # shift the column by 1 to get the previous value
+                X = X.assign(
+                    **{col_name: X.groupby(self.player_group_columns)[col].shift(1)}
+                )
                 X = X.assign(
                     **{
-                        col_name: X.groupby(self.player_group_columns)[col].transform(
+                        col_name: X.groupby(self.player_group_columns)[
+                            col_name
+                        ].transform(
                             lambda x: x.rolling(
                                 window, min_periods=1, center=False
                             ).mean()
@@ -466,6 +474,18 @@ class FantasyFeatures:
         stats_df["is_start"] = 1
         future_week_df = pd.merge(
             future_week_df, stats_df, how="left", on=["name", "team"]
+        )
+        # load in defensive stats data and add in for future week
+        defense_df = pd.read_csv(ff_data_dir / "defense.gz", compression="gzip")
+        # drop the defensive ranking fields in future week df, becauses they are nan
+        future_week_df = future_week_df.drop(
+            columns=[col for col in future_week_df.columns if "_def_rank" in col]
+        )
+        # filter to future week
+        defense_df = defense_df[defense_df["week"] == max_week + 1]
+        # add the defensive rankings back into the future frame
+        future_week_df = pd.merge(
+            future_week_df, defense_df, how="left", on=["opp", "week", "season_year"]
         )
         future_week_df["is_future_week"] = 1
         self.df = (

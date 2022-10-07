@@ -131,29 +131,33 @@ def rank_defense(df: pd.DataFrame, stats_columns: List[str]) -> pd.DataFrame:
 
 
 @pf.register_dataframe_method
-def create_future_defense_rankings(df: pd.DataFrame, current_week: str) -> pd.DataFrame:
-    """Creates a dataframe containing the future defense rankings for each team based
-       their ranking from the prior week. Simply carries over the prior week's ranking.
+def append_future_week_defense_rankings(
+    df: pd.DataFrame, season_year: int
+) -> pd.DataFrame:
+    """Shifts the previous week's defense rankings to the current week.
+
 
     Args:
-        df (pd.DataFrame): The dataframe containing the defense rankings.
-        current_week (str): The current week of the season. Note that
-            this week should not have any games played yet.
+        df (pd.DataFrame): defense rankings for each team.
+        season_year (int): The current season year.
 
     Returns:
-        pd.DataFrame: The future defense rankings for each team along with the
-            historical defense rankings.
+        pd.DataFrame: The defense rankings for each team based on cumulative stats
+        leading up to the current week.
     """
-    most_recent_actual_week = max(df["week"])
-    if most_recent_actual_week < int(current_week):
-        most_recent_week_df = df.query(f"week == {most_recent_actual_week}")
-        # replace week with current_week
-        most_recent_week_df["week"] = int(current_week)
-        # concat with defense_stats_df
-        df = pd.concat([df, most_recent_week_df])
-        return df
-    else:
-        return df
+    max_week = max(df["week"])
+    is_add_future_week = (season_year > 2020 and max_week <= 17) or (
+        season_year <= 2020 and max_week <= 16
+    )
+    if is_add_future_week:
+        future_week_place_holder_df = pd.DataFrame(
+            zip([max_week + 1] * len(df["opp"].unique()), df["opp"].unique()),
+            columns=["week", "opp"],
+        )
+        df = pd.concat([df, future_week_place_holder_df])
+    for def_rank_column in [x for x in df.columns if x.endswith("_rank")]:
+        df = df.assign(**{def_rank_column: df.groupby("opp")[def_rank_column].shift(1)})
+    return df
 
 
 if __name__ == "__main__":
@@ -179,9 +183,8 @@ if __name__ == "__main__":
         )
         cumulative_stats.insert(0, "week", week)
         defense_stats_df = pd.concat([defense_stats_df, cumulative_stats])
-    current_week = fetch_current_week(calendar_df)
-    defense_stats_df = defense_stats_df.create_future_defense_rankings(
-        current_week=current_week
+    defense_stats_df = defense_stats_df.append_future_week_defense_rankings(
+        season_year=args.season_year
     )
     defense_stats_df["season_year"] = args.season_year
     defense_stats_df.write_ff_csv(root_dir, args.season_year, dir_type, data_type)

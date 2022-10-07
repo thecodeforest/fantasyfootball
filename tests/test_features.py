@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import pytest
 from fantasyfootball.config import data_sources, root_dir
 from fantasyfootball.features import (
@@ -425,7 +426,18 @@ def test_add_moving_average_feature(df):
     window_columns = "passing_yds"
     n_week_window = 2
     expected_column_name = "passing_yds_ma_2"
-    expected_values = [0.0, 148.5, 254.0, 293.0, 0.0, 445.0, 222.5, 195.0, 234.5, 229.0]
+    expected_values = expected_values = [
+        0,
+        0,
+        148.5,
+        254.0,
+        0,
+        0,
+        445.0,
+        0,
+        195.0,
+        234.5,
+    ]
     features = FantasyFeatures(df, y="actual_pts", position="QB")
     features.add_moving_avg_feature(
         n_week_window=n_week_window, window_columns=window_columns
@@ -435,8 +447,8 @@ def test_add_moving_average_feature(df):
     # check column name correctly formatted
     assert expected_column_name in result.columns
 
-    # check column values correct
-    assert result[expected_column_name].values.tolist() == expected_values
+    # check column values correct, also fillna(0) to account for NaNs
+    assert result[expected_column_name].fillna(0).values.tolist() == expected_values
 
 
 def test_add_target_encoded_feature(df):

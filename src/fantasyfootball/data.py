@@ -156,6 +156,59 @@ class FantasyData:
                 season_ff_df = pd.merge(season_ff_df, dataset_df, how="left")
         return season_ff_df
 
+    def _filter_to_most_recent_complete_week(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Filters the dataframe to the most recent week that has complete data in-season.
+
+        Args:
+            df (pd.DataFrame): The dataframe
+            containing all historical fantasy football data
+
+        Raises:
+            ValueError: If the most recent week in a season has
+            less than 100 observations.Typically, values should be around 400.
+            Less than 100 indicates an incomplete week.
+
+        Returns:
+            pd.DataFrame: If the most recent week is in season,
+            the dataframe is filtered to the most recent week.
+        """
+        data_path = root_dir / "datasets" / "season" / str(self.season_year_end)
+        calendar_df = pd.read_csv(data_path / "calendar.gz", compression="gzip")
+        stats_df = pd.read_csv(data_path / "stats.gz", compression="gzip")
+        # find most recent season in calendar
+        max_season_year_calendar = calendar_df["season_year"].max()
+        if self.season_year_end == max_season_year_calendar:
+            calendar_df = calendar_df[
+                calendar_df["season_year"] == self.season_year_end
+            ]
+            # filter only to complete games this season
+            stats_df = stats_df.merge(
+                calendar_df, on=["date", "team", "opp", "is_away"]
+            )
+            # take a count of number of observations for the most recent week
+            obs_most_recent_wk = (
+                stats_df["week"]
+                .value_counts()
+                .reset_index()
+                .sort_values("index")
+                .rename(columns={"index": "week", "week": "count"})
+                .tail(1)
+            )
+            if obs_most_recent_wk["count"].values[0] > 100:
+                most_recent_wk = obs_most_recent_wk["week"].values[0]
+                most_recent_wk_date = calendar_df[
+                    calendar_df["week"] == most_recent_wk
+                ]["date"].max()
+                # filter ff_df to be less than or equal to the most recent week date
+                df = df[df["date"] <= most_recent_wk_date]
+                return df
+            else:
+                raise ValueError(
+                    "Most recent week < 100 observations. Check data is complete."
+                )
+        else:
+            return df
+
     def load_data(
         self, data_sources: dict = data_sources, filter_final_season_week: bool = True
     ) -> FantasyData:
@@ -195,6 +248,8 @@ class FantasyData:
                 )
                 season_ff_df = season_ff_df[season_ff_df["week"] != max_week]
             ff_df = pd.concat([ff_df, season_ff_df])
+        # if most recent season is incomplete, filter to the most recent complete week
+        ff_df = self._filter_to_most_recent_complete_week(ff_df)
         self.ff_data = ff_df
 
     @staticmethod

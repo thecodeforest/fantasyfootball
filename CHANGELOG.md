@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.11 (2022-10-11)
+### Documentation
+* Update incorrect url for tutorial notebook ([`b15b826`](https://github.com/thecodeforest/fantasyfootball/commit/b15b82609282884105e46802249c83d387ce29e2))
+
 ## v0.4.10 (2022-10-11)
 ### Fix
 * Addresses issue #41. Filter only to completed games when in-season ([`a800e59`](https://github.com/thecodeforest/fantasyfootball/commit/a800e594f51bc66e45f5366f3b2212780f020010))

@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.10 (2022-10-11)
+### Fix
+* Addresses issue #41. Filter only to completed games when in-season ([`a800e59`](https://github.com/thecodeforest/fantasyfootball/commit/a800e594f51bc66e45f5366f3b2212780f020010))
+
 ## v0.4.9 (2022-10-11)
 ### Fix
 * Update output of ploty to 'png' ([`4f1352b`](https://github.com/thecodeforest/fantasyfootball/commit/4f1352bb7fc573b2a71b22824b9624879064fa13))

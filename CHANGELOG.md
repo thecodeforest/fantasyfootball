@@ -2,6 +2,21 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.9 (2022-10-11)
+### Fix
+* Update output of ploty to 'png' ([`4f1352b`](https://github.com/thecodeforest/fantasyfootball/commit/4f1352bb7fc573b2a71b22824b9624879064fa13))
+* Update output of ploty to 'png' ([`246bb42`](https://github.com/thecodeforest/fantasyfootball/commit/246bb42d6afed4d72b30291de040b942938b16b8))
+
+### Documentation
+* Add link to tutorial notebook in readme ([`18331d2`](https://github.com/thecodeforest/fantasyfootball/commit/18331d2e271222d66c49325c1b265f7f26129891))
+* Fix type-o ([`18aa81f`](https://github.com/thecodeforest/fantasyfootball/commit/18aa81f15ef94d7b52dee7e4f6583d59fe0eea38))
+* Fix type-o ([`a72a4b8`](https://github.com/thecodeforest/fantasyfootball/commit/a72a4b84b31d6a797c090521d88e883a10ce90bf))
+* Resize plot ([`d1fc495`](https://github.com/thecodeforest/fantasyfootball/commit/d1fc49589c852df4c882371cf4671295b7b934a3))
+* Update plot appearance ([`9016066`](https://github.com/thecodeforest/fantasyfootball/commit/901606665dd8072328d67d65eaf4fb4f0239ea4c))
+* Update plot appearance ([`f8faf0a`](https://github.com/thecodeforest/fantasyfootball/commit/f8faf0ac488e2de4ae73ce8c9bfc1ce7c8bdf7fb))
+* Add notebook for inference ([`3978dfd`](https://github.com/thecodeforest/fantasyfootball/commit/3978dfdfbf9a191db1c54486d004821e1c5cc553))
+* Add data for inference notebook ([`4bc4db2`](https://github.com/thecodeforest/fantasyfootball/commit/4bc4db26d67444b615ccfbab03d5f59a1601a617))
+
 ## v0.4.8 (2022-10-07)
 ### Fix
 * Address data leakage issue for defense rankings ([`22fedf7`](https://github.com/thecodeforest/fantasyfootball/commit/22fedf718272f953d9897093e1f6d1313cd8c0d2))

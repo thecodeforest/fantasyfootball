@@ -11,7 +11,7 @@
 
 **fantasyfootball** is a Python package that provides up-to-date game data, including player statistics, betting lines, injuries, defensive rankings, and game-day weather data. While many websites offer NFL game data, obtaining it in a format appropriate for analysis or inference requires either (1) a paid subscription or (2) manual weekly downloads with extensive data cleaning. **fantasy football** centralizes game data in a single location while ensuring it is up-to-date throughout the season.
 
-Additionally, **fantasyfootball** streamlines the creation of features for in-season, player-level fantasy point projections. The resulting projections can then determine weekly roster decisions. 
+Additionally, **fantasyfootball** streamlines the creation of features for in-season, player-level fantasy point projections. The resulting projections can then determine weekly roster decisions. Check out the [tutorial notebook](https://github.com/thecodeforest/fantasyfootball/blob/inference-example/examples/tutorial.ipynb) to get started! 
 
 ## Installation
 

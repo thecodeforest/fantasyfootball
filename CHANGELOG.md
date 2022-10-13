@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.13 (2022-10-13)
+### Documentation
+* Update readme to reflect recent package changes ([`cc739b1`](https://github.com/thecodeforest/fantasyfootball/commit/cc739b165acde306f2fb7b96740126d400f47b01))
+
 ## v0.4.12 (2022-10-13)
 
 

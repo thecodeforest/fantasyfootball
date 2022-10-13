@@ -34,7 +34,7 @@ Let's start by importing several packages and reading all game data from the 201
 
 ```python
 from janitor import get_features_targets 
-from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
 
 from fantasyfootball.data import FantasyData
 from fantasyfootball.features import FantasyFeatures
@@ -63,10 +63,10 @@ print(lockty_df)
 
 | pid      |   week |   is_away |   receiving_rec |   receiving_td |   receiving_yds |   fanduel_salary |   ff_pts_yahoo |
 |:---------|-------:|----------:|----------------:|---------------:|----------------:|--------------------:|---------------:|
-| LockTy00 |     11 |         0 |               4 |              0 |             115 |                6000 |           13.5 |
-| LockTy00 |     12 |         1 |               3 |              0 |              96 |                6300 |           11.1 |
-| LockTy00 |     13 |         0 |               7 |              1 |              68 |                6500 |           16.3 |
-| LockTy00 |     14 |         1 |               5 |              1 |             142 |                6700 |           24.7 |
+| LockTy00 |     11 |         0 |               4 |              0 |             115 |                6800 |           13.5 |
+| LockTy00 |     12 |         1 |               3 |              0 |              96 |                6800 |           11.1 |
+| LockTy00 |     13 |         0 |               7 |              1 |              68 |                6900 |           16.3 |
+| LockTy00 |     14 |         1 |               5 |              1 |             142 |                7300 |           24.7 |
 
 We'll create the feature set that will feed our predictive model in the following section. The first step is to filter to the most recently completed week for all wide receivers (WR). 
 
@@ -97,13 +97,12 @@ The *is_future_week* field is also added during this step and allows an easy spl
 * `create_ff_signature` - Executes all of the steps used to create "derived features," or features that we've created using some transformation (e.g., a lag or moving average). 
 
 ```python
-
 features.filter_inactive_games(status_column="is_active")
 features.filter_n_games_played_by_season(min_games_played=1)
 features.create_future_week()
 features.add_coefficient_of_variation(n_week_window=16)
 features.add_lag_feature(n_week_lag=1, lag_columns=y)
-features.add_moving_avg_feature(n_week_window=4, window_columns=y)
+features.add_moving_avg_feature(n_week_window=4, window_columns=[y, "off_snaps_pct"])
 features_signature_dict = features.create_ff_signature()
 ```
 
@@ -118,7 +117,7 @@ For the sake of simplicity, we'll leverage a small subset of raw, untransformed 
 
 ```python
 derived_feature_names = features_signature_dict.get("pipeline_feature_names")
-raw_feature_names = ["avg_windspeed", "fanduel_salary"]
+raw_feature_names = ["fanduel_salary", "projected_off_pts"]
 all_features = derived_feature_names + raw_feature_names
 ```
 
@@ -131,9 +130,14 @@ X_future = future_df[all_features]
 Now we can fit a simple model and make predictions for the upcoming week. 
 
 ```python
-rf = RandomForestRegressor(n_estimators=1000, max_depth=4, random_state=0)
-rf.fit(X_hist.values, y_hist.values)
-y_future = rf.predict(X_future.values).round(1)
+xgb = XGBRegressor(
+    objective="reg:squarederror",
+    learning_rate=0.01,
+    max_depth=3,
+    n_estimators=500,
+)
+xgb.fit(X_hist.values, y_hist.values)
+y_future = xgb.predict(X_future.values).round(1)
 ```
 
 Below we'll assign our point predictions back to the `future_df` we created for Week 15 and filter to the three players in question.
@@ -141,19 +145,19 @@ Below we'll assign our point predictions back to the `future_df` we created for 
 ```python
 future_df = future_df.assign(**{f"{y}_pred": y_future})
 players = ["Chris Godwin", "Tyler Lockett", "Keenan Allen"]
-future_df[["name", "team", "opp", "week", "date", f"{y}_pred"]].query(
+future_df[["name", "team", "opp", "week", "date", f"{y}_pred", "cv"]].query(
     "name in @players"
 )
 ```
 | name          | team   | opp   |   week | date       |   ff_pts_yahoo_pred |   cv |
 |:--------------|:-------|:------|-------:|:-----------|--------------------:|-----:|
-| Keenan Allen  | LAC    | KAN   |     15 | 2021-12-16 |                14.1 |   35 |
-| Chris Godwin  | TAM    | NOR   |     15 | 2021-12-19 |                11   |   49 |
-| Tyler Lockett | SEA    | LAR   |     15 | 2021-12-21 |                14   |   74 |
+| Keenan Allen  | LAC    | KAN   |     15 | 2021-12-16 |                12.0 |   35 |
+| Chris Godwin  | TAM    | NOR   |     15 | 2021-12-19 |                13.4 |   49 |
+| Tyler Lockett | SEA    | LAR   |     15 | 2021-12-21 |                11.3 |   74 |
 
 
 
-Keenan Allen and Tyler Lockett are projected to score ~3 more points than Chris Godwin. And while Keenan Allen and Tyler Lockett have similar projections, over the past 16 games, Allen is much more consistent than Lockett. That is, we should put more faith in Allen's 14-point forecast relative to Lockett. When point projections are equivalent, CV can be a second input when deciding between two players. For example, if the goal is to score many points and win the week, a player with a large CV might be the better option, as they have a higher potential ceiling. In contrast, if the goal is to win, and the total points scored are less critical, then a more consistent player with a small CV is the better option. 
+Keenan Allen and Chris Godwin are projected to score ~1-2 more points than Tyler Lockett. And while Chris Godwin and Keenan Allen have similar projections over the past 16 games, Allen is more consistent than Godwin. That is, we should put more faith in Allen's 12-point forecast relative to Godwin. When point projections are equivalent, CV can be a second input when deciding between two players. For example, if the goal is to score many points and win the week, a player with a large CV might be the better option, as they have a higher potential ceiling. In contrast, if the goal is to win, and the total points scored are less critical, then a more consistent player with a small CV is the better option. 
 
 
 

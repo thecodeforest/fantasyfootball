@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fantasyfootball"
-version = "0.4.14"
+version = "0.4.15"
 description = "A package for Fantasy Football data and analysis"
 authors = ["Mark LeBoeuf"]
 license = "MIT"

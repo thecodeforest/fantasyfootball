@@ -2,6 +2,9 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.18 (2022-11-10)
+
+
 ## v0.4.17 (2022-11-03)
 ### Fix
 * Address data cleaning issues when processing betting data, including: ([`58fd393`](https://github.com/thecodeforest/fantasyfootball/commit/58fd393c58d979d75d86448c2a81fafe9d6061a7))

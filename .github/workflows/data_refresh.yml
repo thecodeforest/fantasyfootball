@@ -1,8 +1,11 @@
 name: Data Pipeline
 
 on:
-  schedule:
-    - cron: '0 2 * * 4'
+  push:
+    branches:
+      - main
+# schedule:
+#   - cron: '0 2 * * 4'
 
 jobs: 
   data-pipeline: 

@@ -24,9 +24,9 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
-    # Ensure code formatting adheres to existing guidelines
-    - name: Run Pre-commit hooks
-      uses: pre-commit/action@v3.0.0
+  # Ensure code formatting adheres to existing guidelines
+  # - name: Run Pre-commit hooks
+  # uses: pre-commit/action@v3.0.0
 
     # Install dependencies 
     - name: Install Poetry

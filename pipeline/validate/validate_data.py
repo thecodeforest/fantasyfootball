@@ -221,22 +221,6 @@ schemas = {
         },
         coerce=True,
     ),
-    "betting": pa.DataFrameSchema(
-        {
-            "team": pa.Column(
-                pa.String(), checks=pa.Check.isin(TEAM_ABBREVIATION_MAPPING.values())
-            ),
-            "opp": pa.Column(
-                pa.String(), checks=pa.Check.isin(TEAM_ABBREVIATION_MAPPING.values())
-            ),
-            "projected_off_pts": pa.Column(
-                pa.Float(), checks=pa.Check.greater_than_or_equal_to(0)
-            ),
-            "date": pa.Column(pa.DateTime, checks=pa.Check.in_range(start_dt, end_dt)),
-            "season_year": pa.Column(pa.Int(), checks=pa.Check.eq(args.season_year)),
-        },
-        coerce=True,
-    ),
     "draft": pa.DataFrameSchema(
         {
             # "name": pa.Column(pa.String(), checks=pa.Check.isin(players_list)),

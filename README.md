@@ -117,7 +117,8 @@ For the sake of simplicity, we'll leverage a small subset of raw, untransformed 
 
 ```python
 derived_feature_names = features_signature_dict.get("pipeline_feature_names")
-raw_feature_names = ["fanduel_salary", "projected_off_pts"]
+# to do: add another feature in
+raw_feature_names = ["fanduel_salary"]
 all_features = derived_feature_names + raw_feature_names
 ```
 
@@ -236,20 +237,6 @@ The package provides the following seven datasets by season:
     * `windspeed` - Average daily windspeed (mph)
     * `is_outdoor` - Boolean indicator if stadium is outdoor (1 = is outdoor, 0 = retractable/dome). Note that for stadiums with a retractable roof, it is not possible to determine if roof was open during the game. 
     
-    
-
-
-
-<br>
-
-
-* **betting** - Offensive point projections that are derived from the opening over/under and point-spread. Opening point spreads are refreshed each week on Tuesday.
-
-    * `team` - The three letter abbreviation of team with the point projections
-    * `opp` - The three letter abbreviatino of the team's opponent
-    * `projected_off_pts` - The projected number of points for each team. For example, if the over/under for a game is 50, and one team is favored to win by 4 points, then the favored team is projected to score 27 points, while the underdog is projected to score 23 points. 
-    * `date` - Date (yyyy-mm-dd) of the game
-    * `season_year` - The year of the season
 
 <br>
 

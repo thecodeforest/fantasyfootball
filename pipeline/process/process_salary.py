@@ -1,6 +1,3 @@
-"""url: https://dailyroto.com/nfl-historical-production\
-        -fantasy-points-draftkings-fanduel
-"""
 import sys
 from pathlib import Path
 
@@ -102,13 +99,15 @@ if __name__ == "__main__":
         agg_col="fanduel_salary",
         strategy="max",
     )
-    # check if directory in S3 exists
+    # check if directory in S3 exists -
+    # only during week 1 of the season do we need to check
     if wr.s3.list_objects(s3_io_path):
         existing_data = wr.s3.read_csv(f"{s3_io_path}/{data_type}.csv")
-        data_exists = check_if_data_exists(
+        # check if the "new" data already exists in the existing data
+        future_data_exists = check_if_data_exists(
             new_data=clean_salary_df, existing_data=existing_data, time_column="week"
         )
-        if data_exists:
+        if future_data_exists:
             existing_data.write_ff_csv(root_dir, args.season_year, dir_type, data_type)
         else:
             clean_salary_df = pd.concat([existing_data, clean_salary_df])

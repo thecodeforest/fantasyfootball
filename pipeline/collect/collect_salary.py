@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
 import requests
-from datetime import datetime, timedelta
 
 import pandas as pd
 
@@ -14,6 +13,18 @@ from pipeline.utils import (  # noqa: E402
     write_ff_csv,
     read_ff_csv,
 )  # noqa: E402
+
+"""Collect data based on FanDuel salaries. Data is collected for
+the upcoming, unplayed week. This data is then processed in the
+process_salary module and appended to the existing salary data,
+which is stored in S3. An append will only occur if the data
+coming from collect_salary module has a week number that is
+greater than the max week in the existing salary data. Otherwise,
+an error will be raised.
+The URL below is the source of historical Salary data.
+url: https://dailyroto.com/nfl-historical-production\
+        -fantasy-points-draftkings-fanduel
+"""
 
 
 def collect_salary():

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - betting-fix
 # schedule:
 #   - cron: '0 2 * * 4'
 

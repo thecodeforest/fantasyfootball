@@ -135,7 +135,7 @@ def create_player_id(first_name: str, last_name: str) -> List[str]:
     Returns:
         List[str]: A list of all possible player ids for a given player.
     """
-    player_index = ["0" + str(x) if x <= 9 else str(x) for x in range(0, 20)]
+    player_index = ["0" + str(x) if x <= 9 else str(x) for x in range(0, 10)]
     if first_name_is_abbr(first_name):
         (
             first_name_full,
@@ -180,6 +180,12 @@ def pad_last_name(last_name: str) -> str:
     padding = "".join((4 - len(last_name)) * ["x"])
     last_name += padding
     return last_name
+
+
+# TO DO: Add a function to check which players already exist in S3
+# and only collect stats for those that don't exist.
+
+# TO DO:
 
 
 def collect_stats(
@@ -271,4 +277,4 @@ if __name__ == "__main__":
             continue
         pid = stats_raw["pid"].iloc[0]
         stats_raw.write_ff_csv(root_dir, args.season_year, dir_type, data_type, pid)
-        time.sleep(10)
+        time.sleep(15)

@@ -231,7 +231,6 @@ def collect_stats(
     season_year: int,
     stats_url: str,
     existing_player_data: set,
-    header: dict,
 ) -> pd.DataFrame:
     """Collects the season stats for a given player.
 

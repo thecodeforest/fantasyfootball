@@ -6,7 +6,7 @@ on:
       - main
       - betting-fix
 # schedule:
-#   - cron: '0 2 * * 4'
+#   - cron: '0 2 * * 4' 
 
 jobs: 
   data-pipeline: 

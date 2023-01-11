@@ -5,8 +5,10 @@ import re
 import time
 from itertools import chain, product
 from typing import List, Tuple
+from datetime import datetime, timezone
 
 import pandas as pd
+import boto3
 
 sys.path.append(str(Path.cwd()))
 from pipeline.pipeline_config import root_dir, stats_url  # noqa: E402
@@ -183,13 +185,51 @@ def pad_last_name(last_name: str) -> str:
 
 
 # TO DO: Add a function to check which players already exist in S3
-# and only collect stats for those that don't exist.
+def get_recent_raw_stats(
+    season_year: int, bucket_name: str = "fantasy-football-pipeline"
+) -> set:
+    """Get the contents of the S3 bucket that holds the raw player
+       stats for a given season year.If the bucket is empty,
+       return an empty set. If the bucket is not empty and the
+       contents are from today, return the contents.
 
-# TO DO:
+    Args:
+        season_year (int): The season year for which to get the
+            contents of the S3 bucket.
+        bucket_name (str, optional): The name of the S3 bucket.
+            Defaults to "fantasy-football-pipeline".
+
+    Returns:
+        set: A set of the contents of the S3 bucket for the
+            given season year. (e.g., {'MinsGa00', ''HurtJa00'})
+
+    """
+    key = f"datasets/season/{season_year}/raw/stats"
+    s3 = boto3.resource("s3")
+    bucket = s3.Bucket(bucket_name)
+    # if bucket is empty, return empty dict
+    if not list(bucket.objects.filter(Prefix=key)):
+        return {}
+    today_date = datetime.now().astimezone(timezone.utc).strftime("%Y-%m-%d")
+    bucket_contents = set()
+    for obj in bucket.objects.filter(Prefix=key):
+        # get the last modified date of the object
+        last_modified_date = obj.last_modified.strftime("%Y-%m-%d")
+        if last_modified_date != today_date:
+            continue
+        # get the name of the object - e.g.,
+        # 'datasets/season/2022/raw/stats/MinsGa00_stats.csv'
+        player_id = obj.key.split("/")[-1].replace("_stats.csv", "")
+        bucket_contents.add(player_id)
+    return bucket_contents
 
 
 def collect_stats(
-    player_name: str, player_team: str, season_year: int, stats_url: str
+    player_name: str,
+    player_team: str,
+    season_year: int,
+    stats_url: str,
+    existing_player_data: set,
 ) -> pd.DataFrame:
     """Collects the season stats for a given player.
 
@@ -215,6 +255,9 @@ def collect_stats(
     last_name = clean_player_name(name=last_name, name_part="last")
     player_ids = create_player_id(first_name=first_name, last_name=last_name)
     for player_id in player_ids:
+        if player_id in existing_player_data:
+            logger.info(f"Player {player_id} already exists in S3. Skipping...")
+            continue
         if player_name in player_id_edge_cases.keys():
             player_id = player_id_edge_cases.get(player_name)
         player_url = create_url_by_season(stats_url, last_name, player_id, season_year)
@@ -243,8 +286,9 @@ def collect_stats(
                 stats["pid"] = player_id
                 stats["name"] = player_name
                 return stats
-        except Exception:
+        except Exception as e:
             logger.error(f"Error collecting stats for {player_url}")
+            logger.error(e)
             continue
     return pd.DataFrame(None)
 
@@ -263,6 +307,7 @@ if __name__ == "__main__":
     players = pd.read_csv(
         data_dir.parent.parent / "processed" / "players" / "players.csv"
     )
+    existing_player_data = get_recent_raw_stats(season_year=args.season_year)
     for row in players.itertuples():
         _, player_name, player_team, player_position, _ = row
         logger.info(f"collecting data for {player_name}")
@@ -271,10 +316,11 @@ if __name__ == "__main__":
             player_team=player_team,
             season_year=args.season_year,
             stats_url=stats_url,
+            existing_player_data=existing_player_data,
         )
         if stats_raw.empty:
             logger.error(f"Could not collect stats for {player_name}")
             continue
         pid = stats_raw["pid"].iloc[0]
         stats_raw.write_ff_csv(root_dir, args.season_year, dir_type, data_type, pid)
-        time.sleep(15)
+        time.sleep(5)

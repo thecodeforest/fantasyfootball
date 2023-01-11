@@ -1,6 +1,5 @@
 name: Data Pipeline
 
-# turn off pipeline for season
 on:
   push:
     branches:
@@ -56,30 +55,8 @@ jobs:
         YEAR=$(date +%Y)
         source .venv/bin/activate
 
-# python pipeline/collect/collect_calendar.py --season_year $SEASON_YEAR
-# python pipeline/process/process_calendar.py --season_year $SEASON_YEAR
-
-# python pipeline/collect/collect_players.py --season_year $SEASON_YEAR
-# python pipeline/process/process_players.py --season_year $SEASON_YEAR
-# disable at end of season
-# python pipeline/collect/collect_salary.py --season_year $SEASON_YEAR
-# python pipeline/process/process_salary.py --season_year $SEASON_YEAR --s3_bucket $S3_BUCKET_NAME
-
         python pipeline/collect/collect_stats.py --season_year $SEASON_YEAR
         python pipeline/process/process_stats.py --season_year $SEASON_YEAR
-
-# python pipeline/collect/collect_weather.py --season_year $SEASON_YEAR --open_weather_api_key $OPEN_WEATHER_API_KEY
-# python pipeline/process/process_weather.py --season_year $SEASON_YEAR     
-
-# python pipeline/collect/collect_injury.py --season_year $SEASON_YEAR
-# python pipeline/process/process_injury.py --season_year $SEASON_YEAR
-
-# python pipeline/collect/collect_draft.py --season_year $SEASON_YEAR
-# python pipeline/process/process_draft.py --season_year $SEASON_YEAR
-
-# python pipeline/process/process_defense.py --season_year $SEASON_YEAR
-
-# python pipeline/validate/validate_data.py --season_year $SEASON_YEAR --s3_bucket $S3_BUCKET_NAME
 
         python pipeline/load/load_data.py --season_year $SEASON_YEAR
 
@@ -89,15 +66,5 @@ jobs:
       run: | 
         aws s3 cp "pipeline/logs/pipeline-run-$(date +'%Y-%m-%d').log" "s3://$S3_BUCKET_NAME/logs/"
 
-# - name: Commit Changes
-#   run: |
-#     git pull
-#     git config --global user.name 'MarkLeBoeuf'
-#     git config --global user.email 'markleboeuf2015@u.northwestern.edu'
-#     git add src/fantasyfootball/datasets/*.gz        
-#     git commit -m "data: auto update historical NFL data" 
-
-# - name: Push Changes
-#   uses: ad-m/github-push-action@master
 
 

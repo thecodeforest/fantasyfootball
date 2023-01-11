@@ -257,7 +257,8 @@ def collect_stats(
     for player_id in player_ids:
         if player_id in existing_player_data:
             logger.info(f"Player {player_id} already exists in S3. Skipping...")
-            continue
+            return pd.DataFrame()
+    for player_id in player_ids:
         if player_name in player_id_edge_cases.keys():
             player_id = player_id_edge_cases.get(player_name)
         player_url = create_url_by_season(stats_url, last_name, player_id, season_year)
@@ -289,6 +290,13 @@ def collect_stats(
         except Exception as e:
             logger.error(f"Error collecting stats for {player_url}")
             logger.error(e)
+            if e == "HTTP Error 429: Too Many Requests":
+                # shut down the script
+                logger.error("Too many requests. Shutting down...")
+                sys.exit()
+                # logger.error("Sleeping for 5 minutes...")
+                # time.sleep(300)
+                # logger.error("Resuming...
             continue
     return pd.DataFrame(None)
 

@@ -8,6 +8,7 @@ from typing import List, Tuple
 from datetime import datetime, timezone
 
 import pandas as pd
+import requests
 import boto3
 
 sys.path.append(str(Path.cwd()))
@@ -230,6 +231,7 @@ def collect_stats(
     season_year: int,
     stats_url: str,
     existing_player_data: set,
+    header: dict,
 ) -> pd.DataFrame:
     """Collects the season stats for a given player.
 
@@ -263,7 +265,16 @@ def collect_stats(
             player_id = player_id_edge_cases.get(player_name)
         player_url = create_url_by_season(stats_url, last_name, player_id, season_year)
         try:
-            stats = pd.read_html(player_url)[0]
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36",  # noqa E501
+                "Accept-Language": "en-US,en;q=0.5",
+                "Accept-Encoding": "gzip, deflate",
+                "Connection": "keep-alive",
+                "Upgrade-Insecure-Requests": "1",
+                "TE": "Trailers",
+            }
+            stats = pd.read_html(requests.get(player_url, headers=headers).content)[0]
+            # stats = pd.read_html(player_url, header=header)[0]
             stats.columns = ["_".join(x) for x in stats.columns.to_flat_index()]
             # Ensures player is on correct team
             correct_team = (

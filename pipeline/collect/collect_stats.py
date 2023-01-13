@@ -8,7 +8,7 @@ from typing import List, Tuple
 from datetime import datetime, timezone
 
 import pandas as pd
-import requests
+from urllib.error import HTTPError
 import boto3
 
 sys.path.append(str(Path.cwd()))
@@ -211,12 +211,13 @@ def get_recent_raw_stats(
     # if bucket is empty, return empty dict
     if not list(bucket.objects.filter(Prefix=key)):
         return {}
-    today_date = datetime.now().astimezone(timezone.utc).strftime("%Y-%m-%d")
+    today_date = datetime.now().astimezone(timezone.utc)
     bucket_contents = set()
     for obj in bucket.objects.filter(Prefix=key):
         # get the last modified date of the object
-        last_modified_date = obj.last_modified.strftime("%Y-%m-%d")
-        if last_modified_date != today_date:
+        last_modified_date = obj.last_modified.astimezone(timezone.utc)
+        # if the object was last modified less than 6 days ago, skip it
+        if (today_date - last_modified_date).days < 6:
             continue
         # get the name of the object - e.g.,
         # 'datasets/season/2022/raw/stats/MinsGa00_stats.csv'
@@ -264,16 +265,7 @@ def collect_stats(
             player_id = player_id_edge_cases.get(player_name)
         player_url = create_url_by_season(stats_url, last_name, player_id, season_year)
         try:
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36",  # noqa E501
-                "Accept-Language": "en-US,en;q=0.5",
-                "Accept-Encoding": "gzip, deflate",
-                "Connection": "keep-alive",
-                "Upgrade-Insecure-Requests": "1",
-                "TE": "Trailers",
-            }
-            stats = pd.read_html(requests.get(player_url, headers=headers).content)[0]
-            # stats = pd.read_html(player_url, header=header)[0]
+            stats = pd.read_html(player_url)[0]
             stats.columns = ["_".join(x) for x in stats.columns.to_flat_index()]
             # Ensures player is on correct team
             correct_team = (

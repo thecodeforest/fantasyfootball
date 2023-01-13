@@ -217,7 +217,7 @@ def get_recent_raw_stats(
         # get the last modified date of the object
         last_modified_date = obj.last_modified.astimezone(timezone.utc)
         # if the object was last modified less than 6 days ago, skip it
-        if (today_date - last_modified_date).days < 6:
+        if (today_date - last_modified_date).days > 6:
             continue
         # get the name of the object - e.g.,
         # 'datasets/season/2022/raw/stats/MinsGa00_stats.csv'
@@ -290,15 +290,13 @@ def collect_stats(
                 stats["name"] = player_name
                 return stats
         except Exception as e:
-            logger.error(f"Error collecting stats for {player_url}")
-            logger.error(e)
-            if e == "HTTP Error 429: Too Many Requests":
-                # shut down the script
-                logger.error("Too many requests. Shutting down...")
-                sys.exit()
-                # logger.error("Sleeping for 5 minutes...")
-                # time.sleep(300)
-                # logger.error("Resuming...
+            # if exception type is HTTP Error 429: Too Many Requests, shut down
+            # the script
+            if isinstance(e, HTTPError) and e.code == 429:
+                logger.error(
+                    "HTTP Error 429: Too Many Requests. Shutting down script..."
+                )
+                sys.exit(1)
             continue
     return pd.DataFrame(None)
 

@@ -47,12 +47,6 @@ data_sources = {
         "is_required": False,
         "is_forward_looking": False,
     },
-    "betting": {
-        "keys": ["date", "season_year", "team", "opp"],
-        "cols": ["team", "opp", "projected_off_pts", "date", "season_year"],
-        "is_required": False,
-        "is_forward_looking": True,
-    },
     "salary": {
         "keys": ["name", "position", "season_year", "week"],
         "cols": ["name", "position", "season_year", "week", "fanduel_salary"],

@@ -17,6 +17,7 @@ scikit-learn = {version = "^1.0.2", python = "^3.8"}
 sklearn = "^0.0"
 openpyxl = "^3.0.9"
 html5lib = "^1.1"
+jsonschema = "^4.17.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"

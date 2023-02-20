@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.23 (2023-02-20)
+### Fix
+* Skip any file updated in past 6 days in S3 ([`5533c52`](https://github.com/thecodeforest/fantasyfootball/commit/5533c52b18890eef34d7d4320589011fe9ab6180))
+* Fix header issue ([`d859f24`](https://github.com/thecodeforest/fantasyfootball/commit/d859f24dc7f91884b7c4fc4771eb7e969b062044))
+* Add header to read_html call ([`009ff70`](https://github.com/thecodeforest/fantasyfootball/commit/009ff70d57e4397d5d7afdd339515eebc73cccfe))
+* Address call rate issue ([`2013e86`](https://github.com/thecodeforest/fantasyfootball/commit/2013e86d26b47c93737bbf01d7b6abf76a07f4f9))
+* Increase wait time from 10 to 15 seconds for player stats ([`788cd1a`](https://github.com/thecodeforest/fantasyfootball/commit/788cd1a17ea52fdc1dafa071e1e293110053de95))
+
 ## v0.4.22 (2022-12-14)
 
 

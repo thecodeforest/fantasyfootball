@@ -2,6 +2,9 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.24 (2023-02-20)
+
+
 ## v0.4.23 (2023-02-20)
 ### Fix
 * Skip any file updated in past 6 days in S3 ([`5533c52`](https://github.com/thecodeforest/fantasyfootball/commit/5533c52b18890eef34d7d4320589011fe9ab6180))

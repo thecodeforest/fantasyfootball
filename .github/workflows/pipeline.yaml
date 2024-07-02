@@ -36,7 +36,7 @@ jobs:
     #     OUTPUT_DIR: './data'
 
     - name: Run collect_adp.py
-      run: poetry run python collect_adp.py
+      run: poetry run python ./pipeline/collect/collect_adp.py
       env:
         OUTPUT_DIR: './data'
 

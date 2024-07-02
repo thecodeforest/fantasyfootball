@@ -1,0 +1,54 @@
+name: Fantasy Football Data Pipeline
+
+on:
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  run-scripts:
+    runs-on: ubuntu-latest  # Specifies the runner
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2  # Checks out your repository under $GITHUB_WORKSPACE
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'  # Specify the Python version
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+
+    - name: Configure Poetry
+      run: |
+        echo "$HOME/.local/bin" >> $GITHUB_PATH  # Add Poetry to PATH
+
+    - name: Install dependencies
+      run: poetry install
+
+    - name: Set DATA_PIPELINE_ROOT environment variable
+      run: echo "DATA_PIPELINE_ROOT=${{ github.workspace }}/pipeline_root" >> $GITHUB_ENV
+
+    # - name: Run collect_stats.py
+    #   run: poetry run python collect_stats.py
+    #   env:
+    #     OUTPUT_DIR: './data'
+
+    - name: Run collect_adp.py
+      run: poetry run python collect_adp.py
+      env:
+        OUTPUT_DIR: './data'
+
+    # - name: Run process_stats.py
+    #   run: poetry run python process_stats.py
+
+    # - name: Run process_adp.py
+    #   run: poetry run python process_adp.py
+
+    # Optional: Use this step to upload artifacts (e.g., CSV files)
+    - name: Upload CSV files
+      uses: actions/upload-artifact@v3
+      with:
+        name: csv-files
+        path: ./data/*.csv

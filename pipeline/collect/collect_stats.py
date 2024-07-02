@@ -36,9 +36,8 @@ def collect_stats():
     weeks = list(range(1, 18))
     years = list(range(2022, 2024))
     combinations = list(itertools.product(positions, weeks, years))
-
     for position, week, year in combinations:
-        dir_path = dp_root / str(position) / str(year) / str(week)
+        dir_path = dp_root / 'data' / 'raw' / 'stats' / str(position) / str(year) / str(week)
         file_path = dir_path / f'{position}_{week}_{year}.csv'
         if file_path.exists():
             logger.info(f'{position} stats for week {week} in {year} already exists')

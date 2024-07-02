@@ -51,4 +51,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: csv-files
-        path: ./data/*.csv
+        path: ./pipeline_root/data/raw/adp/**/*.csv

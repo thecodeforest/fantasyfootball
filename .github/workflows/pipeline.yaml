@@ -28,24 +28,44 @@ jobs:
       run: poetry install
 
     - name: Set DATA_PIPELINE_ROOT environment variable
-      run: echo "DATA_PIPELINE_ROOT=${{ github.workspace }}/pipeline_root" >> $GITHUB_ENV
+      run: echo "DATA_PIPELINE_ROOT=${{ github.workspace }}" >> $GITHUB_ENV
 
-    - name: Run collect_adp.py
+    - name: Collect Average Draft Position
       run: poetry run python ./pipeline/collect/collect_adp.py
       env:
         OUTPUT_DIR: './data'
 
-    - name: Upload Raw CSV files
+    - name: Write Average Draft Position
       uses: actions/upload-artifact@v4
       with:
-        name: raw-csv-files
-        path: ./pipeline_root/data/raw/adp/**/*.csv
+        name: raw-adp-files
+        path: ./data/raw/adp/**/*.csv
 
-    - name: Run process_adp.py
+    - name: Collect Player Stats
+      run: poetry run python ./pipeline/collect/collect_stats.py
+      env:
+        OUTPUT_DIR: './data'
+
+    - name: Write Player Stats
+      uses: actions/upload-artifact@v4
+      with:
+        name: raw-stats-files
+        path: ./data/raw/stats/**/*.csv
+
+    - name: Process Average Draft Position
       run: poetry run python ./pipeline/process/process_adp.py
 
-    - name: Upload Processed CSV files
+    - name: Write Processed ADP files
       uses: actions/upload-artifact@v4
       with:
-        name: processed-csv-files
-        path: ./pipeline_root/data/processed/adp/**/*.csv
+        name: processed-adp-files
+        path: ./data/processed/adp/**/*.csv
+
+    - name: Process Player Stats
+      run: poetry run python ./pipeline/process/process_stats.py
+
+    - name: Write Processed stats files
+      uses: actions/upload-artifact@v4
+      with:
+        name: processed-stats-files
+        path: ./data/processed/stats/**/*.csv

@@ -1,312 +1,65 @@
-import sys
-from pathlib import Path
-import re
-from itertools import chain
-
+import os
 import pandas as pd
-import pandas_flavor as pf
-from janitor import clean_names
+from pathlib import Path
+import logging
 
-sys.path.append(str(Path.cwd()))
-from pipeline.pipeline_config import root_dir  # noqa: E402
-from pipeline.pipeline_logger import logger  # noqa: E402
-from pipeline.utils import (  # noqa: E402
-    get_module_purpose,
-    read_args,
-    write_ff_csv,
-    delete_files_in_staging_datasets_dir,
-)
+from pipeline.pipeline_utils import rename_columns, remove_punctuation, format_player_name
+from pipeline.process.process_adp import create_fantasy_draft_id
 
-REQUIRED_COLUMNS = {
-    "player_columns": ["pid", "name"],
-    "game_columns": ["tm", "opp", "is_active", "date", "result", "is_away", "is_start"],
-    "stats_columns": [
-        "g_nbr",
-        "receiving_tgt",
-        "receiving_rec",
-        "receiving_yds",
-        "receiving_td",
-        "rushing_att",
-        "rushing_yds",
-        "rushing_td",
-        "passing_att",
-        "passing_cmp",
-        "passing_yds",
-        "passing_td",
-        "fumbles_fmb",
-        "passing_int",
-        "scoring_2pm",
-        "punt_returns_td",
-        "off_snaps_pct",
-    ],
-}
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
+PLAYER_STATS_COLUMN_MAPPING = {"rsh": "rush_attempts",
+                    "rshyd": "rush_yards",
+                    "exp": "years_in_league",
+                    "rshtd": "rush_touchdowns",
+                    "rec": "receptions",
+                    "recyd": "receiving_yards",
+                    "rectd": "receiving_touchdowns",
+                    "fgm": "field_goals_made",
+                    "fga": "field_goals_attempted",
+                    "xpm": "extra_points_made",
+                    "xpa": "extra_points_attempted",
+                    "cmp": "completions",
+                    "att": "pass_attempts",
+                    "pyd": "pass_yards",
+                    "ptd": "pass_touchdowns",
+                    "int": "interceptions",
+                    }
 
-@pf.register_dataframe_method
-def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
-    """Cleans the column names of the given dataframe by applying the following steps
-       after using the janitor `clean_names` function:
-        * strips any 'unnamed' field, for example 'Unnamed: 0'
-        * replaces the first missing name with 'is_away'
-        * coverts '#' to '_nbr'
-        * converts '%' to '_pct'
+def create_stats_id(row):
+    name = remove_punctuation(row['name'])  # Strip punctuation from the name
+    formatted_name = format_player_name(name)
+    year_of_birth = int(row['season']) - int(row['age'])
+    player_id = formatted_name + str(year_of_birth)
+    return player_id
 
-    Args:
-        df (pd.DataFrame): The dataframe to clean the column names of.
-
-    Returns:
-        pd.DataFrame: The dataframe with cleaned column names.
-    """
-    df = clean_names(df)
-    cols = df.columns
-    cols = [re.sub("unnamed_[0-9]+_level_[0-9]", "", x).strip("_") for x in cols]
-    # away will always be the first empty string following cleaning step above
-    cols[cols.index("")] = "is_away"
-    cols = [x.replace("#", "_nbr") for x in cols]
-    cols = [x.replace("%", "_pct") for x in cols]
-    cols = ["is_active" if x == "status" else x for x in cols]
-    cols = ["is_start" if x == "gs" else x for x in cols]
-    df.columns = cols
-    return df
-
-
-@pf.register_dataframe_method
-def clean_status_column(df: pd.DataFrame) -> pd.DataFrame:
-    """Cleans the status column indicating if a player was playing or not.
-       If a player did not missing any games during a season,
-       the status column will not be present
-       and will need to be added to the dataframe.
-       An active status is denoted by an empty string. Any
-       other status indicates the player was not
-       active (e.g., "Did Not Play", "Covid-19", etc.).
-
-    Args:
-        df (pd.DataFrame): Dataframe with the status column.
-
-    Returns:
-        pd.DataFrame: The Dataframe with the status column cleaned.
-    """
-    # empty string indicates player played, otherwise player was injured, sick, etc.
-    if "is_active" not in df.columns:
-        df["is_active"] = [1] * df.shape[0]
-    else:
-        df["is_active"] = [1 if not x else 0 for x in df["is_active"]]
-    return df
-
-
-@pf.register_dataframe_method
-def add_missing_stats_columns(
-    df: pd.DataFrame, required_columns: dict = REQUIRED_COLUMNS
-) -> pd.DataFrame:
-    """Detects missing columns in the dataframe and adds them to the dataframe.
-       For example, if a player
-       has never thrown a pass, not 'passing' columns will be present
-       in the dataframe.
-
-    Args:
-        df (pd.DataFrame): The dataframe to add missing stats columns to.
-        required_columns (dict, optional): Indicates which
-                                           player stats columns must be included.
-        Defaults to REQUIRED_COLUMNS indicated at the top of this file.
-
-    Raises:
-        ValueError: If a "non-stats" column is missing
-                    (e.g., "pid", "name", "team", "opp",etc.),
-                    an error is raised because filling with zeros is not appropriate.
-
-    Returns:
-        pd.DataFrame: The dataframe with missing stats columns added.
-    """
-    df = df.copy()
-    current_columns = df.columns.tolist()
-    missing_columns = set(chain(*required_columns.values())) - set(current_columns)
-    non_stats_columns = set(
-        chain(
-            *[
-                required_columns[x]
-                for x in required_columns.keys()
-                if x != "stats_columns"
-            ]
-        )
-    )
-    # check for overlap between missing_columns and non_stats_columns
-    missing_non_stats_columns = missing_columns & non_stats_columns
-    if missing_non_stats_columns:
-        raise ValueError(
-            f"Columns {missing_non_stats_columns} are missing but not stats columns."
-        )
-    if missing_columns:
-        for column in missing_columns:
-            df[column] = 0
-    return df
-
-
-@pf.register_dataframe_method
-def select_ff_columns(
-    df: pd.DataFrame, required_columns: dict = REQUIRED_COLUMNS
-) -> pd.DataFrame:
-    """Selects the columns that are required for the fantasy football data.
-
-    Args:
-        df (pd.DataFrame): The dataframe to select the required columns from.
-        required_columns (dict, optional): Indicates which player stats columns
-                                           must be included. Defaults
-                                           to REQUIRED_COLUMNS
-                                           indicated at the top of this file.
-
-    Returns:
-        pd.DataFrame: The dataframe with the required columns selected.
-    """
-    return df[
-        required_columns["player_columns"]
-        + required_columns["game_columns"]
-        + required_columns["stats_columns"]
-    ]
-
-
-def clean_stats_column(col: pd.Series) -> list:
-    """Cleans the column values of the given series by applying the following steps:
-        * Fills NA with "0"
-        * Strips percent signs from the end of the string
-        * Replaces any non-numeric values with "0"
-        * Converts all values to a float
-
-    Args:
-        col (pd.Series): The series to clean the column values of.
-
-    Returns:
-        list: The cleaned column values.
-    """
-    col = col.fillna("0")
-    col = col.astype(str).tolist()
-    col = [x.strip("%") for x in col]
-    numeric_values = [x.replace(".", "").isdigit() for x in col]
-    if not all(numeric_values):
-        non_numeric_value_indexes = [
-            index for (index, value) in enumerate(numeric_values) if not value
-        ]
-        for i in non_numeric_value_indexes:
-            col[i] = "0"
-    col = [float(x) for x in col]
-    return col
-
-
-@pf.register_dataframe_method
-def clean_stats_column_values(
-    df: pd.DataFrame, stats_columns: list = REQUIRED_COLUMNS["stats_columns"]
-) -> pd.DataFrame:
-    df = df.copy()
-    for col in stats_columns:
-        df[col] = clean_stats_column(col=df[col])
-    return df
-
-
-@pf.register_dataframe_method
-def recode_str_to_numeric(
-    df: pd.DataFrame, column: str, target_value: str, replacement_value: int
-) -> pd.DataFrame:
-    """Replaces the target_value with the replacement_value (1, 0) in the given column.
-
-    Args:
-        df (pd.DataFrame): The dataframe to recode the column values of.
-        column (str): The column to recode the values of.
-        target_value (str): The value to replace.
-        replacement_value (int): The value to replace the target_value with.
-                                 Must be 1 or 0.
-
-    Raises:
-        ValueError: If the replacement_value is not 1 or 0, an error is raised.
-
-    Returns:
-        pd.DataFrame: The dataframe with the column values recoded.
-    """
-    if replacement_value not in [0, 1]:
-        raise ValueError("replacement_value must be 0 or 1")
-    other_replacement_value = int(not replacement_value)
-    df = df.assign(
-        **{
-            column: df[column].transform(
-                lambda x: replacement_value
-                if x == target_value
-                else other_replacement_value
-            )
-        }
-    )
-    return df
-
-
-def remove_duplicate_inactive_weeks(df: pd.DataFrame) -> pd.DataFrame:
-    """Addresses data error where players are reported as
-    being both active and inactive for the same week. When
-    this occurs, players are always inactive. Filter
-    only to the inactive week.
-
-    Args:
-        df (pd.DataFrame): Clean stats dataframe
-
-    Returns:
-        pd.DataFrame: Clean stats dataframe without duplicate weeks
-    """
-    # find dates that occur more than once for each player
-    duplicate_date_df = (
-        df["date"].value_counts().to_frame().reset_index().query("date > 1")
-    )
-    n_duplicated_dates = duplicate_date_df.shape[0]
-    if n_duplicated_dates > 1:
-        max_n_duplicates = max(duplicate_date_df["date"])
-        if max_n_duplicates > 2:
-            player_id = df["pid"].iloc[0]
-            logger.info(f"Found {n_duplicated_dates} duplicate dates")
-            logger.info(f"Found {max_n_duplicates} duplicate dates")
-            logger.info(f"Check data for {player_id}")
-            raise ValueError("Found multiple duplicate dates")
-    if not duplicate_date_df.empty:
-        # extract index when player is active (they are actually inactive)
-        duplicate_index = (
-            df[df["date"] == duplicate_date_df["index"][0]]
-            .query("is_active == 1")
-            .index[0]
-        )
-        df = df.drop([df.index[duplicate_index]])
-        df = df.reset_index(drop=True)
-        return df
-    else:
-        return df
-
+def process_stats():
+    logger.info('Processing stats data')
+    dp_root = Path(os.getenv('DATA_PIPELINE_ROOT', Path.cwd().parent.parent))  
+    read_path = dp_root / "data" / "raw" / "stats"
+    write_path = dp_root / "data" / "processed" / "stats"   
+    input_raw_stats_files = [file for file in read_path.glob('**/*.csv') if file.is_file()]  
+    for file_path in input_raw_stats_files:
+        position, year, week, fname = str(file_path).split("/")[-4:]
+        df = pd.read_csv(file_path)
+        df = df.rename(columns=str.lower)
+        df = df.drop(columns=["rank", "fp/g", "fantpt", "fg%", "y/att", 'cm%', 'y/rsh', 'y/rec', 'g'], errors='ignore')
+        df = rename_columns(df, PLAYER_STATS_COLUMN_MAPPING)
+        df = df.fillna(0)
+        df['position'] = position
+        df['position'] = df['position'].str.upper()
+        df['week'] = week
+        df['season'] = year   
+        df.loc[df['position'] == 'PK', 'position'] = 'K'
+        df['team']  = df['name'].apply(lambda x: x.split(" ")[-1])
+        df['name'] = df.apply(lambda row: row['name'].replace(row['team'], ''), axis=1)
+        df['name'] = df['name'].str.strip()
+        df['stats_id'] = df.apply(create_stats_id, axis=1)
+        df['draft_id'] = df.apply(create_fantasy_draft_id, axis=1)
+        Path(write_path / position).mkdir(parents=True, exist_ok=True)
+        df.to_csv(Path(write_path) / position / fname, index=False)
+    logger.info('Stats data processing complete')
 
 if __name__ == "__main__":
-    args = read_args()
-    dir_type, data_type = get_module_purpose(module_path=__file__)
-    raw_data_dir = (
-        root_dir
-        / "staging_datasets"
-        / "season"
-        / str(args.season_year)
-        / "raw"
-        / data_type
-    )
-    raw_stats_files = raw_data_dir.glob("*.csv")
-    for player_stats_path in raw_stats_files:
-        clean_stats_df = pd.read_csv(player_stats_path, keep_default_na=False)
-        pid = clean_stats_df["pid"].iloc[0]
-        logger.info(f"Processing player {pid}")
-        clean_stats_df = (
-            clean_stats_df.clean_column_names()
-            .rename(columns={"gs": "is_start"})
-            .clean_status_column()
-            .add_missing_stats_columns()
-            .select_ff_columns()
-            .clean_stats_column_values()
-            .query("~date.str.contains('Games')")
-            .recode_str_to_numeric(
-                column="is_away", target_value="@", replacement_value=1
-            )
-            .recode_str_to_numeric(
-                column="is_start", target_value="*", replacement_value=1
-            )
-            .rename(columns={"tm": "team"})
-        )
-        clean_stats_df = remove_duplicate_inactive_weeks(clean_stats_df)
-        clean_stats_df.write_ff_csv(
-            root_dir, args.season_year, dir_type, data_type, pid
-        )
+    process_stats()

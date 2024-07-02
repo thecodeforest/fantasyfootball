@@ -42,7 +42,7 @@ jobs:
         path: ./pipeline_root/data/raw/adp/**/*.csv
 
     - name: Run process_adp.py
-      run: poetry run python ./pipeline/collect/process_adp.py
+      run: poetry run python ./pipeline/process/process_adp.py
 
     - name: Upload Processed CSV files
       uses: actions/upload-artifact@v4

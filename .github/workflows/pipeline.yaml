@@ -1,28 +1,28 @@
 name: Fantasy Football Data Pipeline
 
 on:
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:
 
 jobs:
   run-scripts:
-    runs-on: ubuntu-latest  # Specifies the runner
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: ${{ github.workspace }}
 
     steps:
     - name: Check out repository
-      uses: actions/checkout@v2  # Checks out your repository under $GITHUB_WORKSPACE
+      uses: actions/checkout@v3
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.10'  # Specify the Python version
+        python-version: '3.10'
 
     - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
+      run: curl -sSL https://install.python-poetry.org | python3 -
 
     - name: Configure Poetry
-      run: |
-        echo "$HOME/.local/bin" >> $GITHUB_PATH  # Add Poetry to PATH
+      run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     - name: Install dependencies
       run: poetry install
@@ -30,25 +30,22 @@ jobs:
     - name: Set DATA_PIPELINE_ROOT environment variable
       run: echo "DATA_PIPELINE_ROOT=${{ github.workspace }}/pipeline_root" >> $GITHUB_ENV
 
-    # - name: Run collect_stats.py
-    #   run: poetry run python collect_stats.py
-    #   env:
-    #     OUTPUT_DIR: './data'
-
     - name: Run collect_adp.py
       run: poetry run python ./pipeline/collect/collect_adp.py
       env:
         OUTPUT_DIR: './data'
 
-    # - name: Run process_stats.py
-    #   run: poetry run python process_stats.py
-
-    # - name: Run process_adp.py
-    #   run: poetry run python process_adp.py
-
-    # Optional: Use this step to upload artifacts (e.g., CSV files)
-    - name: Upload CSV files
-      uses: actions/upload-artifact@v3
+    - name: Upload Raw CSV files
+      uses: actions/upload-artifact@v4
       with:
-        name: csv-files
+        name: raw-csv-files
         path: ./pipeline_root/data/raw/adp/**/*.csv
+
+    - name: Run process_adp.py
+      run: poetry run python ./pipeline/collect/process_adp.py
+
+    - name: Upload Processed CSV files
+      uses: actions/upload-artifact@v4
+      with:
+        name: processed-csv-files
+        path: ./pipeline_root/data/processed/adp/**/*.csv

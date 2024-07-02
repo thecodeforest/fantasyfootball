@@ -36,6 +36,7 @@ def collect_adp():
                     df = pd.DataFrame(data, columns=headers)
                     
                     fpath.mkdir(parents=True, exist_ok=True)
+                    logger.info(f"Writing ADP data to {fpath / f'adp_{season}.csv'}")
                     df.to_csv(fpath / f'adp_{season}.csv', index=False)   
                     logger.info(f'ADP data for {season} collected successfully')      
                 except:

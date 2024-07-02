@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def collect_adp():
     logger.info('Collecting ADP data')
-    dp_root = Path(os.getenv('DATA_PIPELINE_ROOT'))
+    dp_root = Path(os.getenv('DATA_PIPELINE_ROOT', Path.cwd().parent.parent))
     write_path = dp_root / 'data' / 'raw' / 'adp'
     seasons = range(2015, 2025)
     for season in seasons:
@@ -33,8 +33,7 @@ def collect_adp():
                         cols = [ele.text.strip() for ele in cols]
                         data.append(cols)
                 try:
-                    df = pd.DataFrame(data, columns=headers)
-                    
+                    df = pd.DataFrame(data, columns=headers)                    
                     fpath.mkdir(parents=True, exist_ok=True)
                     logger.info(f"Writing ADP data to {fpath / f'adp_{season}.csv'}")
                     df.to_csv(fpath / f'adp_{season}.csv', index=False)   

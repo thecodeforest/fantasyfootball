@@ -1,4 +1,5 @@
 import string
+import pandas as pd
 
 def remove_punctuation(text: str) -> str:
     # Create a translation table that maps punctuation to None
@@ -13,3 +14,9 @@ def format_player_name(name: str) -> str:
     # Combine and convert to upper case
     formatted_name = (first_name_abbr + last_name_abbr).upper()
     return formatted_name
+
+def rename_columns(df: pd.DataFrame, column_mapping: dict) -> pd.DataFrame:
+    for col in df.columns:
+        if col in column_mapping:
+            df = df.rename(columns={col: column_mapping[col]})
+    return df

@@ -38,15 +38,17 @@ def collect_stats():
     combinations = list(itertools.product(positions, weeks, years))
 
     for position, week, year in combinations:
-        fpath = dp_root / str(position) / str(year) / str(week) / f'{position}_{week}_{year}.csv'
-        if fpath.exists():
+        dir_path = dp_root / str(position) / str(year) / str(week)
+        file_path = dir_path / f'{position}_{week}_{year}.csv'
+        if file_path.exists():
             logger.info(f'{position} stats for week {week} in {year} already exists')
             continue
         url = create_url(position=position, week=week, year=year)
         df = scrape_player_stats(url)
-        fpath.mkdir(parents=True, exist_ok=True)
-        df.to_csv(fpath, index=False)
+        dir_path.mkdir(parents=True, exist_ok=True)
+        df.to_csv(file_path, index=False)  # Saving to the correct file path
     logger.info('Stats data collection complete')
+
 
 if __name__ == "__main__":
     collect_stats()

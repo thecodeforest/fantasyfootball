@@ -61,11 +61,11 @@ jobs:
         name: processed-adp-files
         path: ./data/processed/adp/**/*.csv
 
-    - name: Process Player Stats
-      run: poetry run python ./pipeline/process/process_stats.py
+    # - name: Process Player Stats
+    #   run: poetry run python ./pipeline/process/process_stats.py
 
-    - name: Write Processed stats files
-      uses: actions/upload-artifact@v4
-      with:
-        name: processed-stats-files
-        path: ./data/processed/stats/**/*.csv
+    # - name: Write Processed stats files
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: processed-stats-files
+    #     path: ./data/processed/stats/**/*.csv

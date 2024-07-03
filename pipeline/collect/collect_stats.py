@@ -45,7 +45,7 @@ def collect_stats():
         url = create_url(position=position, week=week, year=year)
         df = scrape_player_stats(url)
         dir_path.mkdir(parents=True, exist_ok=True)
-        logger.info("Writing stats data to {file_path}")
+        logger.info(f"Writing stats data to {file_path}")
         df.to_csv(file_path, index=False)  # Saving to the correct file path
     logger.info('Stats data collection complete')
 

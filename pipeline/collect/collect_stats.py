@@ -48,6 +48,7 @@ def collect_stats():
         logger.info(f"Writing stats data to {file_path}")
         df.to_csv(file_path, index=False)  # Saving to the correct file path
     logger.info('Stats data collection complete')
+    print(list(write_path.glob('*.csv')))
 
 
 if __name__ == "__main__":

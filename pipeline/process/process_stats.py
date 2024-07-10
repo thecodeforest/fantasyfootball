@@ -3,7 +3,7 @@ import pandas as pd
 from pathlib import Path
 import logging
 
-from ..pipeline_utils import rename_columns, remove_punctuation, format_player_name
+from ..pipeline_utils import rename_columns, remove_punctuation, format_player_name, standardize_team_names
 from .process_adp import create_fantasy_draft_id
 
 logging.basicConfig(level=logging.INFO)
@@ -55,11 +55,12 @@ def process_stats():
         df['week'] = week
         df['season'] = year   
         df.loc[df['position'] == 'PK', 'position'] = 'K'
-        df['team']  = df['name'].apply(lambda x: x.split(" ")[-1])
+        df['team']  = df['name'].apply(lambda x: x.split(" ")[-1])        
         df['name'] = df.apply(lambda row: row['name'].replace(row['team'], ''), axis=1)
         df['name'] = df['name'].str.strip()        
         df['stats_id'] = df.apply(create_stats_id, axis=1)
         df['draft_id'] = df.apply(create_fantasy_draft_id, axis=1)
+        df['team'] = df['team'].apply(standardize_team_names)
         Path(write_path).mkdir(parents=True, exist_ok=True)
         df.to_csv(Path(write_path) / file_path.name, index=False)
     logger.info('Stats data processing complete')

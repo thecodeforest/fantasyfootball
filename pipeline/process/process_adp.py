@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 import pandas as pd
-from ..pipeline_utils import remove_punctuation, format_player_name
+from ..pipeline_utils import remove_punctuation, format_player_name, standardize_team_names
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -35,6 +35,7 @@ def process_adp():
         df.loc[df['position'] == 'PK', 'position'] = 'K'
         df = df.dropna(subset=['name'])
         df['draft_id'] = df.apply(create_fantasy_draft_id, axis=1)
+        df['team'] = df['team'].apply(standardize_team_names)
         df = df.drop(columns=['name', 'position', 'season'])        
         write_path.mkdir(parents=True, exist_ok=True)
         df.to_csv(write_path / f'adp_{season}.csv', index=False)

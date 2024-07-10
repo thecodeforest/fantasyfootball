@@ -48,14 +48,14 @@ jobs:
     #     name: raw-stats-files
     #     path: /home/runner/work/data/raw/stats/*.csv
 
-    # - name: Process Average Draft Position
-    #   run: poetry run python ./pipeline/process/process_adp.py
+    - name: Process Average Draft Position
+      run: poetry run python ./pipeline/process/process_adp.py
 
-    # - name: Write Processed ADP files
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: processed-adp-files
-    #     path: ./data/processed/adp/**/*.csv
+    - name: Write Processed ADP files
+      uses: actions/upload-artifact@v4
+      with:
+        name: processed-adp-files
+        path: ./data/processed/adp/**/*.csv
 
     # - name: Process Player Stats
     #   run: poetry run python ./pipeline/process/process_stats.py

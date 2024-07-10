@@ -31,7 +31,7 @@ jobs:
       run: poetry install
 
     - name: Collect Average Draft Position
-      run: poetry run python -m ./pipeline/collect/collect_adp.py
+      run: poetry run python -m fantasyfootball.pipeline.collect.collect_adp
 
     - name: Write Average Draft Position
       uses: actions/upload-artifact@v4

@@ -43,16 +43,16 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: raw-adp-files
-        path: ./data/raw/adp/**/*.csv
+        path: /home/runner/work/data/raw/adp/**/*.csv
 
-    # - name: Collect Player Stats
-    #   run: poetry run python ./pipeline/collect/collect_stats.py
+    - name: Collect Player Stats
+      run: poetry run python -m pipeline/collect/collect_stats
 
-    # - name: Write Player Stats
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: raw-stats-files
-    #     path: /home/runner/work/data/raw/stats/*.csv
+    - name: Write Player Stats
+      uses: actions/upload-artifact@v4
+      with:
+        name: raw-stats-files
+        path: /home/runner/work/data/raw/stats/*.csv
 
     - name: Process Average Draft Position
       run: poetry run python -m pipeline.process.process_adp
@@ -61,13 +61,13 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: processed-adp-files
-        path: ./data/processed/adp/**/*.csv
+        path: /home/runner/work/data/processed/adp/**/*.csv
 
-    # - name: Process Player Stats
-    #   run: poetry run python ./pipeline/process/process_stats.py
+    - name: Process Player Stats
+      run: poetry run python -m pipeline.process.process_stats
 
-    # - name: Write Processed stats files
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: processed-stats-files
-    #     path: /home/runner/work/data/processed/stats/**/*.csv
+    - name: Write Processed stats files
+      uses: actions/upload-artifact@v4
+      with:
+        name: processed-stats-files
+        path: /home/runner/work/data/processed/stats/*.csv

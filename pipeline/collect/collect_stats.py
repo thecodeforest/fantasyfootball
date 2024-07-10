@@ -31,12 +31,12 @@ def scrape_player_stats(url):
 
 def collect_stats():
     logger.info('Collecting stats data')
-    dp_root = Path(os.getenv('DATA_PIPELINE_ROOT'), Path.cwd().parent.parent)
+    dp_root = Path(os.getenv('DATA_PIPELINE_ROOT', Path.cwd()))
     write_path = dp_root / 'data' / 'raw' / 'stats'
     write_path.mkdir(parents=True, exist_ok=True)
     positions = ['qb', 'rb', 'wr', 'te', 'pk']
     weeks = list(range(1, 18))
-    seasons = list(range(2022, 2024))
+    seasons = list(range(2023, 2024))
     combinations = list(itertools.product(positions, weeks, seasons))
     for position, week, season in combinations:
         file_path = write_path / f'{position}_{week}_{season}.csv'
@@ -48,7 +48,6 @@ def collect_stats():
         logger.info(f"Writing stats data to {file_path}")
         df.to_csv(file_path, index=False)  # Saving to the correct file path
     logger.info('Stats data collection complete')
-    print(list(write_path.glob('*.csv')))
 
 
 if __name__ == "__main__":

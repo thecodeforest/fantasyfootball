@@ -3,8 +3,8 @@ import pandas as pd
 from pathlib import Path
 import logging
 
-from pipeline.pipeline_utils import rename_columns, remove_punctuation, format_player_name
-from pipeline.process.process_adp import create_fantasy_draft_id
+from ..pipeline_utils import rename_columns, remove_punctuation, format_player_name
+from .process_adp import create_fantasy_draft_id
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -39,12 +39,12 @@ def process_stats():
     dp_root = Path(os.getenv('DATA_PIPELINE_ROOT', Path.cwd()))
     logger.info(f"dp root is {dp_root}")
     # /home/runner/work/data/raw/stats
-    read_path = dp_root.parent.parent / "data" / "raw" / "stats"
+    read_path = dp_root / "data" / "raw" / "stats"
     logger.info(f"read path is {read_path}")
-    write_path = dp_root.parent.parent / "data" / "processed" / "stats"   
+    write_path = dp_root / "data" / "processed" / "stats"   
     input_raw_stats_files = [file for file in read_path.glob('**/*.csv') if file.is_file()]  
     for file_path in input_raw_stats_files:
-        position, year, week, fname = str(file_path).split("/")[-4:]
+        position, week, year = file_path.stem.split('_')
         df = pd.read_csv(file_path)
         df = df.rename(columns=str.lower)
         df = df.drop(columns=["rank", "fp/g", "fantpt", "fg%", "y/att", 'cm%', 'y/rsh', 'y/rec', 'g'], errors='ignore')
@@ -57,11 +57,11 @@ def process_stats():
         df.loc[df['position'] == 'PK', 'position'] = 'K'
         df['team']  = df['name'].apply(lambda x: x.split(" ")[-1])
         df['name'] = df.apply(lambda row: row['name'].replace(row['team'], ''), axis=1)
-        df['name'] = df['name'].str.strip()
+        df['name'] = df['name'].str.strip()        
         df['stats_id'] = df.apply(create_stats_id, axis=1)
         df['draft_id'] = df.apply(create_fantasy_draft_id, axis=1)
         Path(write_path / position).mkdir(parents=True, exist_ok=True)
-        df.to_csv(Path(write_path) / position / fname, index=False)
+        df.to_csv(Path(write_path) / position / file_path.name, index=False)
     logger.info('Stats data processing complete')
 
 if __name__ == "__main__":

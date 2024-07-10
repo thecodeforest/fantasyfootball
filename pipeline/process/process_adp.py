@@ -1,9 +1,8 @@
 import os
 from pathlib import Path
 import pandas as pd
-from pipeline.pipeline_utils import remove_punctuation, format_player_name
+from ..pipeline_utils import remove_punctuation, format_player_name
 import logging
-import warnings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -18,9 +17,9 @@ def create_fantasy_draft_id(row):
 
 def process_adp():
     logger.info('Processing ADP data')
-    dp_root = Path(os.getenv('DATA_PIPELINE_ROOT', Path.cwd().parent.parent))  
-    read_path = dp_root / "data" / "raw" / "adp"
-    write_path = dp_root / "data" / "processed" / "adp"   
+    dp_root = Path(os.getenv('DATA_PIPELINE_ROOT', Path.cwd() / "data"))  
+    read_path = dp_root  / "raw" / "adp"
+    write_path = dp_root / "processed" / "adp"   
     input_raw_adp_files = [file for file in read_path.glob('**/*.csv') if file.is_file()]     
     for file in input_raw_adp_files:
         season = file.parent.name 

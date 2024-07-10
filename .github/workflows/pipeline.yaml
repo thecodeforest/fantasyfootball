@@ -55,7 +55,7 @@ jobs:
     #     path: /home/runner/work/data/raw/stats/*.csv
 
     - name: Process Average Draft Position
-      run: poetry run python -m fantasyfootball.pipeline.process.process_adp
+      run: poetry run python -m pipeline.process.process_adp
 
     - name: Write Processed ADP files
       uses: actions/upload-artifact@v4

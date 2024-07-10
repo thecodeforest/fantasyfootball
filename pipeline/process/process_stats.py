@@ -38,10 +38,10 @@ def process_stats():
     logger.info('Processing stats data')
     dp_root = Path(os.getenv('DATA_PIPELINE_ROOT', Path.cwd() / 'data'))
     logger.info(f"dp root is {dp_root}")
-    # /home/runner/work/data/raw/stats
     read_path = dp_root / "raw" / "stats"
     logger.info(f"read path is {read_path}")
     write_path = dp_root / "processed" / "stats"   
+    logger.info(f"write path is {write_path}")
     input_raw_stats_files = [file for file in read_path.glob('**/*.csv') if file.is_file()]  
     for file_path in input_raw_stats_files:
         position, week, year = file_path.stem.split('_')
@@ -60,8 +60,8 @@ def process_stats():
         df['name'] = df['name'].str.strip()        
         df['stats_id'] = df.apply(create_stats_id, axis=1)
         df['draft_id'] = df.apply(create_fantasy_draft_id, axis=1)
-        Path(write_path / position).mkdir(parents=True, exist_ok=True)
-        df.to_csv(Path(write_path) / position / file_path.name, index=False)
+        Path(write_path).mkdir(parents=True, exist_ok=True)
+        df.to_csv(Path(write_path) / file_path.name, index=False)
     logger.info('Stats data processing complete')
 
 if __name__ == "__main__":

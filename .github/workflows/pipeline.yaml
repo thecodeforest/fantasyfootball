@@ -29,6 +29,9 @@ jobs:
 
     - name: Install dependencies
       run: poetry install
+    
+    - name: Display PythonPath
+      run: echo $PYTHONPATH
 
     - name: Collect Average Draft Position
       run: poetry run python -m fantasyfootball.pipeline.collect.collect_adp

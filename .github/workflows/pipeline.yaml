@@ -31,7 +31,7 @@ jobs:
       run: poetry install
 
     - name: Collect Average Draft Position
-      run: poetry run python ./pipeline/collect/collect_adp.py
+      run: poetry run python -m ./pipeline/collect/collect_adp.py
 
     - name: Write Average Draft Position
       uses: actions/upload-artifact@v4
@@ -49,7 +49,7 @@ jobs:
     #     path: /home/runner/work/data/raw/stats/*.csv
 
     - name: Process Average Draft Position
-      run: poetry run python -m ./pipeline/process/process_adp.py
+      run: poetry run python -m fantasyfootball.pipeline.process.process_adp
 
     - name: Write Processed ADP files
       uses: actions/upload-artifact@v4

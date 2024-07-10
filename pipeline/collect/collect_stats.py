@@ -31,8 +31,8 @@ def scrape_player_stats(url):
 
 def collect_stats():
     logger.info('Collecting stats data')
-    dp_root = Path(os.getenv('DATA_PIPELINE_ROOT', Path.cwd()))
-    write_path = dp_root / 'data' / 'raw' / 'stats'
+    dp_root = Path(os.getenv('DATA_PIPELINE_ROOT', Path.cwd() / 'data'))
+    write_path = dp_root / 'raw' / 'stats'
     write_path.mkdir(parents=True, exist_ok=True)
     positions = ['qb', 'rb', 'wr', 'te', 'pk']
     weeks = list(range(1, 18))

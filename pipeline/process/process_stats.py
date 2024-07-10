@@ -36,12 +36,12 @@ def create_stats_id(row):
 
 def process_stats():
     logger.info('Processing stats data')
-    dp_root = Path(os.getenv('DATA_PIPELINE_ROOT', Path.cwd()))
+    dp_root = Path(os.getenv('DATA_PIPELINE_ROOT', Path.cwd() / 'data'))
     logger.info(f"dp root is {dp_root}")
     # /home/runner/work/data/raw/stats
-    read_path = dp_root / "data" / "raw" / "stats"
+    read_path = dp_root / "raw" / "stats"
     logger.info(f"read path is {read_path}")
-    write_path = dp_root / "data" / "processed" / "stats"   
+    write_path = dp_root / "processed" / "stats"   
     input_raw_stats_files = [file for file in read_path.glob('**/*.csv') if file.is_file()]  
     for file_path in input_raw_stats_files:
         position, week, year = file_path.stem.split('_')

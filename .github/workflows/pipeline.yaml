@@ -70,4 +70,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: processed-stats-files
-        path: /home/runner/work/data/processed/stats/*.csv
+        path: ./data/processed/stats/*.csv

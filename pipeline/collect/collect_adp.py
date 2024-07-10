@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 def collect_adp():
     logger.info('Collecting ADP data')
-    dp_root = Path(os.getenv('DATA_PIPELINE_ROOT', Path.cwd().parent.parent))
-    write_path = dp_root / 'data' / 'raw' / 'adp'
+    dp_root = Path(os.getenv('DATA_PIPELINE_ROOT', Path.cwd() / 'data'))
+    write_path = dp_root / 'raw' / 'adp'
     seasons = range(2015, 2025)
     for season in seasons:
         fpath = write_path / str(season)

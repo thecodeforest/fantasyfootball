@@ -52,7 +52,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: raw-stats-files
-        path: /home/runner/work/data/raw/stats/*.csv
+        path: ./data/raw/stats/*.csv
 
     - name: Process Average Draft Position
       run: poetry run python -m pipeline.process.process_adp
@@ -61,7 +61,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: processed-adp-files
-        path: /home/runner/work/data/processed/adp/**/*.csv
+        path: ./data/processed/adp/**/*.csv
 
     - name: Process Player Stats
       run: poetry run python -m pipeline.process.process_stats
@@ -70,4 +70,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: processed-stats-files
-        path: /home/runner/work/data/processed/stats/*.csv
+        path: ./data/processed/stats/*.csv
